@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This project provides a modular deployment framework for [**CMTAT**](https://github.com/CMTA/CMTAT), a compliant token implementation, using three different upgradeability patterns: **UUPS proxy**, **Transparent proxy**, and **Beacon proxy**.
+This project provides a modular deployment framework for [**CMTAT**](https://github.com/CMTA/CMTAT), a security token framework, using three different upgradeability patterns: **UUPS proxy**, **Transparent proxy**, and **Beacon proxy**.
 Each factory contract automates deployment using **deterministic addresses (via CREATE2)** and initializes CMTAT instances with a structured set of parameters passed in arguments by the deployer.
 
 [TOC]
