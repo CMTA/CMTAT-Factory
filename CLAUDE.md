@@ -117,8 +117,10 @@ Salt behavior is central to this repo.
 - If `useCustomSalt == true`, the caller-supplied salt is used directly.
 - Custom salts are one-time-use only and tracked in `customSaltUsed`.
 - Reusing a custom salt reverts with `FactoryErrors.CMTAT_Factory_SaltAlreadyUsed()`.
+- `nextDeploymentSalt()` returns the next effective non-custom salt.
+- `computedNextProxyAddress(...)` mirrors `deployCMTAT(...)`: it uses the caller-provided salt in custom-salt mode and `nextDeploymentSalt()` otherwise.
 
-`computedProxyAddress(...)` must mirror the exact bytecode used by `deployCMTAT(...)`. When changing constructor args, proxy type, or initializer payload, update both paths consistently. Proxy creation bytecode must be `abi.encodePacked(type(Proxy).creationCode, abi.encode(constructor args...))`.
+`computedProxyAddress(effectiveDeploymentSalt, ...)` must mirror the exact bytecode used by `deployCMTAT(...)`. When changing constructor args, proxy type, or initializer payload, update both paths consistently. Proxy creation bytecode must be `abi.encodePacked(type(Proxy).creationCode, abi.encode(constructor args...))`.
 
 ## CMTAT Initializer Arguments
 

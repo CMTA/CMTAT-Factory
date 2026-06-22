@@ -79,13 +79,20 @@ describe('Deploy Light Beacon with Factory', function () {
     })
 
     it('testCanDeployCMTATLightWithFactory', async function () {
+      const deploymentSaltInput = ethers.encodeBytes32String('light')
       const computedCMTATAddress = await this.FACTORY.computedProxyAddress(
         ethers.keccak256(ethers.solidityPacked(['uint256'], [0x0])),
         this.CMTATLightArg
       )
+      expect(
+        await this.FACTORY.computedNextProxyAddress(
+          deploymentSaltInput,
+          this.CMTATLightArg
+        )
+      ).to.equal(computedCMTATAddress)
 
       await this.FACTORY.connect(this.admin).deployCMTAT(
-        ethers.encodeBytes32String('light'),
+        deploymentSaltInput,
         this.CMTATLightArg
       )
 

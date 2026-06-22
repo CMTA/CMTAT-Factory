@@ -53,14 +53,21 @@ describe('Deploy Beacon with Factory', function () {
         .withArgs(this.attacker.address, CMTAT_DEPLOYER_ROLE)
     })
     it('testCanDeployCMTATWithFactory', async function () {
+      const deploymentSaltInput = ethers.encodeBytes32String('test')
       let computedCMTATAddress = await this.FACTORY.computedProxyAddress(
         // 0x0 => id counter 0
         ethers.keccak256(ethers.solidityPacked(['uint256'], [0x0])),
         this.CMTATArg
       )
+      expect(
+        await this.FACTORY.computedNextProxyAddress(
+          deploymentSaltInput,
+          this.CMTATArg
+        )
+      ).to.equal(computedCMTATAddress)
       // Act
       this.logs = await this.FACTORY.connect(this.admin).deployCMTAT(
-        ethers.encodeBytes32String('test'),
+        deploymentSaltInput,
         this.CMTATArg
       )
 

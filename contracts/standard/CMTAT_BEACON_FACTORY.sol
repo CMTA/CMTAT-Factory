@@ -69,19 +69,31 @@ contract CMTAT_BEACON_FACTORY is CMTATFactoryRoot {
     }
 
     /**
-    * @param deploymentSalt salt for the deployment
+    * @param effectiveDeploymentSalt effective salt for the deployment
     * @param cmtatArgument argument for the function initialize
-    * @notice get the proxy address depending on a particular salt
+    * @notice get the proxy address depending on a particular effective salt
     * @return cmtatProxy proxy address
     */
     function computedProxyAddress( 
-        bytes32 deploymentSalt,
+        bytes32 effectiveDeploymentSalt,
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
         bytes memory bytecode =  _getBytecode(
         // CMTAT function initialize
         cmtatArgument);
-        return Create2.computeAddress(deploymentSalt,  keccak256(bytecode), address(this) );
+        return Create2.computeAddress(effectiveDeploymentSalt,  keccak256(bytecode), address(this) );
+    }
+
+    /**
+    * @notice get the proxy address using the same salt selection as deployCMTAT
+    */
+    function computedNextProxyAddress(
+        bytes32 deploymentSaltInput,
+        CMTAT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
+        return computedProxyAddress(
+            _computeDeploymentSalt(deploymentSaltInput),
+            cmtatArgument
+        );
     }
 
     /**

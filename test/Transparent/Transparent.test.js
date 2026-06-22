@@ -56,15 +56,26 @@ describe('Deploy TP with Factory', function () {
         .withArgs(this.attacker.address, CMTAT_DEPLOYER_ROLE)
     })
     it('testCanDeployCMTATWithFactory', async function () {
+      const deploymentSaltInput = ethers.encodeBytes32String('test')
+      expect(await this.FACTORY.nextDeploymentSalt()).to.equal(
+        ethers.keccak256(ethers.solidityPacked(['uint256'], [0x0]))
+      )
       let computedCMTATAddress = await this.FACTORY.computedProxyAddress(
         // 0x0 => id counter 0
         ethers.keccak256(ethers.solidityPacked(['uint256'], [0x0])),
         this.admin,
         this.CMTATArg
       )
+      expect(
+        await this.FACTORY.computedNextProxyAddress(
+          deploymentSaltInput,
+          this.admin,
+          this.CMTATArg
+        )
+      ).to.equal(computedCMTATAddress)
       // Act
       this.logs = await this.FACTORY.connect(this.admin).deployCMTAT(
-        ethers.encodeBytes32String('test'),
+        deploymentSaltInput,
         this.admin,
         this.CMTATArg
       )
@@ -96,6 +107,9 @@ describe('Deploy TP with Factory', function () {
       events = await this.FACTORY.queryFilter(filter, -1)
       args = events[0].args
       expect(args[1]).to.equal(1)
+      expect(await this.FACTORY.nextDeploymentSalt()).to.equal(
+        ethers.keccak256(ethers.solidityPacked(['uint256'], [0x2]))
+      )
 
       // Check address
       computedCMTATAddress = await this.FACTORY.computedProxyAddress(

@@ -55,9 +55,23 @@ describe('Deploy TP with Factory - Salt', function () {
         .withArgs(this.attacker.address, CMTAT_DEPLOYER_ROLE)
     })
     it('testCanDeployCMTATWithFactory', async function () {
+      const deploymentSaltInput = ethers.encodeBytes32String('test')
+      expect(
+        await this.FACTORY.computedNextProxyAddress(
+          deploymentSaltInput,
+          this.admin,
+          this.CMTATArg
+        )
+      ).to.equal(
+        await this.FACTORY.computedProxyAddress(
+          deploymentSaltInput,
+          this.admin,
+          this.CMTATArg
+        )
+      )
       // Act
       this.logs = await this.FACTORY.connect(this.admin).deployCMTAT(
-        ethers.encodeBytes32String('test'),
+        deploymentSaltInput,
         this.admin,
         this.CMTATArg
       )

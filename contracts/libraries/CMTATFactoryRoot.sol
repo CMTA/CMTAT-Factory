@@ -57,6 +57,14 @@ abstract contract CMTATFactoryRoot is AccessControl, CMTATFactoryInvariant {
         return cmtats[cmtatCounterId_];
     }
 
+    /**
+     * @notice Returns the effective salt that will be used for the next deployment when custom salts are disabled.
+     * @dev Custom-salt deployments use the caller-provided salt directly.
+     */
+    function nextDeploymentSalt() public view virtual returns(bytes32 saltBytes) {
+        return bytes32(keccak256(abi.encodePacked(cmtatCounterId)));
+    }
+
     /*//////////////////////////////////////////////////////////////
                             INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -75,8 +83,15 @@ abstract contract CMTATFactoryRoot is AccessControl, CMTATFactoryInvariant {
                 saltBytes = deploymentSalt;
             }
         }else{
-            saltBytes = bytes32(keccak256(abi.encodePacked(cmtatCounterId)));
+            saltBytes = nextDeploymentSalt();
         }
+    }
+
+    /**
+    * @dev Mirrors deployment salt selection without mutating customSaltUsed.
+    */
+    function _computeDeploymentSalt(bytes32 deploymentSaltInput) internal view virtual returns(bytes32 saltBytes){
+        return useCustomSalt ? deploymentSaltInput : nextDeploymentSalt();
     }
 
     /**

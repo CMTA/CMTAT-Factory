@@ -63,6 +63,13 @@ describe('Deploy Light TP with Factory', function () {
         this.admin,
         this.CMTATLightArg
       )
+      expect(
+        await this.FACTORY.computedNextProxyAddress(
+          deploymentSalt,
+          this.admin,
+          this.CMTATLightArg
+        )
+      ).to.equal(computedCMTATAddress)
 
       this.logs = await this.FACTORY.connect(this.admin).deployCMTAT(
         deploymentSalt,
