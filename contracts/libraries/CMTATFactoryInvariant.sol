@@ -16,6 +16,10 @@ abstract contract CMTATFactoryInvariant {
         ICMTATConstructor.ExtraInformationAttributes extraInformationAttributes;
         ICMTATConstructor.Engine engines;
     }
+    struct CMTAT_LIGHT_ARGUMENT{
+        address CMTATAdmin;
+        ICMTATConstructor.ERC20Attributes ERC20Attributes;
+    }
     /* ============ State Variables ============ */
     /// @dev Role to deploy CMTAT
     bytes32 public constant CMTAT_DEPLOYER_ROLE = keccak256("CMTAT_DEPLOYER_ROLE");

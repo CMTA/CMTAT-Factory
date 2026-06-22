@@ -74,12 +74,8 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase {
     * @dev Deploy CMTAT and push the created CMTAT in the list
     */
     function _deployBytecode(bytes memory bytecode, bytes32  deploymentSalt) internal returns (ERC1967Proxy cmtat) {
-                    address cmtatAddress = Create2.deploy(0, deploymentSalt, bytecode);
+                    address cmtatAddress = _deployAndRegisterProxy(bytecode, deploymentSalt);
                     cmtat = ERC1967Proxy(payable(cmtatAddress));
-                    cmtats[cmtatCounterId] = address(cmtat);
-                    emit CMTAT(address(cmtat), cmtatCounterId);
-                    ++cmtatCounterId;
-                    cmtatsList.push(address(cmtat));
                     return cmtat;
      }
 
@@ -97,7 +93,6 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase {
                 cmtatArgument.extraInformationAttributes,
                 cmtatArgument.engines
         );
-        // abi.encode instead of encodePacked because creationCode return a dynamic type (bytes memory)
-        bytecode = abi.encode(type(ERC1967Proxy).creationCode,  logic, implementation);
+        bytecode = abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(logic, implementation));
      }
 }

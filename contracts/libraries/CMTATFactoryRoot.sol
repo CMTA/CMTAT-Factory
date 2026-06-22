@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 
 import {AccessControl} from '@openzeppelin/contracts/access/AccessControl.sol';
+import {Create2} from '@openzeppelin/contracts/utils/Create2.sol';
 import {CMTATFactoryInvariant} from "./CMTATFactoryInvariant.sol";
 import {FactoryErrors} from "./FactoryErrors.sol";
 /**
@@ -76,5 +77,16 @@ abstract contract CMTATFactoryRoot is AccessControl, CMTATFactoryInvariant {
         }else{
             saltBytes = bytes32(keccak256(abi.encodePacked(cmtatCounterId)));
         }
+    }
+
+    /**
+    * @dev Deploy CMTAT proxy and register it in the factory index.
+    */
+    function _deployAndRegisterProxy(bytes memory bytecode, bytes32 deploymentSalt) internal returns (address cmtatAddress) {
+        cmtatAddress = Create2.deploy(0, deploymentSalt, bytecode);
+        cmtats[cmtatCounterId] = cmtatAddress;
+        emit CMTAT(cmtatAddress, cmtatCounterId);
+        ++cmtatCounterId;
+        cmtatsList.push(cmtatAddress);
     }
 }
