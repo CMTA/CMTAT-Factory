@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {CMTATUpgradeableUUPS} from "../../CMTAT/contracts/deployment/CMTATUpgradeableUUPS.sol";
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
-import {CMTATFactoryInvariant} from "../libraries/CMTATFactoryInvariant.sol";
 import {CMTATFactoryBase} from "../libraries/CMTATFactoryBase.sol";
 
 
