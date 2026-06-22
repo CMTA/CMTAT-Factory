@@ -5,7 +5,7 @@ import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol"
 import {AccessControl} from '@openzeppelin/contracts/access/AccessControl.sol';
 import {Create2} from '@openzeppelin/contracts/utils/Create2.sol';
 import {UpgradeableBeacon} from '@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol';
-import {CMTATUpgradeable} from "../CMTAT/contracts/deployment/CMTATUpgradeable.sol";
+import {CMTATStandardUpgradeable} from "../CMTAT/contracts/deployment/CMTATStandardUpgradeable.sol";
 import {CMTATFactoryRoot} from "./libraries/CMTATFactoryRoot.sol";
 import {FactoryErrors} from "./libraries/FactoryErrors.sol";
 
@@ -35,7 +35,7 @@ contract CMTAT_BEACON_FACTORY is AccessControl, CMTATFactoryRoot {
         }
         if(implementation_ == address(0)){
            // Forwarder is the zero address if no implementation provided
-           implementation_ = address(new CMTATUpgradeable(address(0)));
+           implementation_ = address(new CMTATStandardUpgradeable(address(0)));
         }
         beacon = new UpgradeableBeacon(implementation_, beaconOwner);
     }
@@ -118,7 +118,7 @@ contract CMTAT_BEACON_FACTORY is AccessControl, CMTATFactoryRoot {
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument) internal view returns(bytes memory bytecode) {
         bytes memory _implementation = abi.encodeWithSelector(
-            CMTATUpgradeable(address(0)).initialize.selector,
+            CMTATStandardUpgradeable(address(0)).initialize.selector,
             cmtatArgument.CMTATAdmin,
             cmtatArgument.ERC20Attributes,
             cmtatArgument.extraInformationAttributes,

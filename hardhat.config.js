@@ -16,6 +16,9 @@ module.exports = {
       evmVersion: 'prague'
     }
   },
+  gasReporter: {
+    enabled: process.env.REPORT_GAS === 'true'
+  },
   contractSizer: {
     alphaSort: true,
     disambiguatePaths: false,

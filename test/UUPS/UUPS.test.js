@@ -28,7 +28,7 @@ describe('Deploy UUPPSwith Factory', function () {
       this.admin,
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       extraInformationAttributes,
-      [ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS]
+      [ZERO_ADDRESS]
     ]
   })
 

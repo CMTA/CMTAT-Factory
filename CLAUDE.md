@@ -51,8 +51,8 @@ This repo vendors the upstream CMTAT project in the `CMTAT/` directory. Some tes
 
 ```text
 CMTAT_UUPS_FACTORY    - deploys ERC1967Proxy instances pointing at CMTATUpgradeableUUPS
-CMTAT_TP_FACTORY      - deploys TransparentUpgradeableProxy instances
-CMTAT_BEACON_FACTORY  - deploys BeaconProxy instances backed by one UpgradeableBeacon
+CMTAT_TP_FACTORY      - deploys TransparentUpgradeableProxy instances pointing at CMTATStandardUpgradeable
+CMTAT_BEACON_FACTORY  - deploys BeaconProxy instances backed by one UpgradeableBeacon pointing at CMTATStandardUpgradeable
 ```
 
 ### Shared Base Contracts
@@ -81,11 +81,11 @@ CMTATFactoryBase
   Uses `ERC1967Proxy` and encodes `CMTATUpgradeableUUPS.initialize(...)`.
 
 - `CMTAT_TP_FACTORY`
-  Uses `TransparentUpgradeableProxy` and requires `proxyAdminOwner` per deployment.
+  Uses `TransparentUpgradeableProxy`, encodes `CMTATStandardUpgradeable.initialize(...)`, and requires `proxyAdminOwner` per deployment.
 
 - `CMTAT_BEACON_FACTORY`
   Creates one `UpgradeableBeacon` in the constructor and deploys `BeaconProxy` instances.
-  If `implementation_` is zero, it deploys a fresh `CMTATUpgradeable` implementation internally before creating the beacon.
+  If `implementation_` is zero, it deploys a fresh `CMTATStandardUpgradeable` implementation internally before creating the beacon.
 
 ## Deployment Flow
 
@@ -128,7 +128,7 @@ Tests usually construct this as:
   admin,
   ['CMTA Token', 'CMTAT', 0],
   extraInformationAttributes,
-  [ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS]
+  [ZERO_ADDRESS]
 ]
 ```
 
@@ -157,7 +157,7 @@ Important invariants:
 
 1. UUPS and Transparent factories require a non-zero `logic_` in the constructor.
 2. Beacon factory requires a non-zero `beaconOwner`.
-3. Beacon factory tolerates `implementation_ == address(0)` by deploying a fallback `CMTATUpgradeable`.
+3. Beacon factory tolerates `implementation_ == address(0)` by deploying a fallback `CMTATStandardUpgradeable`.
 4. Every successful deployment increments `cmtatCounterId` by exactly one.
 5. `CMTATProxyAddress(id)` must match the emitted `CMTAT` event and the corresponding entry in `cmtatsList`.
 6. Address prediction must stay aligned with the actual deployment bytecode.
@@ -208,7 +208,7 @@ When changing shared factory logic in `CMTATFactoryRoot` or `CMTATFactoryInvaria
   `/* ============ SECTION ============ */`
 - Prefer minimal, targeted changes. The current codebase is small and has duplicated deployment logic by design.
 - Be careful with proxy initializer selectors:
-  `CMTATUpgradeableUUPS.initialize.selector` is intentionally different from `CMTATUpgradeable.initialize.selector`.
+  `CMTATUpgradeableUUPS.initialize.selector` is intentionally different from `CMTATStandardUpgradeable.initialize.selector`.
 - If you modify proxy creation bytecode, re-check both deployment and `computedProxyAddress(...)`.
 
 ## Practical Review Checklist

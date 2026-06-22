@@ -12,3 +12,5 @@ cache
 artifacts
 #drawio
 *.bkp
+history
+.codex

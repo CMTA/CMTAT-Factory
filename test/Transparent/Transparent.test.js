@@ -28,7 +28,7 @@ describe('Deploy TP with Factory', function () {
       this.admin,
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       extraInformationAttributes,
-      [ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS]
+      [ZERO_ADDRESS]
     ]
   })
 
@@ -81,7 +81,9 @@ describe('Deploy TP with Factory', function () {
       expect(await this.FACTORY.CMTATProxyAddress(0)).to.equal(
         computedCMTATAddress
       )
-      const MyContract = await ethers.getContractFactory('CMTATUpgradeable')
+      const MyContract = await ethers.getContractFactory(
+        'CMTATStandardUpgradeable'
+      )
       const CMTAT_PROXY = MyContract.attach(CMTAT_ADDRESS)
       await CMTAT_PROXY.connect(this.admin).mint(this.admin, 100)
       // Second deployment

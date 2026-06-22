@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import {CMTATUpgradeable} from "../CMTAT/contracts/deployment/CMTATUpgradeable.sol";
+import {CMTATStandardUpgradeable} from "../CMTAT/contracts/deployment/CMTATStandardUpgradeable.sol";
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 import {CMTATFactoryInvariant} from "./libraries/CMTATFactoryInvariant.sol";
 import {CMTATFactoryBase} from "./libraries/CMTATFactoryBase.sol";
@@ -98,7 +98,7 @@ contract CMTAT_TP_FACTORY is CMTATFactoryBase {
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument) internal view returns(bytes memory bytecode) {
         bytes memory implementation = abi.encodeWithSelector(
-            CMTATUpgradeable(address(0)).initialize.selector,
+            CMTATStandardUpgradeable(address(0)).initialize.selector,
                   cmtatArgument.CMTATAdmin,
                     cmtatArgument.ERC20Attributes,
                 cmtatArgument.extraInformationAttributes,

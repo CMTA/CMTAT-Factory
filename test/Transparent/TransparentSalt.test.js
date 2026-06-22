@@ -27,7 +27,7 @@ describe('Deploy TP with Factory - Salt', function () {
       this.admin,
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       extraInformationAttributes,
-      [ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS]
+      [ZERO_ADDRESS]
     ]
   })
 
@@ -69,7 +69,9 @@ describe('Deploy TP with Factory - Salt', function () {
       let args = events[0].args
       expect(args[1]).to.equal(0)
       const CMTAT_ADDRESS = args[0]
-      const MyContract = await ethers.getContractFactory('CMTATUpgradeable')
+      const MyContract = await ethers.getContractFactory(
+        'CMTATStandardUpgradeable'
+      )
       const CMTAT_PROXY = MyContract.attach(CMTAT_ADDRESS)
       // Check address with ID
       expect(await this.FACTORY.CMTATProxyAddress(0)).to.equal(CMTAT_ADDRESS)
