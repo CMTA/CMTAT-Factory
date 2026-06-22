@@ -187,11 +187,13 @@ Important invariants:
 
 ```text
 contracts/
-|- CMTAT_UUPS_FACTORY.sol
-|- CMTAT_TP_FACTORY.sol
-|- CMTAT_BEACON_FACTORY.sol
-|- CMTAT_LIGHT_TP_FACTORY.sol
-|- CMTAT_LIGHT_BEACON_FACTORY.sol
+|- standard/
+|  |- CMTAT_UUPS_FACTORY.sol
+|  |- CMTAT_TP_FACTORY.sol
+|  `- CMTAT_BEACON_FACTORY.sol
+|- light/
+|  |- CMTAT_LIGHT_TP_FACTORY.sol
+|  `- CMTAT_LIGHT_BEACON_FACTORY.sol
 `- libraries/
    |- CMTATFactoryBase.sol
    |- CMTATFactoryRoot.sol

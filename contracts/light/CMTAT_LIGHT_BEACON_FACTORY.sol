@@ -5,9 +5,9 @@ import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol"
 import {AccessControl} from '@openzeppelin/contracts/access/AccessControl.sol';
 import {Create2} from '@openzeppelin/contracts/utils/Create2.sol';
 import {UpgradeableBeacon} from '@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol';
-import {CMTATUpgradeableLight} from "../CMTAT/contracts/deployment/light/CMTATUpgradeableLight.sol";
-import {CMTATFactoryRoot} from "./libraries/CMTATFactoryRoot.sol";
-import {FactoryErrors} from "./libraries/FactoryErrors.sol";
+import {CMTATUpgradeableLight} from "../../CMTAT/contracts/deployment/light/CMTATUpgradeableLight.sol";
+import {CMTATFactoryRoot} from "../libraries/CMTATFactoryRoot.sol";
+import {FactoryErrors} from "../libraries/FactoryErrors.sol";
 
 /**
 * @notice Factory to deploy CMTAT Light with a beacon proxy

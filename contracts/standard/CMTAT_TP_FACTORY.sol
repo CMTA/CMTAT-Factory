@@ -2,10 +2,10 @@
 pragma solidity ^0.8.20;
 
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import {CMTATStandardUpgradeable} from "../CMTAT/contracts/deployment/CMTATStandardUpgradeable.sol";
+import {CMTATStandardUpgradeable} from "../../CMTAT/contracts/deployment/CMTATStandardUpgradeable.sol";
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
-import {CMTATFactoryInvariant} from "./libraries/CMTATFactoryInvariant.sol";
-import {CMTATFactoryBase} from "./libraries/CMTATFactoryBase.sol";
+import {CMTATFactoryInvariant} from "../libraries/CMTATFactoryInvariant.sol";
+import {CMTATFactoryBase} from "../libraries/CMTATFactoryBase.sol";
 
 
 /**
