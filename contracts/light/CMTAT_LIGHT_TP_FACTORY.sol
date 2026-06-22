@@ -5,6 +5,7 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 import {CMTATUpgradeableLight} from "../../CMTAT/contracts/deployment/light/CMTATUpgradeableLight.sol";
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 import {CMTATFactoryBase} from "../libraries/CMTATFactoryBase.sol";
+import {FactoryErrors} from "../libraries/FactoryErrors.sol";
 
 /**
 * @notice Factory to deploy CMTAT Light with a transparent proxy
@@ -35,6 +36,7 @@ contract CMTAT_LIGHT_TP_FACTORY is CMTATFactoryBase {
         address proxyAdminOwner,
         CMTAT_LIGHT_ARGUMENT calldata cmtatArgument
     ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) returns(TransparentUpgradeableProxy cmtat)   {
+        _checkProxyAdminOwner(proxyAdminOwner);
         bytes32 deploymentSalt = _checkAndDetermineDeploymentSalt(deploymentSaltInput);
         bytes memory bytecode = _getBytecode(proxyAdminOwner, cmtatArgument);
         cmtat = _deployBytecode(bytecode,  deploymentSalt);
@@ -51,6 +53,7 @@ contract CMTAT_LIGHT_TP_FACTORY is CMTATFactoryBase {
         bytes32 effectiveDeploymentSalt,
         address proxyAdminOwner,
         CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
+        _checkProxyAdminOwner(proxyAdminOwner);
         bytes memory bytecode =  _getBytecode(proxyAdminOwner, cmtatArgument);
         return Create2.computeAddress(effectiveDeploymentSalt,  keccak256(bytecode), address(this) );
     }
@@ -80,6 +83,15 @@ contract CMTAT_LIGHT_TP_FACTORY is CMTATFactoryBase {
         address cmtatAddress = _deployAndRegisterProxy(bytecode, deploymentSalt);
         cmtat = TransparentUpgradeableProxy(payable(cmtatAddress));
         return cmtat;
+    }
+
+    /**
+    * @dev Reverts if the transparent proxy admin owner is zero.
+    */
+    function _checkProxyAdminOwner(address proxyAdminOwner) internal pure {
+        if(proxyAdminOwner == address(0)){
+            revert FactoryErrors.CMTAT_Factory_AddressZeroNotAllowedForProxyAdminOwner();
+        }
     }
 
     /**

@@ -6,6 +6,7 @@ import {CMTATStandardUpgradeable} from "../../CMTAT/contracts/deployment/CMTATSt
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 import {CMTATFactoryInvariant} from "../libraries/CMTATFactoryInvariant.sol";
 import {CMTATFactoryBase} from "../libraries/CMTATFactoryBase.sol";
+import {FactoryErrors} from "../libraries/FactoryErrors.sol";
 
 
 /**
@@ -45,6 +46,7 @@ contract CMTAT_TP_FACTORY is CMTATFactoryBase {
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument
     ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) returns(TransparentUpgradeableProxy cmtat)   {
+        _checkProxyAdminOwner(proxyAdminOwner);
         bytes32 deploymentSalt = _checkAndDetermineDeploymentSalt(deploymentSaltInput);
         bytes memory bytecode = _getBytecode(proxyAdminOwner,
         // CMTAT function initialize
@@ -65,6 +67,7 @@ contract CMTAT_TP_FACTORY is CMTATFactoryBase {
         address proxyAdminOwner,
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
+        _checkProxyAdminOwner(proxyAdminOwner);
         bytes memory bytecode =  _getBytecode(proxyAdminOwner,
         // CMTAT function initialize
         cmtatArgument);
@@ -99,6 +102,15 @@ contract CMTAT_TP_FACTORY is CMTATFactoryBase {
                     cmtat = TransparentUpgradeableProxy(payable(cmtatAddress));
                     return cmtat;
      }
+
+    /**
+    * @dev Reverts if the transparent proxy admin owner is zero.
+    */
+    function _checkProxyAdminOwner(address proxyAdminOwner) internal pure {
+        if(proxyAdminOwner == address(0)){
+            revert FactoryErrors.CMTAT_Factory_AddressZeroNotAllowedForProxyAdminOwner();
+        }
+    }
 
     
     /**

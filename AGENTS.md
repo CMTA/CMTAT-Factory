@@ -174,6 +174,7 @@ Custom errors are defined in `contracts/libraries/FactoryErrors.sol`:
 - `CMTAT_Factory_AddressZeroNotAllowedForFactoryAdmin`
 - `CMTAT_Factory_AddressZeroNotAllowedForBeaconOwner`
 - `CMTAT_Factory_AddressZeroNotAllowedForLogicContract`
+- `CMTAT_Factory_AddressZeroNotAllowedForProxyAdminOwner`
 - `CMTAT_Factory_SaltAlreadyUsed`
 
 Important invariants:
