@@ -2,19 +2,14 @@
 pragma solidity ^0.8.20;
 
 import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
-import {Create2} from '@openzeppelin/contracts/utils/Create2.sol';
-import {UpgradeableBeacon} from '@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol';
 import {CMTATStandardUpgradeable} from "../../CMTAT/contracts/deployment/CMTATStandardUpgradeable.sol";
-import {CMTATFactoryRoot} from "../libraries/CMTATFactoryRoot.sol";
-import {FactoryErrors} from "../libraries/FactoryErrors.sol";
+import {CMTATBeaconFactoryBase} from "../libraries/CMTATBeaconFactoryBase.sol";
 
 /**
 * @notice Factory to deploy beacon proxy
 * 
 */
-contract CMTAT_BEACON_FACTORY is CMTATFactoryRoot {
-    UpgradeableBeacon public immutable beacon;
-    
+contract CMTAT_BEACON_FACTORY is CMTATBeaconFactoryBase {
     /**
      * @notice Deploys a factory that manages CMTAT Beacon proxies.
      * @dev 
@@ -28,16 +23,13 @@ contract CMTAT_BEACON_FACTORY is CMTATFactoryRoot {
      * @param beaconOwner Address that will own and control the beacon upgrades.
      * @param useCustomSalt_ Boolean flag to enable or disable deterministic deployment salt usage.
      */
-    constructor(address implementation_, address factoryAdmin, address beaconOwner, bool useCustomSalt_) CMTATFactoryRoot(factoryAdmin, useCustomSalt_) {
-        if(beaconOwner == address(0)){
-            revert  FactoryErrors.CMTAT_Factory_AddressZeroNotAllowedForBeaconOwner();
-        }
-        if(implementation_ == address(0)){
-           // Forwarder is the zero address if no implementation provided
-           implementation_ = address(new CMTATStandardUpgradeable(address(0)));
-        }
-        beacon = new UpgradeableBeacon(implementation_, beaconOwner);
-    }
+    constructor(address implementation_, address factoryAdmin, address beaconOwner, bool useCustomSalt_)
+        CMTATBeaconFactoryBase(
+            implementation_ == address(0) ? address(new CMTATStandardUpgradeable(address(0))) : implementation_,
+            factoryAdmin,
+            beaconOwner,
+            useCustomSalt_
+        ) {}
 
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/EXTERNAL FUNCTIONS
@@ -60,12 +52,7 @@ contract CMTAT_BEACON_FACTORY is CMTATFactoryRoot {
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument
     ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) returns(BeaconProxy cmtat)   {
-        bytes32 deploymentSalt = _checkAndDetermineDeploymentSalt(deploymentSaltInput);
-        bytes memory bytecode = _getBytecode(
-        // CMTAT function initialize
-        cmtatArgument);
-        cmtat = _deployBytecode(bytecode,  deploymentSalt);
-        return cmtat;
+        return _deployBeaconProxy(deploymentSaltInput, _initializerData(cmtatArgument));
     }
 
     /**
@@ -78,10 +65,7 @@ contract CMTAT_BEACON_FACTORY is CMTATFactoryRoot {
         bytes32 effectiveDeploymentSalt,
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
-        bytes memory bytecode =  _getBytecode(
-        // CMTAT function initialize
-        cmtatArgument);
-        return Create2.computeAddress(effectiveDeploymentSalt,  keccak256(bytecode), address(this) );
+        return _computedBeaconProxyAddress(effectiveDeploymentSalt, _initializerData(cmtatArgument));
     }
 
     /**
@@ -90,18 +74,7 @@ contract CMTAT_BEACON_FACTORY is CMTATFactoryRoot {
     function computedNextProxyAddress(
         bytes32 deploymentSaltInput,
         CMTAT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
-        return computedProxyAddress(
-            _computeDeploymentSalt(deploymentSaltInput),
-            cmtatArgument
-        );
-    }
-
-    /**
-    * @notice get the implementation address from the beacon
-    * @return beaconimplementation Address of the CMTAT implementation contract.
-    */
-    function implementation() public virtual view returns (address beaconimplementation) {
-        return beacon.implementation();
+        return _computedNextBeaconProxyAddress(deploymentSaltInput, _initializerData(cmtatArgument));
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -109,28 +82,17 @@ contract CMTAT_BEACON_FACTORY is CMTATFactoryRoot {
     //////////////////////////////////////////////////////////////*/
 
     /**
-    * @dev Deploy CMTAT and push the created CMTAT in the list
+    * @dev return the CMTAT initializer data
     */
-    function _deployBytecode(bytes memory bytecode, bytes32  deploymentSalt) internal returns (BeaconProxy cmtat) {
-                    address cmtatAddress = _deployAndRegisterProxy(bytecode, deploymentSalt);
-                    cmtat = BeaconProxy(payable(cmtatAddress));
-                    return cmtat;
-     }
-
-    
-    /**
-    * @dev return the smart contract bytecode
-    */
-     function _getBytecode( 
+     function _initializerData(
         // CMTAT function initialize
-        CMTAT_ARGUMENT calldata cmtatArgument) internal view returns(bytes memory bytecode) {
-        bytes memory _implementation = abi.encodeWithSelector(
+        CMTAT_ARGUMENT calldata cmtatArgument) internal pure returns(bytes memory initializerData) {
+        initializerData = abi.encodeWithSelector(
             CMTATStandardUpgradeable(address(0)).initialize.selector,
             cmtatArgument.CMTATAdmin,
             cmtatArgument.ERC20Attributes,
             cmtatArgument.extraInformationAttributes,
             cmtatArgument.engines
         );
-        bytecode = abi.encodePacked(type(BeaconProxy).creationCode, abi.encode(address(beacon), _implementation));
      }
 }

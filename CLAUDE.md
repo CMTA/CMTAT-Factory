@@ -78,6 +78,12 @@ CMTATFactoryRoot
 CMTATFactoryBase
 |- logic immutable
 |- shared by UUPS and Transparent factories
+
+CMTATTransparentFactoryBase
+|- shared Transparent proxy validation, bytecode, address prediction, and deployment
+
+CMTATBeaconFactoryBase
+|- shared Beacon creation, bytecode, address prediction, and deployment
 ```
 
 ### Factory Differences

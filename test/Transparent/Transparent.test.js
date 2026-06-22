@@ -55,6 +55,33 @@ describe('Deploy TP with Factory', function () {
         )
         .withArgs(this.attacker.address, CMTAT_DEPLOYER_ROLE)
     })
+
+    it('testCannotDeployWithProxyAdminOwnerZero', async function () {
+      await expect(
+        this.FACTORY.connect(this.admin).deployCMTAT(
+          ethers.encodeBytes32String('test'),
+          ZERO_ADDRESS,
+          this.CMTATArg
+        )
+      ).to.be.revertedWithCustomError(
+        this.FACTORY,
+        'CMTAT_Factory_AddressZeroNotAllowedForProxyAdminOwner'
+      )
+    })
+
+    it('testCannotComputeAddressWithProxyAdminOwnerZero', async function () {
+      await expect(
+        this.FACTORY.computedProxyAddress(
+          await this.FACTORY.nextDeploymentSalt(),
+          ZERO_ADDRESS,
+          this.CMTATArg
+        )
+      ).to.be.revertedWithCustomError(
+        this.FACTORY,
+        'CMTAT_Factory_AddressZeroNotAllowedForProxyAdminOwner'
+      )
+    })
+
     it('testCanDeployCMTATWithFactory', async function () {
       const deploymentSaltInput = ethers.encodeBytes32String('test')
       expect(await this.FACTORY.nextDeploymentSalt()).to.equal(
