@@ -2,7 +2,6 @@
 pragma solidity ^0.8.20;
 
 import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
-import {AccessControl} from '@openzeppelin/contracts/access/AccessControl.sol';
 import {Create2} from '@openzeppelin/contracts/utils/Create2.sol';
 import {UpgradeableBeacon} from '@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol';
 import {CMTATStandardUpgradeable} from "../../CMTAT/contracts/deployment/CMTATStandardUpgradeable.sol";
@@ -13,7 +12,7 @@ import {FactoryErrors} from "../libraries/FactoryErrors.sol";
 * @notice Factory to deploy beacon proxy
 * 
 */
-contract CMTAT_BEACON_FACTORY is AccessControl, CMTATFactoryRoot {
+contract CMTAT_BEACON_FACTORY is CMTATFactoryRoot {
     UpgradeableBeacon public immutable beacon;
     
     /**
