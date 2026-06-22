@@ -220,3 +220,7 @@ When working on this repo, verify:
 3. Events, id tracking, and `cmtatsList` updates happen exactly once per deployment.
 4. Role gating remains on all deployment entrypoints.
 5. Changes do not break the CMTAT initializer tuple shape expected by tests.
+
+## Note
+
+After each implemented feature or fix, provide a one-line GitHub commit message for all changes since the last commit.
