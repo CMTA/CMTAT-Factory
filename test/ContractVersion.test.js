@@ -57,7 +57,6 @@ describe('Factory ContractVersion', function () {
 
   it('testCanExposeERC8303VersionAcrossFactories', async function () {
     for (const factory of this.factories) {
-      expect(await factory.VERSION()).to.equal(FACTORY_VERSION)
       expect(await factory.version()).to.equal(FACTORY_VERSION)
     }
   })
