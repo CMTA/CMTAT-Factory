@@ -4,20 +4,16 @@ pragma solidity ^0.8.20;
 
 import {AccessControl} from '@openzeppelin/contracts/access/AccessControl.sol';
 import {Create2} from '@openzeppelin/contracts/utils/Create2.sol';
+import {ContractVersion} from "./ContractVersion.sol";
 import {CMTATFactoryInvariant} from "./CMTATFactoryInvariant.sol";
 import {FactoryErrors} from "./FactoryErrors.sol";
 /**
 * @notice Code common to Beacon, TP and UUPS factory
 * 
 */
-abstract contract CMTATFactoryRoot is AccessControl, CMTATFactoryInvariant {
+abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFactoryInvariant {
     /* ============ State Variables ============ */
     /* ==== Public Variables ======== */
-    /** 
-    * @notice 
-    * Get the current version of the smart contract
-    */
-    string public constant VERSION = "0.2.0";
     address[] public cmtatsList;
     bool immutable public useCustomSalt;
     uint256 public cmtatCounterId;
@@ -55,6 +51,19 @@ abstract contract CMTATFactoryRoot is AccessControl, CMTATFactoryInvariant {
      */
     function CMTATProxyAddress(uint256 cmtatCounterId_) public view virtual returns (address) {
         return cmtats[cmtatCounterId_];
+    }
+
+    /**
+    * @inheritdoc AccessControl
+    */
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(AccessControl, ContractVersion)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 
     /**
