@@ -56,9 +56,10 @@ describe('Deploy UUPPSwith Factory', function () {
     })
     it('testCanDeployCMTATWithFactory', async function () {
       const deploymentSaltInput = ethers.encodeBytes32String('test')
+      const effectiveDeploymentSalt = await this.FACTORY.nextDeploymentSalt()
       let computedCMTATAddress = await this.FACTORY.computedProxyAddress(
         // 0x0 => id counter 0
-        ethers.keccak256(ethers.solidityPacked(['uint256'], [0x0])),
+        effectiveDeploymentSalt,
         this.CMTATArg
       )
       expect(
@@ -72,6 +73,9 @@ describe('Deploy UUPPSwith Factory', function () {
         deploymentSaltInput,
         this.CMTATArg
       )
+      await expect(this.logs)
+        .to.emit(this.FACTORY, 'CMTATDeployed')
+        .withArgs(computedCMTATAddress, this.admin.address, 0, effectiveDeploymentSalt)
       await this.logs.wait()
       const filter = this.FACTORY.filters.CMTAT
       let events = await this.FACTORY.queryFilter(filter, -1)

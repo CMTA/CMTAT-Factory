@@ -25,4 +25,5 @@ abstract contract CMTATFactoryInvariant {
     bytes32 public constant CMTAT_DEPLOYER_ROLE = keccak256("CMTAT_DEPLOYER_ROLE");
     /* ============ Events ============ */
     event CMTAT(address indexed CMTAT, uint256 id);
+    event CMTATDeployed(address indexed proxy, address indexed deployer, uint256 indexed id, bytes32 salt);
 }

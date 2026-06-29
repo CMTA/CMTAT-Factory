@@ -101,6 +101,7 @@ abstract contract CMTATFactoryRoot is AccessControl, CMTATFactoryInvariant {
         cmtatAddress = Create2.deploy(0, deploymentSalt, bytecode);
         cmtats[cmtatCounterId] = cmtatAddress;
         emit CMTAT(cmtatAddress, cmtatCounterId);
+        emit CMTATDeployed(cmtatAddress, msg.sender, cmtatCounterId, deploymentSalt);
         ++cmtatCounterId;
         cmtatsList.push(cmtatAddress);
     }

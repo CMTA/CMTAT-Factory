@@ -102,6 +102,9 @@ describe('Deploy Light TP with Factory', function () {
         this.admin,
         this.CMTATLightArg
       )
+      await expect(this.logs)
+        .to.emit(this.FACTORY, 'CMTATDeployed')
+        .withArgs(computedCMTATAddress, this.admin.address, 0, deploymentSalt)
 
       const filter = this.FACTORY.filters.CMTAT
       const events = await this.FACTORY.queryFilter(filter, -1)
