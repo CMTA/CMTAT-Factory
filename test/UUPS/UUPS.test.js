@@ -72,7 +72,7 @@ describe('Deploy UUPPSwith Factory', function () {
         deploymentSaltInput,
         this.CMTATArg
       )
-      const receipt = await this.logs.wait()
+      await this.logs.wait()
       const filter = this.FACTORY.filters.CMTAT
       let events = await this.FACTORY.queryFilter(filter, -1)
       let args = events[0].args

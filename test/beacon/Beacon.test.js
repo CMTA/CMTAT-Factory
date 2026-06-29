@@ -71,8 +71,7 @@ describe('Deploy Beacon with Factory', function () {
         this.CMTATArg
       )
 
-      // https://github.com/ethers-io/ethers.js/discussions/4484#discussioncomment-9890653
-      const receipt = await this.logs.wait()
+      await this.logs.wait()
       const filter = this.FACTORY.filters.CMTAT
       let events = await this.FACTORY.queryFilter(filter, -1)
       let args = events[0].args
