@@ -37,6 +37,11 @@ describe('Deploy TP with Factory', function () {
       // Act + Assert
       expect(await this.FACTORY.logic()).to.equal(this.CMTAT_PROXY_IMPL.target)
     })
+    it('testReportsUseCustomSaltFalse', async function () {
+      // Factory constructed with useCustomSalt_ = false: the immutable must be
+      // false (it is no longer assigned conditionally, so this guards C3).
+      expect(await this.FACTORY.useCustomSalt()).to.equal(false)
+    })
   })
 
   context('Deploy CMTAT with Factory', function () {

@@ -36,6 +36,10 @@ describe('Deploy TP with Factory - Salt', function () {
       // Act + Assert
       expect(await this.FACTORY.logic()).to.equal(this.CMTAT_PROXY_IMPL.target)
     })
+    it('testReportsUseCustomSaltTrue', async function () {
+      // Factory constructed with useCustomSalt_ = true
+      expect(await this.FACTORY.useCustomSalt()).to.equal(true)
+    })
   })
 
   context('Deploy CMTAT with Factory', function () {

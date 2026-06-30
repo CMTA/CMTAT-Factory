@@ -29,9 +29,7 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
         if(factoryAdmin == address(0)){
             revert  FactoryErrors.CMTAT_Factory_AddressZeroNotAllowedForFactoryAdmin();
         }
-        if(useCustomSalt_){
-            useCustomSalt = useCustomSalt_;
-        }
+        useCustomSalt = useCustomSalt_;
         _grantRole(DEFAULT_ADMIN_ROLE, factoryAdmin);
         _grantRole(CMTAT_DEPLOYER_ROLE, factoryAdmin);
     }
