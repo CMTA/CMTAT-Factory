@@ -72,6 +72,7 @@ Commit: _pending release commit_
 
 ### Dependencies
 
+- Update Solidity (Hardhat compiler) to v0.8.34.
 - Update CMTAT to v3.3.0-rc1.
 - Update OpenZeppelin (Contracts & Contracts-Upgradeable) to v5.6.1 — required by CMTAT v3.3.0-rc1 and resolves a duplicate `Initializable` declaration that broke compilation under v5.4.0.
 

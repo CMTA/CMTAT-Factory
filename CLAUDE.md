@@ -17,7 +17,7 @@ This file helps AI agents understand and work with this codebase.
 The factories deploy token proxies with `CREATE2`, track deployed instances by incremental id, and gate deployment behind `AccessControl`.
 
 - **Factory version:** `0.3.0` in `contracts/libraries/ContractVersion.sol`
-- **Solidity:** source files use `^0.8.20`, Hardhat compiles with `0.8.30`
+- **Solidity:** source files use `^0.8.20`, Hardhat compiles with `0.8.34`
 - **EVM target:** `prague`
 - **License:** `MPL-2.0`
 

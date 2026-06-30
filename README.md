@@ -460,7 +460,7 @@ are the latest ones that we tested:
 - Hardhat ^2.26.1
 - Node 20.5.0
 - Smart contract
-  - Solidity [0.8.30](https://docs.soliditylang.org/en/v0.8.30/) (via solc-js)
+  - Solidity [0.8.34](https://docs.soliditylang.org/en/v0.8.34/) (via solc-js)
   - EVM: Prague
   - CMTAT [v3.3.0-rc1](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc1)
   - OpenZeppelin Contracts (Node.js module) [v5.6.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.1) 
