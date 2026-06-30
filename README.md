@@ -11,7 +11,41 @@ Each factory contract automates deployment using **deterministic addresses (via 
 
 In addition to the three standard factories, two **CMTAT Light** factories (`CMTAT_LIGHT_TP_FACTORY` and `CMTAT_LIGHT_BEACON_FACTORY`) deploy the lighter `CMTATUpgradeableLight` implementation. They behave exactly like their standard Transparent/Beacon counterparts but take the smaller `CMTAT_LIGHT_ARGUMENT` initializer struct (admin + ERC20 attributes only).
 
-[TOC]
+## Table of Contents
+
+- [Introduction](#introduction)
+  - [Key features](#key-features)
+  - [Factory Overview](#factory-overview)
+  - [CMTAT versions: Standard vs Light](#cmtat-versions-standard-vs-light)
+- [Library contracts](#library-contracts)
+  - [CMTATFactoryBase](#cmtatfactorybase)
+  - [CMTATFactoryRoot](#cmtatfactoryroot)
+- [Deterministic deployment: `CREATE` vs `CREATE2`](#deterministic-deployment-create-vs-create2)
+- [Common factory API](#common-factory-api)
+  - [Versioning (ERC-8303)](#versioning-erc-8303)
+  - [Events](#events)
+  - [Deployment tracking](#deployment-tracking)
+  - [Salt behavior](#salt-behavior)
+  - [Access control](#access-control)
+- [Factory contracts](#factory-contracts)
+  - [Proxy patterns: Transparent vs UUPS vs Beacon](#proxy-patterns-transparent-vs-uups-vs-beacon)
+  - [Note](#note)
+  - [Note (CMTAT Light)](#note-cmtat-light)
+  - [Beacon Proxy Factory](#beacon-proxy-factory)
+  - [Transparent Proxy Factory](#transparent-proxy-factory)
+  - [UUPS ProxyFactory](#uups-proxyfactory)
+  - [CMTAT Light Factories](#cmtat-light-factories)
+- [Usage instructions](#usage-instructions)
+  - [Dependencies](#dependencies)
+  - [Installation](#installation)
+  - [Hardhat](#hardhat)
+  - [Generate documentation](#generate-documentation)
+- [Security](#security)
+  - [Vulnerability disclosure](#vulnerability-disclosure)
+  - [Audit](#audit)
+  - [Tools](#tools)
+- [Further reading](#further-reading)
+- [Intellectual property](#intellectual-property)
 
 ### Key features
 
