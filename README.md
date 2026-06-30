@@ -6,8 +6,10 @@
 
 ## Introduction
 
-This project provides a modular deployment framework for [**CMTAT**](https://github.com/CMTA/CMTAT), a security token framework, using three different upgradeability patterns: **UUPS proxy**, **Transparent proxy**, and **Beacon proxy**.
+This project provides a modular deployment framework for [**CMTAT**](https://github.com/CMTA/CMTAT), a security token framework, using three upgradeability patterns: **UUPS proxy**, **Transparent proxy**, and **Beacon proxy**.
 Each factory contract automates deployment using **deterministic addresses (via CREATE2)** and initializes CMTAT instances with a structured set of parameters passed in arguments by the deployer.
+
+In addition to the three standard factories, two **CMTAT Light** factories (`CMTAT_LIGHT_TP_FACTORY` and `CMTAT_LIGHT_BEACON_FACTORY`) deploy the lighter `CMTATUpgradeableLight` implementation. They behave exactly like their standard Transparent/Beacon counterparts but take the smaller `CMTAT_LIGHT_ARGUMENT` initializer struct (admin + ERC20 attributes only).
 
 [TOC]
 
@@ -22,13 +24,19 @@ Each factory contract automates deployment using **deterministic addresses (via 
 
 - **UUPS Proxy Factory**
   - Deploys CMTAT behind a UUPS proxy ([ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)) with minimal admin overhead.
-  - Contract: [CMTAT_UUPS_FACTORY.sol](./contracts/CMTAT_UUPS_FACTORY.sol) 
+  - Contract: [CMTAT_UUPS_FACTORY.sol](./contracts/standard/CMTAT_UUPS_FACTORY.sol) 
 - **Transparent Proxy Factory**
   - Deploys CMTAT behind a TransparentUpgradeableProxy with a dedicated ProxyAdmin contract.
-  - Contract: [CMTAT_TRANSPARENT_FACTORY.sol](./contracts/CMTAT_TP_FACTORY.sol)
+  - Contract: [CMTAT_TP_FACTORY.sol](./contracts/standard/CMTAT_TP_FACTORY.sol)
 - **Beacon Proxy Factory**
   - Deploys CMTAT behind a BeaconProxy using an UpgradeableBeacon for shared implementation upgrades.
-  - Contract: [CMTAT_BEACON_FACTORY.sol](./contracts/CMTAT_BEACON_FACTORY.sol)
+  - Contract: [CMTAT_BEACON_FACTORY.sol](./contracts/standard/CMTAT_BEACON_FACTORY.sol)
+- **CMTAT Light Transparent Proxy Factory**
+  - Deploys the lighter `CMTATUpgradeableLight` implementation behind a TransparentUpgradeableProxy.
+  - Contract: [CMTAT_LIGHT_TP_FACTORY.sol](./contracts/light/CMTAT_LIGHT_TP_FACTORY.sol)
+- **CMTAT Light Beacon Proxy Factory**
+  - Deploys the lighter `CMTATUpgradeableLight` implementation behind a BeaconProxy.
+  - Contract: [CMTAT_LIGHT_BEACON_FACTORY.sol](./contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol)
 
 ## Library contracts
 
@@ -70,7 +78,7 @@ Library abstract contracts are imported by several different factories.
 
 ### Note
 
-The struct `CMTAT_ARGUMENT` will be ABI encoded in function signature as: ` (address,(string,string,uint8),(string,(string,string,bytes32),string),(address,address,address))`.
+The struct `CMTAT_ARGUMENT` will be ABI encoded in function signature as: ` (address,(string,string,uint8),(string,(string,string,bytes32),string),(address))`.
 
 ```solidity
 struct CMTAT_ARGUMENT {
@@ -126,13 +134,22 @@ struct ExtraInformationAttributes {
 ```
 struct Engine {
     IRuleEngine ruleEngine;
-    ISnapshotEngine snapshotEngine;
-    IERC1643 documentEngine;
 }
-=> (address,address,address)
+=> (address)
 ```
 
+### Note (CMTAT Light)
 
+The CMTAT Light factories (`CMTAT_LIGHT_TP_FACTORY`, `CMTAT_LIGHT_BEACON_FACTORY`) use the smaller `CMTAT_LIGHT_ARGUMENT` struct, ABI encoded as: `(address,(string,string,uint8))`.
+
+```solidity
+struct CMTAT_LIGHT_ARGUMENT {
+    address CMTATAdmin;
+    ICMTATConstructor.ERC20Attributes ERC20Attributes;
+}
+```
+
+`ERC20Attributes` is the same `(string,string,uint8)` tuple documented above. The CMTAT Light factory entrypoints (`deployCMTAT`, `computedProxyAddress`, `computedNextProxyAddress`) have the same signatures as their standard Transparent/Beacon counterparts, except they take `CMTAT_LIGHT_ARGUMENT` instead of `CMTAT_ARGUMENT`.
 
 ### Beacon Proxy Factory
 
@@ -262,9 +279,9 @@ Get the predicted proxy address for a given deployment salt without deploying it
 
 ------
 
-##### `deployCMTAT(bytes32,address, CMTAT_ARGUMENT) -> (address proxy, address proxyAdmin)`
+##### `deployCMTAT(bytes32,address, CMTAT_ARGUMENT) -> (TransparentUpgradeableProxy cmtat)`
 
-Deploys a CMTAT token implementation behind a TransparentUpgradeableProxy, along with a new ProxyAdmin contract.
+Deploys a CMTAT token implementation behind a TransparentUpgradeableProxy, along with a new ProxyAdmin contract. The ProxyAdmin is created inside the proxy's constructor and owned by `proxyAdminOwner`; its address is not returned (read it from the proxy's `AdminChanged` event).
 
 **Parameters:**
 
@@ -276,9 +293,9 @@ Deploys a CMTAT token implementation behind a TransparentUpgradeableProxy, along
 
 **Return Values:**
 
-| Name  | Type    | Description                                          |
-| ----- | ------- | ---------------------------------------------------- |
-| proxy | address | Address of the deployed TransparentUpgradeableProxy. |
+| Name  | Type                       | Description                                |
+| ----- | -------------------------- | ------------------------------------------ |
+| cmtat | TransparentUpgradeableProxy | The deployed TransparentUpgradeableProxy. |
 
 ------
 
@@ -336,6 +353,24 @@ Get the predicted proxy address for a given deployment salt without deploying it
 | Name       | Type    | Description                                                 |
 | ---------- | ------- | ----------------------------------------------------------- |
 | cmtatProxy | address | The computed address of the CMTAT proxy for the given salt. |
+
+
+
+### CMTAT Light Factories
+
+Two additional factories deploy the lighter `CMTATUpgradeableLight` implementation:
+
+- **`CMTAT_LIGHT_TP_FACTORY`** ([contracts/light/CMTAT_LIGHT_TP_FACTORY.sol](./contracts/light/CMTAT_LIGHT_TP_FACTORY.sol)) — Transparent proxy variant. Same architecture as the [Transparent Proxy Factory](#transparent-proxy-factory).
+- **`CMTAT_LIGHT_BEACON_FACTORY`** ([contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol](./contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol)) — Beacon proxy variant. Same architecture as the [Beacon Proxy Factory](#beacon-proxy-factory). When `implementation_ == address(0)`, the constructor deploys a fresh `CMTATUpgradeableLight` implementation.
+
+Both expose the same entrypoints as their standard counterparts but take `CMTAT_LIGHT_ARGUMENT` instead of `CMTAT_ARGUMENT`:
+
+| Factory | Entrypoint signature |
+| --- | --- |
+| `CMTAT_LIGHT_TP_FACTORY` | `deployCMTAT(bytes32, address proxyAdminOwner, CMTAT_LIGHT_ARGUMENT) -> (TransparentUpgradeableProxy cmtat)` |
+| `CMTAT_LIGHT_TP_FACTORY` | `computedProxyAddress(bytes32, address proxyAdminOwner, CMTAT_LIGHT_ARGUMENT) -> (address cmtatProxy)` |
+| `CMTAT_LIGHT_BEACON_FACTORY` | `deployCMTAT(bytes32, CMTAT_LIGHT_ARGUMENT) -> (BeaconProxy cmtat)` |
+| `CMTAT_LIGHT_BEACON_FACTORY` | `computedProxyAddress(bytes32, CMTAT_LIGHT_ARGUMENT) -> (address cmtatProxy)` |
 
 
 
