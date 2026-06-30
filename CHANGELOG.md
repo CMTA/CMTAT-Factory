@@ -59,12 +59,16 @@ Commit: _pending release commit_
 - ERC-8303 factory version support: `version()` exposed through `IERC8303` / `ContractVersion`, with matching ERC-165 `supportsInterface`.
 - Rich deployment event `CMTATDeployed(address indexed proxy, address indexed deployer, uint256 indexed id, bytes32 salt)`, emitted on every deployment.
 - Deployment-salt helpers for address prediction: `nextDeploymentSalt()` and `computedNextProxyAddress(...)` on every factory.
+- `npm run check:oz` script (also run in CI) that fails the build if the installed OpenZeppelin version diverges from the version required by the pinned CMTAT submodule.
 
 ### Changed
 
 - Reorganised factory contracts into `contracts/standard/` and `contracts/light/` folders.
 - Shared transparent and beacon deployment logic into new base contracts `CMTATTransparentFactoryBase` and `CMTATBeaconFactoryBase`.
 - Removed redundant beacon access-control inheritance and made factory-error imports explicit.
+- Removed the redundant `cmtats` mapping — `CMTATProxyAddress(id)` now reads `cmtatsList` (with a bounds guard returning the zero address for unknown ids), saving one storage write per deployment.
+- Assigned `useCustomSalt` unconditionally in the constructor and removed a no-op `bytes32(...)` cast in `nextDeploymentSalt()`.
+- Set the `package.json` `version` field to `0.3.0`.
 
 ### Removed
 
@@ -84,6 +88,13 @@ Commit: _pending release commit_
 ### Documentation
 
 - Major README overhaul: document all five factories including the Light variants, the ERC-8303 `version()`, deployment events, and the salt / address-prediction API; correct the `Engine` ABI encoding, the Transparent `deployCMTAT` return type, and contract paths; complete the library-contracts section and regenerate the Surya diagrams.
+- Added README sections: a generated table of contents, `CREATE` vs `CREATE2` deterministic deployment, a Transparent/UUPS/Beacon proxy comparison table, and a CMTAT Standard vs Light overview.
+- Added `@return` NatSpec to `computedProxyAddress` (Transparent/UUPS), fixed the `beaconImplementation` casing, and linked ERC-8303 to its draft PR (not yet published as an EIP page).
+- Added versioned Slither and Aderyn static-analysis reports for v0.3.0 with per-finding triage feedback, and a consolidated [`doc/audits/AUDIT_OVERVIEW.md`](doc/audits/AUDIT_OVERVIEW.md) (both tools: nothing to fix).
+
+### Testing
+
+- Added tests for the proxy registry (the emitted `CMTATDeployed` address, `cmtatsList(id)`, and `CMTATProxyAddress(id)` all agree, in both counter-salt and custom-salt modes; unknown ids return the zero address), the `useCustomSalt` getter (true/false), and a uniform `version()` across all five factories.
 
 ## 0.2.0
 
