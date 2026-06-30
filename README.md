@@ -681,23 +681,33 @@ This project is not audited !
 
 ### Tools
 
+Static-analysis reports are versioned under [`doc/audits/`](./doc/audits/); see the [audit overview](./doc/audits/AUDIT_OVERVIEW.md) for the consolidated results and triage. All runs exclude mocks and exclude dependencies / the CMTAT submodule from scope. **For v0.3.0, neither tool reports anything to fix.**
+
 #### [Slither](https://github.com/crytic/slither)
 
 Slither is a Solidity static analysis framework written in Python3
 
 ```bash
-slither .  --checklist --filter-paths "openzeppelin-contracts-upgradeable|openzeppelin-contracts|@openzeppelin|test|CMTAT" > slither-report.md
+slither . --checklist --filter-paths "node_modules,CMTAT,test,forge-std,mocks" > slither-report.md
 ```
 
-
+| Version | Report | Feedback |
+| --- | --- | --- |
+| v0.3.0 | [slither-report.md](./doc/audits/v0.3.0/slither-report.md) | [feedback](./doc/audits/v0.3.0/slither-report-feedback.md) |
+| v0.2.0 | [slither-report.md](./doc/audits/v0.2.0/slither-report.md) | — |
 
 #### Aderyn
 
-Here is the list of report performed with [Aderyn](https://github.com/Cyfrin/aderyn)
+Here is the list of reports performed with [Aderyn](https://github.com/Cyfrin/aderyn)
 
 ```bash
-aderyn -x mock --output aderyn-report.md
+aderyn -x mocks --output aderyn-report.md
 ```
+
+| Version | Report | Feedback |
+| --- | --- | --- |
+| v0.3.0 | [aderyn-report.md](./doc/audits/v0.3.0/aderyn-report.md) | [feedback](./doc/audits/v0.3.0/aderyn-report-feedback.md) |
+| v0.2.0 | [aderyn-report.md](./doc/audits/v0.2.0/aderyn-report.md) | — |
 
 
 
