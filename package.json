@@ -1,6 +1,6 @@
 {
   "name": "CMTAT Factory",
-  "version": "",
+  "version": "0.3.0",
   "description": "Factory smart contracts for CMTAT",
   "files": [
     "contracts",
