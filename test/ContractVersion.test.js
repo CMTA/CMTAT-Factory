@@ -8,7 +8,7 @@ const {
 
 const ERC8303_INTERFACE_ID = '0x54fd4d50'
 const INVALID_INTERFACE_ID = '0xffffffff'
-const FACTORY_VERSION = '0.2.0'
+const FACTORY_VERSION = '0.3.0'
 
 describe('Factory ContractVersion', function () {
   beforeEach(async function () {

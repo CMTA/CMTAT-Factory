@@ -19,7 +19,7 @@ abstract contract ContractVersion is ERC165, IERC8303 {
     /**
     * @notice Get the current version of the smart contract.
     */
-    string private constant VERSION = "0.2.0";
+    string private constant VERSION = "0.3.0";
 
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/EXTERNAL FUNCTIONS

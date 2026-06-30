@@ -45,7 +45,7 @@ The factories are built from a small set of abstract base contracts in `contract
 | Contract | Inherits | Used by | Responsibility |
 | --- | --- | --- | --- |
 | `CMTATFactoryInvariant` | — | all factories | Declares the shared structs (`CMTAT_ARGUMENT`, `CMTAT_LIGHT_ARGUMENT`), the `CMTAT_DEPLOYER_ROLE` constant, and the `CMTAT` / `CMTATDeployed` events. |
-| `ContractVersion` | `ERC165`, `IERC8303` | `CMTATFactoryRoot` | ERC-8303 `version()` (`"0.2.0"`) and ERC-165 `supportsInterface`. |
+| `ContractVersion` | `ERC165`, `IERC8303` | `CMTATFactoryRoot` | ERC-8303 `version()` (`"0.3.0"`) and ERC-165 `supportsInterface`. |
 | `CMTATFactoryRoot` | `AccessControl`, `ContractVersion`, `CMTATFactoryInvariant` | all factories | Deployment index (`cmtatsList`, `cmtatCounterId`, `CMTATProxyAddress`), salt logic (`useCustomSalt`, `nextDeploymentSalt`, `_checkAndDetermineDeploymentSalt`, `_computeDeploymentSalt`), and CREATE2 deploy + registration (`_deployAndRegisterProxy`). |
 | `CMTATFactoryBase` | `CMTATFactoryRoot` | UUPS & Transparent factories | Stores the immutable `logic` implementation and reverts on a zero logic address. |
 | `CMTATTransparentFactoryBase` | `CMTATFactoryBase` | `CMTAT_TP_FACTORY`, `CMTAT_LIGHT_TP_FACTORY` | Transparent proxy bytecode, address prediction, `proxyAdminOwner` validation, and deployment. |
@@ -97,7 +97,7 @@ All factories inherit `CMTATFactoryRoot` and share the following surface, in add
 Factories implement [ERC-8303](https://eips.ethereum.org/EIPS/eip-8303) through `ContractVersion` and expose the factory version:
 
 ```solidity
-function version() external view returns (string memory); // current: "0.2.0"
+function version() external view returns (string memory); // current: "0.3.0"
 ```
 
 `supportsInterface(bytes4)` (ERC-165) returns `true` for `type(IERC8303).interfaceId`, in addition to the `AccessControl` interfaces.
@@ -610,7 +610,7 @@ aderyn -x mock --output aderyn-report.md
 
 For more details and test scenario, you can read this article on the Taurus blog: [Making CMTAT Tokenization More Scalable and Cost-Effective with Proxy and Factory Contracts](https://www.taurushq.com/blog/cmtat-tokenization-deployment-with-proxy-and-factory/).
 
-This article uses the CMTAT version [2.5.1](https://github.com/CMTA/CMTAT/releases/tag/v2.5.1) when the factory code was still included in the CMTAT repository, corresponding to Factory release `0.1.0`. The current factory version is `0.2.0` (exposed on-chain through `version()`, see [Versioning (ERC-8303)](#versioning-erc-8303)).
+This article uses the CMTAT version [2.5.1](https://github.com/CMTA/CMTAT/releases/tag/v2.5.1) when the factory code was still included in the CMTAT repository, corresponding to Factory release `0.1.0`. The current factory version is `0.3.0` (exposed on-chain through `version()`, see [Versioning (ERC-8303)](#versioning-erc-8303)).
 
 ## Intellectual property
 
