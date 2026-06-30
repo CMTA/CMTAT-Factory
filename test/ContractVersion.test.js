@@ -56,9 +56,15 @@ describe('Factory ContractVersion', function () {
   })
 
   it('testCanExposeERC8303VersionAcrossFactories', async function () {
+    const versions = []
     for (const factory of this.factories) {
-      expect(await factory.version()).to.equal(FACTORY_VERSION)
+      const v = await factory.version()
+      expect(v).to.equal(FACTORY_VERSION)
+      versions.push(v)
     }
+    // All five factories must report the SAME version string, so a partial
+    // version bump (one factory missed) fails loudly.
+    expect(new Set(versions).size).to.equal(1)
   })
 
   it('testCanAdvertiseERC8303InterfaceAcrossFactories', async function () {

@@ -167,13 +167,21 @@ describe('Deploy TP with Factory', function () {
         this.admin,
         this.CMTATArg
       )
-      // cmtatsList is the id => address registry and agrees with CMTATProxyAddress
-      expect(await this.FACTORY.cmtatsList(0)).to.equal(
-        await this.FACTORY.CMTATProxyAddress(0)
+      // Invariant: for every deployment the emitted event address, cmtatsList(id),
+      // and CMTATProxyAddress(id) all agree.
+      const events = await this.FACTORY.queryFilter(
+        this.FACTORY.filters.CMTATDeployed
       )
-      expect(await this.FACTORY.cmtatsList(1)).to.equal(
-        await this.FACTORY.CMTATProxyAddress(1)
-      )
+      expect(events.length).to.equal(2)
+      for (const ev of events) {
+        const proxy = ev.args[0]
+        const id = ev.args[2]
+        expect(await this.FACTORY.cmtatsList(id)).to.equal(proxy)
+        expect(await this.FACTORY.CMTATProxyAddress(id)).to.equal(proxy)
+      }
+      // ids are the sequential 0,1
+      expect(events[0].args[2]).to.equal(0)
+      expect(events[1].args[2]).to.equal(1)
       // unknown id returns the zero address instead of reverting
       expect(await this.FACTORY.CMTATProxyAddress(2)).to.equal(ZERO_ADDRESS)
     })
