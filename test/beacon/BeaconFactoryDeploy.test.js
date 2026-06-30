@@ -21,7 +21,7 @@ describe('Deploy Beacon with Factory', function () {
       this.admin,
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       extraInformationAttributes,
-      [ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS]
+      [ZERO_ADDRESS]
     ]
   })
   context('BeaconDeployment', function () {
@@ -37,7 +37,9 @@ describe('Deploy Beacon with Factory', function () {
         this.CMTATArg
       )
       const CMTAT_ADDRESS = await this.FACTORY.CMTATProxyAddress(0)
-      const MyContract = await ethers.getContractFactory('CMTATUpgradeable')
+      const MyContract = await ethers.getContractFactory(
+        'CMTATStandardUpgradeable'
+      )
       const CMTAT_PROXY = MyContract.attach(CMTAT_ADDRESS)
       // Act + Assert
       await CMTAT_PROXY.connect(this.admin).mint(this.admin, 100)

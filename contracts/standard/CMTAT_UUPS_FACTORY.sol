@@ -2,10 +2,9 @@
 pragma solidity ^0.8.20;
 
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {CMTATUpgradeableUUPS} from "../CMTAT/contracts/deployment/CMTATUpgradeableUUPS.sol";
+import {CMTATUpgradeableUUPS} from "../../CMTAT/contracts/deployment/CMTATUpgradeableUUPS.sol";
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
-import {CMTATFactoryInvariant} from "./libraries/CMTATFactoryInvariant.sol";
-import {CMTATFactoryBase} from "./libraries/CMTATFactoryBase.sol";
+import {CMTATFactoryBase} from "../libraries/CMTATFactoryBase.sol";
 
 
 /**
@@ -52,18 +51,31 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase {
     }
 
     /**
-    * @param deploymentSalt salt for the deployment
+    * @param effectiveDeploymentSalt effective salt for the deployment
     * @param cmtatArgument argument for the function initialize
-    * @notice get the proxy address depending on a particular salt
+    * @notice get the proxy address depending on a particular effective salt
+    * @return cmtatProxy predicted address of the CMTAT proxy for the given salt
     */
-    function computedProxyAddress( 
-        bytes32 deploymentSalt,
+    function computedProxyAddress(
+        bytes32 effectiveDeploymentSalt,
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
         bytes memory bytecode =  _getBytecode(
         // CMTAT function initialize
         cmtatArgument);
-        return Create2.computeAddress(deploymentSalt,  keccak256(bytecode), address(this) );
+        return Create2.computeAddress(effectiveDeploymentSalt,  keccak256(bytecode), address(this) );
+    }
+
+    /**
+    * @notice get the proxy address using the same salt selection as deployCMTAT
+    */
+    function computedNextProxyAddress(
+        bytes32 deploymentSaltInput,
+        CMTAT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
+        return computedProxyAddress(
+            _computeDeploymentSalt(deploymentSaltInput),
+            cmtatArgument
+        );
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -74,12 +86,8 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase {
     * @dev Deploy CMTAT and push the created CMTAT in the list
     */
     function _deployBytecode(bytes memory bytecode, bytes32  deploymentSalt) internal returns (ERC1967Proxy cmtat) {
-                    address cmtatAddress = Create2.deploy(0, deploymentSalt, bytecode);
+                    address cmtatAddress = _deployAndRegisterProxy(bytecode, deploymentSalt);
                     cmtat = ERC1967Proxy(payable(cmtatAddress));
-                    cmtats[cmtatCounterId] = address(cmtat);
-                    emit CMTAT(address(cmtat), cmtatCounterId);
-                    ++cmtatCounterId;
-                    cmtatsList.push(address(cmtat));
                     return cmtat;
      }
 
@@ -97,7 +105,6 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase {
                 cmtatArgument.extraInformationAttributes,
                 cmtatArgument.engines
         );
-        // abi.encode instead of encodePacked because creationCode return a dynamic type (bytes memory)
-        bytecode = abi.encode(type(ERC1967Proxy).creationCode,  logic, implementation);
+        bytecode = abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(logic, implementation));
      }
 }

@@ -1,6 +1,6 @@
 {
   "name": "CMTAT Factory",
-  "version": "",
+  "version": "0.3.0",
   "description": "Factory smart contracts for CMTAT",
   "files": [
     "contracts",
@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "test": "npx hardhat test",
+    "check:oz": "node scripts/check-oz-version.js",
     "lint:js": "npx eslint test",
     "lint:js:fix": "npx eslint test --fix",
     "lint:sol": "npx solium -d contracts",
@@ -73,7 +74,7 @@
     "surya": "^0.4.11"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "5.4.0",
-    "@openzeppelin/contracts-upgradeable": "5.4.0"
+    "@openzeppelin/contracts": "5.6.1",
+    "@openzeppelin/contracts-upgradeable": "5.6.1"
   }
 }

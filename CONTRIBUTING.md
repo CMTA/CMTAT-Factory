@@ -4,7 +4,7 @@ There are many ways to contribute to CMTAT Factory Contracts.
 
 ## Opening an issue
 
-You can [open an issue] to suggest a feature, a difficulty you have or report a minor bug. For serious bugs in an audited version please do not open an issue, instead refer to our [security policy] for appropriate steps. See [SECURITY.md](./SECURITY.md).
+You can [open an issue] to suggest a feature, a difficulty you have or report a minor bug. For serious bugs in an audited version please do not open an issue, instead refer to our [security policy] for appropriate steps. See [CMTAT/SECURITY.md](https://github.com/CMTA/CMTAT/blob/master/SECURITY.md).
 
 Before opening an issue, be sure to search through the existing open and closed issues, and consider posting a comment in one of those instead.
 

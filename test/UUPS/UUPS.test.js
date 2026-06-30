@@ -28,7 +28,7 @@ describe('Deploy UUPPSwith Factory', function () {
       this.admin,
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       extraInformationAttributes,
-      [ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS]
+      [ZERO_ADDRESS]
     ]
   })
 
@@ -55,23 +55,34 @@ describe('Deploy UUPPSwith Factory', function () {
         .withArgs(this.attacker.address, CMTAT_DEPLOYER_ROLE)
     })
     it('testCanDeployCMTATWithFactory', async function () {
+      const deploymentSaltInput = ethers.encodeBytes32String('test')
+      const effectiveDeploymentSalt = await this.FACTORY.nextDeploymentSalt()
       let computedCMTATAddress = await this.FACTORY.computedProxyAddress(
         // 0x0 => id counter 0
-        ethers.keccak256(ethers.solidityPacked(['uint256'], [0x0])),
+        effectiveDeploymentSalt,
         this.CMTATArg
       )
+      expect(
+        await this.FACTORY.computedNextProxyAddress(
+          deploymentSaltInput,
+          this.CMTATArg
+        )
+      ).to.equal(computedCMTATAddress)
       // Act
       this.logs = await this.FACTORY.connect(this.admin).deployCMTAT(
-        ethers.encodeBytes32String('test'),
+        deploymentSaltInput,
         this.CMTATArg
       )
-      const receipt = await this.logs.wait()
-      const filter = this.FACTORY.filters.CMTAT
+      await expect(this.logs)
+        .to.emit(this.FACTORY, 'CMTATDeployed')
+        .withArgs(computedCMTATAddress, this.admin.address, 0, effectiveDeploymentSalt)
+      await this.logs.wait()
+      const filter = this.FACTORY.filters.CMTATDeployed
       let events = await this.FACTORY.queryFilter(filter, -1)
       let args = events[0].args
       // Assert
       // Check  Id
-      expect(args[1]).to.equal(0)
+      expect(args[2]).to.equal(0)
       let CMTAT_ADDRESS = args[0]
       // Check address with ID
       expect(await this.FACTORY.CMTATProxyAddress(0)).to.equal(CMTAT_ADDRESS)
@@ -91,7 +102,7 @@ describe('Deploy UUPPSwith Factory', function () {
       // Check Id increment
       events = await this.FACTORY.queryFilter(filter, -1)
       args = events[0].args
-      expect(args[1]).to.equal(1)
+      expect(args[2]).to.equal(1)
 
       // Check address
       computedCMTATAddress = await this.FACTORY.computedProxyAddress(

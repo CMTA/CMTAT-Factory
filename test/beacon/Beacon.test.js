@@ -24,7 +24,7 @@ describe('Deploy Beacon with Factory', function () {
       this.admin,
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       extraInformationAttributes,
-      [ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS]
+      [ZERO_ADDRESS]
     ]
   })
 
@@ -53,24 +53,30 @@ describe('Deploy Beacon with Factory', function () {
         .withArgs(this.attacker.address, CMTAT_DEPLOYER_ROLE)
     })
     it('testCanDeployCMTATWithFactory', async function () {
+      const deploymentSaltInput = ethers.encodeBytes32String('test')
       let computedCMTATAddress = await this.FACTORY.computedProxyAddress(
         // 0x0 => id counter 0
         ethers.keccak256(ethers.solidityPacked(['uint256'], [0x0])),
         this.CMTATArg
       )
+      expect(
+        await this.FACTORY.computedNextProxyAddress(
+          deploymentSaltInput,
+          this.CMTATArg
+        )
+      ).to.equal(computedCMTATAddress)
       // Act
       this.logs = await this.FACTORY.connect(this.admin).deployCMTAT(
-        ethers.encodeBytes32String('test'),
+        deploymentSaltInput,
         this.CMTATArg
       )
 
-      // https://github.com/ethers-io/ethers.js/discussions/4484#discussioncomment-9890653
-      const receipt = await this.logs.wait()
-      const filter = this.FACTORY.filters.CMTAT
+      await this.logs.wait()
+      const filter = this.FACTORY.filters.CMTATDeployed
       let events = await this.FACTORY.queryFilter(filter, -1)
       let args = events[0].args
       // Check Id increment
-      expect(args[1]).to.equal(0)
+      expect(args[2]).to.equal(0)
       // Assert
       let CMTAT_ADDRESS = args[0]
       // Check address with ID
@@ -78,7 +84,9 @@ describe('Deploy Beacon with Factory', function () {
       expect(await this.FACTORY.CMTATProxyAddress(0)).to.equal(
         computedCMTATAddress
       )
-      const MyContract = await ethers.getContractFactory('CMTATUpgradeable')
+      const MyContract = await ethers.getContractFactory(
+        'CMTATStandardUpgradeable'
+      )
       const CMTAT_PROXY = MyContract.attach(CMTAT_ADDRESS)
       // Act + Assert
       await CMTAT_PROXY.connect(this.admin).mint(this.admin, 100)
@@ -90,7 +98,7 @@ describe('Deploy Beacon with Factory', function () {
       // Check Id increment
       events = await this.FACTORY.queryFilter(filter, -1)
       args = events[0].args
-      expect(args[1]).to.equal(1)
+      expect(args[2]).to.equal(1)
 
       // Check address
       computedCMTATAddress = await this.FACTORY.computedProxyAddress(

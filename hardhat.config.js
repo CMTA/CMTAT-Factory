@@ -7,7 +7,7 @@ require("hardhat-contract-sizer");
 require("@nomicfoundation/hardhat-chai-matchers")
 module.exports = {
   solidity: {
-    version: '0.8.30',
+    version: '0.8.34',
     settings: {
       optimizer: {
         enabled: true,
@@ -15,6 +15,9 @@ module.exports = {
       },
       evmVersion: 'prague'
     }
+  },
+  gasReporter: {
+    enabled: process.env.REPORT_GAS === 'true'
   },
   contractSizer: {
     alphaSort: true,
