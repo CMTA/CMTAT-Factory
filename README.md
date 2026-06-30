@@ -104,6 +104,32 @@ The factories are built from a small set of abstract base contracts in `contract
 
 
 
+## Deterministic deployment: `CREATE` vs `CREATE2`
+
+Every factory deploys its proxies with the **`CREATE2`** opcode instead of the default `CREATE`. The difference is how the new contract's address is derived.
+
+- **`CREATE`** (the default when you do `new Contract()`):
+
+  ```text
+  address = keccak256(rlp_encode(deployerAddress, deployerNonce))[12:]
+  ```
+
+  The address depends on the **deployer's account nonce**, which increases with every transaction/contract the deployer makes. You therefore cannot reliably know the address in advance — it depends on how many deployments happened before, and in what order.
+
+- **`CREATE2`** ([EIP-1014](https://eips.ethereum.org/EIPS/eip-1014)):
+
+  ```text
+  address = keccak256(0xff ++ deployerAddress ++ salt ++ keccak256(init_code))[12:]
+  ```
+
+  The address depends only on the **deployer address**, a caller-chosen **`salt`**, and the **`init_code`** (creation bytecode + ABI-encoded constructor arguments) — **not** on the nonce. Given those three inputs the address is fully deterministic and can be computed *before* deploying (a "counterfactual" address).
+
+**Why this project uses `CREATE2`**
+
+- It lets you compute a token's address ahead of time via `computedProxyAddress(...)` / `computedNextProxyAddress(...)` and, for example, fund it or reference it before it exists on-chain.
+- Because `init_code` is part of the hash, the predicted address is bound to the exact proxy bytecode **and** the CMTAT initializer arguments. Changing any constructor arg, proxy type, or initializer payload changes the resulting address — which is why the deploy path and the address-prediction path must stay byte-for-byte in sync.
+- A given `(deployer, salt, init_code)` triple maps to exactly one address, so a salt can only be used once. The factory enforces this for custom salts (`CMTAT_Factory_SaltAlreadyUsed`) and, in non-custom mode, derives a fresh salt from `cmtatCounterId` for each deployment. See [Salt behavior](#salt-behavior).
+
 ## Common factory API
 
 All factories inherit `CMTATFactoryRoot` and share the following surface, in addition to the proxy-specific `deployCMTAT` / `computedProxyAddress` documented per factory below.
