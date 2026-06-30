@@ -38,6 +38,22 @@ In addition to the three standard factories, two **CMTAT Light** factories (`CMT
   - Deploys the lighter `CMTATUpgradeableLight` implementation behind a BeaconProxy.
   - Contract: [CMTAT_LIGHT_BEACON_FACTORY.sol](./contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol)
 
+### CMTAT versions: Standard vs Light
+
+This project deploys two flavors of the [CMTAT](https://github.com/CMTA/CMTAT) implementation (pinned at **v3.3.0-rc1**), each initialized with its own argument struct.
+
+- **CMTAT Standard** — the full-featured security token.
+  - Used by the UUPS, Transparent, and Beacon factories: `CMTATUpgradeableUUPS` (UUPS) and `CMTATStandardUpgradeable` (Transparent / Beacon).
+  - Includes the complete CMTAT module set: ERC-20 with mint/burn, pause, enforcement (freeze / forced transfer), validation backed by an external **RuleEngine**, document management (ERC-1643), snapshots, debt, cross-chain (ERC-20 bridging), gasless meta-transactions (ERC-2771), and ERC-7551 enforcement.
+  - Initialized with the full [`CMTAT_ARGUMENT`](#factory-contracts) struct (admin, ERC-20 attributes, extra information, and the `Engine` rule-engine address).
+
+- **CMTAT Light** — a minimal, cheaper-to-deploy variant.
+  - Used by the two Light factories: `CMTATUpgradeableLight`.
+  - Keeps only the core security-token features: ERC-20 with mint/burn, pause, enforcement, allowlist/allowance validation, and access control. It drops the heavier extensions (RuleEngine, documents, snapshots, debt, cross-chain, meta-transactions, ERC-7551).
+  - Initialized with the smaller [`CMTAT_LIGHT_ARGUMENT`](#note-cmtat-light) struct (admin and ERC-20 attributes only).
+
+Choose **Light** when you only need a self-contained transfer-restricted token, and **Standard** when you need rule engines, documents, snapshots, or cross-chain support.
+
 ## Library contracts
 
 The factories are built from a small set of abstract base contracts in `contracts/libraries/`:
