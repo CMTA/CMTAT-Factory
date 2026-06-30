@@ -40,7 +40,17 @@ In addition to the three standard factories, two **CMTAT Light** factories (`CMT
 
 ## Library contracts
 
-Library abstract contracts are imported by several different factories.
+The factories are built from a small set of abstract base contracts in `contracts/libraries/`:
+
+| Contract | Inherits | Used by | Responsibility |
+| --- | --- | --- | --- |
+| `CMTATFactoryInvariant` | — | all factories | Declares the shared structs (`CMTAT_ARGUMENT`, `CMTAT_LIGHT_ARGUMENT`), the `CMTAT_DEPLOYER_ROLE` constant, and the `CMTAT` / `CMTATDeployed` events. |
+| `ContractVersion` | `ERC165`, `IERC8303` | `CMTATFactoryRoot` | ERC-8303 `version()` (`"0.2.0"`) and ERC-165 `supportsInterface`. |
+| `CMTATFactoryRoot` | `AccessControl`, `ContractVersion`, `CMTATFactoryInvariant` | all factories | Deployment index (`cmtatsList`, `cmtatCounterId`, `CMTATProxyAddress`), salt logic (`useCustomSalt`, `nextDeploymentSalt`, `_checkAndDetermineDeploymentSalt`, `_computeDeploymentSalt`), and CREATE2 deploy + registration (`_deployAndRegisterProxy`). |
+| `CMTATFactoryBase` | `CMTATFactoryRoot` | UUPS & Transparent factories | Stores the immutable `logic` implementation and reverts on a zero logic address. |
+| `CMTATTransparentFactoryBase` | `CMTATFactoryBase` | `CMTAT_TP_FACTORY`, `CMTAT_LIGHT_TP_FACTORY` | Transparent proxy bytecode, address prediction, `proxyAdminOwner` validation, and deployment. |
+| `CMTATBeaconFactoryBase` | `CMTATFactoryRoot` | `CMTAT_BEACON_FACTORY`, `CMTAT_LIGHT_BEACON_FACTORY` | Creates the `UpgradeableBeacon` (validating `beaconOwner`), exposes `implementation()`, and handles beacon proxy bytecode, prediction, and deployment. |
+| `FactoryErrors` | — (library) | all factories | Custom errors (zero-address guards and `CMTAT_Factory_SaltAlreadyUsed`). |
 
 ### CMTATFactoryBase
 
@@ -63,14 +73,18 @@ Library abstract contracts are imported by several different factories.
 
 
 
-|       Contract       |               Type               |                Bases                 |                |               |
-| :------------------: | :------------------------------: | :----------------------------------: | :------------: | :-----------: |
-|          └           |        **Function Name**         |            **Visibility**            | **Mutability** | **Modifiers** |
-|                      |                                  |                                      |                |               |
-| **CMTATFactoryRoot** |          Implementation          | AccessControl, CMTATFactoryInvariant |                |               |
+|       Contract       |               Type               |                       Bases                        |                |               |
+| :------------------: | :------------------------------: | :------------------------------------------------: | :------------: | :-----------: |
+|          └           |        **Function Name**         |                  **Visibility**                    | **Mutability** | **Modifiers** |
+|                      |                                  |                                                    |                |               |
+| **CMTATFactoryRoot** |          Implementation          | AccessControl, ContractVersion, CMTATFactoryInvariant |             |               |
 |          └           |          <Constructor>           |               Public ❗️               |       🛑        |      NO❗️      |
 |          └           |        CMTATProxyAddress         |               Public ❗️               |                |      NO❗️      |
+|          └           |        supportsInterface         |               Public ❗️               |                |      NO❗️      |
+|          └           |        nextDeploymentSalt        |               Public ❗️               |                |      NO❗️      |
 |          └           | _checkAndDetermineDeploymentSalt |              Internal 🔒              |       🛑        |               |
+|          └           |       _computeDeploymentSalt     |              Internal 🔒              |                |               |
+|          └           |      _deployAndRegisterProxy     |              Internal 🔒              |       🛑        |               |
 
 
 
@@ -355,7 +369,7 @@ Contrary to the Transparent Proxy, the logic to upgrade the proxy is situated in
 The factory will use the same implementation for each UUPS proxy deployed. 
 
 - Each UUPS proxy can upgrade their implementation to a new one independently and without impact on other proxies.
-- This is the reason whey there is a specific CMTAT contract which includes this logic to use: `CMTATUpgradeableUUPS`
+- This is the reason why there is a specific CMTAT contract which includes this logic to use: `CMTATUpgradeableUUPS`
 
 #### Inheritance
 
@@ -421,6 +435,18 @@ Both expose the same entrypoints as their standard counterparts but take `CMTAT_
 | `CMTAT_LIGHT_BEACON_FACTORY` | `deployCMTAT(bytes32, CMTAT_LIGHT_ARGUMENT) -> (BeaconProxy cmtat)` |
 | `CMTAT_LIGHT_BEACON_FACTORY` | `computedProxyAddress(bytes32, CMTAT_LIGHT_ARGUMENT) -> (address cmtatProxy)` |
 
+#### Inheritance
+
+![surya_inheritance_CMTAT_LIGHT_TP_FACTORY.sol](./doc/schema/surya_inheritance/surya_inheritance_CMTAT_LIGHT_TP_FACTORY.sol.png)
+
+![surya_inheritance_CMTAT_LIGHT_BEACON_FACTORY.sol](./doc/schema/surya_inheritance/surya_inheritance_CMTAT_LIGHT_BEACON_FACTORY.sol.png)
+
+#### Graph
+
+![surya_graph_CMTAT_LIGHT_TP_FACTORY.sol](./doc/schema/surya_graph/surya_graph_CMTAT_LIGHT_TP_FACTORY.sol.png)
+
+![surya_graph_CMTAT_LIGHT_BEACON_FACTORY.sol](./doc/schema/surya_graph/surya_graph_CMTAT_LIGHT_BEACON_FACTORY.sol.png)
+
 
 
 ## Usage instructions
@@ -454,7 +480,7 @@ Clone the git repository, with the option `--recurse-submodules` to fetch the su
 
 We recommend to install the [Node Version Manager `nvm`](https://github.com/nvm-sh/nvm) to manage multiple versions of Node.js on your machine. You can then, for example, install the version 20.5.0 of Node.js with the following command: `nvm install 20.5.0`
 
-The file [.nvmrc](../.nvmrc) at the root of the project set the Node.js version. `nvm use`will automatically use this version if no version is supplied on the command line.
+The file [.nvmrc](./.nvmrc) at the root of the project set the Node.js version. `nvm use`will automatically use this version if no version is supplied on the command line.
 
 - node modules
 
@@ -495,7 +521,7 @@ The script calls the plugin [hardhat-contract-sizer](https://www.npmjs.com/packa
 
 #### Testing
 
-Tests are written in JavaScript by using [web3js](https://web3js.readthedocs.io/en/v1.10.0/) and run **only** with Hardhat as follows:
+Tests are written in JavaScript using [ethers.js](https://docs.ethers.org/) together with Mocha, Chai, and `@nomicfoundation/hardhat-network-helpers`, and run **only** with Hardhat as follows:
 
 `npx hardhat test`
 
