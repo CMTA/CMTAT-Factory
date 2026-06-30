@@ -74,6 +74,55 @@ Library abstract contracts are imported by several different factories.
 
 
 
+## Common factory API
+
+All factories inherit `CMTATFactoryRoot` and share the following surface, in addition to the proxy-specific `deployCMTAT` / `computedProxyAddress` documented per factory below.
+
+### Versioning (ERC-8303)
+
+Factories implement [ERC-8303](https://eips.ethereum.org/EIPS/eip-8303) through `ContractVersion` and expose the factory version:
+
+```solidity
+function version() external view returns (string memory); // current: "0.2.0"
+```
+
+`supportsInterface(bytes4)` (ERC-165) returns `true` for `type(IERC8303).interfaceId`, in addition to the `AccessControl` interfaces.
+
+### Events
+
+Every successful deployment emits both events, once each, with the same incremental `id`:
+
+```solidity
+event CMTAT(address indexed CMTAT, uint256 id);
+event CMTATDeployed(address indexed proxy, address indexed deployer, uint256 indexed id, bytes32 salt);
+```
+
+`CMTATDeployed` is the richer event: it also records the `deployer` (`msg.sender`) and the effective `salt` used by CREATE2.
+
+### Deployment tracking
+
+| Member | Type | Description |
+| --- | --- | --- |
+| `cmtatCounterId` | `uint256` | Number of CMTAT instances deployed; also the `id` assigned to the next deployment. Incremented by exactly one per deployment. |
+| `CMTATProxyAddress(uint256 id)` | `address` | Address of the deployed proxy for a given `id`. |
+| `cmtatsList(uint256)` | `address` | Array of every deployed proxy address, in deployment order. |
+
+### Salt behavior
+
+| Member | Type | Description |
+| --- | --- | --- |
+| `useCustomSalt` | `bool` (immutable) | If `false`, the factory derives the salt itself; if `true`, the caller-supplied salt is used. |
+| `nextDeploymentSalt()` | `bytes32` | The salt the next non-custom deployment will use: `keccak256(abi.encodePacked(cmtatCounterId))`. |
+| `computedNextProxyAddress(...)` | `address` | Predicts the next proxy address using the same salt selection as `deployCMTAT` (custom salt when `useCustomSalt == true`, otherwise `nextDeploymentSalt()`). Same trailing arguments as the factory's `deployCMTAT`. |
+
+- When `useCustomSalt == false`, the salt is always `keccak256(abi.encodePacked(cmtatCounterId))`; the `deploymentSaltInput` argument is ignored.
+- When `useCustomSalt == true`, the caller-supplied salt is used directly and is **one-time-use**: reusing a salt reverts with `FactoryErrors.CMTAT_Factory_SaltAlreadyUsed()`.
+- `computedProxyAddress(...)` takes an *effective* salt and mirrors the exact bytecode used by `deployCMTAT(...)`, while `computedNextProxyAddress(...)` applies the same salt-selection logic as a real deployment.
+
+### Access control
+
+All factories inherit OpenZeppelin `AccessControl`. The constructor grants both `DEFAULT_ADMIN_ROLE` and `CMTAT_DEPLOYER_ROLE` to `factoryAdmin`, and `deployCMTAT(...)` is gated by `onlyRole(CMTAT_DEPLOYER_ROLE)`.
+
 ## Factory contracts
 
 ### Note
@@ -382,12 +431,12 @@ The toolchain includes the following components, where the versions
 are the latest ones that we tested: 
 
 - npm 10.2.5
-- Hardhat ^2.22.7
+- Hardhat ^2.26.1
 - Node 20.5.0
 - Smart contract
   - Solidity [0.8.30](https://docs.soliditylang.org/en/v0.8.30/) (via solc-js)
   - EVM: Prague
-  - CMTAT [v3.0.0](https://github.com/CMTA/CMTAT/releases/tag/v3.0.0)
+  - CMTAT [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0)
   - OpenZeppelin Contracts (Node.js module) [v5.4.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.4.0) 
   - OpenZeppelin Contracts Upgradeable (Node.js module) [v5.4.0](https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/releases/tag/v5.4.0)
 
@@ -535,7 +584,7 @@ aderyn -x mock --output aderyn-report.md
 
 For more details and test scenario, you can read this article on the Taurus blog: [Making CMTAT Tokenization More Scalable and Cost-Effective with Proxy and Factory Contracts](https://www.taurushq.com/blog/cmtat-tokenization-deployment-with-proxy-and-factory/).
 
-This article uses the CMTAT version [2.5.1](https://github.com/CMTA/CMTAT/releases/tag/v2.5.1) when the factory code was still included in the CMTAT repository. The factory code corresponds to the Factory release: 0.1.0
+This article uses the CMTAT version [2.5.1](https://github.com/CMTA/CMTAT/releases/tag/v2.5.1) when the factory code was still included in the CMTAT repository, corresponding to Factory release `0.1.0`. The current factory version is `0.2.0` (exposed on-chain through `version()`, see [Versioning (ERC-8303)](#versioning-erc-8303)).
 
 ## Intellectual property
 
