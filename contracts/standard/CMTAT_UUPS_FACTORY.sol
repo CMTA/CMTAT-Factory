@@ -54,8 +54,9 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase {
     * @param effectiveDeploymentSalt effective salt for the deployment
     * @param cmtatArgument argument for the function initialize
     * @notice get the proxy address depending on a particular effective salt
+    * @return cmtatProxy predicted address of the CMTAT proxy for the given salt
     */
-    function computedProxyAddress( 
+    function computedProxyAddress(
         bytes32 effectiveDeploymentSalt,
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {

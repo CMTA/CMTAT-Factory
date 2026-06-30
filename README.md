@@ -378,7 +378,7 @@ Get the predicted BeaconProxy address for a given deployment salt without deploy
 
 ------
 
-#### `implementation() -> (address beaconImplementation)`
+##### `implementation() -> (address beaconImplementation)`
 
 Get the current implementation address stored in the UpgradeableBeacon.
 

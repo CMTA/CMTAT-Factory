@@ -51,8 +51,9 @@ contract CMTAT_TP_FACTORY is CMTATTransparentFactoryBase {
     * @param proxyAdminOwner admin of the proxy
     * @param cmtatArgument argument for the function initialize
     * @notice get the proxy address depending on a particular effective salt
+    * @return cmtatProxy predicted address of the CMTAT proxy for the given salt
     */
-    function computedProxyAddress( 
+    function computedProxyAddress(
         bytes32 effectiveDeploymentSalt,
         address proxyAdminOwner,
         // CMTAT function initialize

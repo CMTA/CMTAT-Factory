@@ -33,9 +33,9 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
 
     /**
     * @notice get the implementation address from the beacon
-    * @return beaconimplementation Address of the CMTAT implementation contract.
+    * @return beaconImplementation Address of the CMTAT implementation contract.
     */
-    function implementation() public virtual view returns (address beaconimplementation) {
+    function implementation() public virtual view returns (address beaconImplementation) {
         return beacon.implementation();
     }
 
