@@ -113,7 +113,7 @@ For all three factories, deployment follows the same high-level sequence:
 2. Factory derives the effective salt through `_checkAndDetermineDeploymentSalt`.
 3. Factory ABI-encodes proxy creation bytecode plus CMTAT initializer calldata.
 4. Factory deploys with `Create2.deploy`.
-5. Factory stores the proxy address in `cmtats[id]`, emits `CMTATDeployed(proxy,deployer,id,salt)`, increments `cmtatCounterId`, and appends to `cmtatsList`.
+5. Factory emits `CMTATDeployed(proxy,deployer,id,salt)`, increments `cmtatCounterId`, and appends the proxy to `cmtatsList` (the array doubles as the `id => address` registry, indexed by `cmtatCounterId`).
 
 ## Salt Behavior
 

@@ -19,7 +19,6 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     uint256 public cmtatCounterId;
     
     /* ==== Internal mapping ======== */
-    mapping(uint256 => address) internal cmtats;
     mapping(bytes32 => bool) internal customSaltUsed;
     
     /* ============ Constructor ============ */
@@ -44,13 +43,15 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
 
     /**
      * @notice Retrieves the address of a deployed CMTAT proxy by its counter ID.
+     * @dev The id is the sequential deployment index, independent of the salt used
+     * (custom or counter-derived). Returns the zero address for an unknown id.
      *
      * @param cmtatCounterId_ Identifier used to track deployed CMTAT instances.
      *
      * @return proxyAddress The address of the CMTAT proxy corresponding to the given counter ID.
      */
     function CMTATProxyAddress(uint256 cmtatCounterId_) public view virtual returns (address) {
-        return cmtats[cmtatCounterId_];
+        return cmtatCounterId_ < cmtatsList.length ? cmtatsList[cmtatCounterId_] : address(0);
     }
 
     /**
@@ -108,7 +109,7 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     */
     function _deployAndRegisterProxy(bytes memory bytecode, bytes32 deploymentSalt) internal returns (address cmtatAddress) {
         cmtatAddress = Create2.deploy(0, deploymentSalt, bytecode);
-        cmtats[cmtatCounterId] = cmtatAddress;
+        // cmtatsList index == cmtatCounterId, so the array doubles as the id => address registry.
         emit CMTATDeployed(cmtatAddress, msg.sender, cmtatCounterId, deploymentSalt);
         ++cmtatCounterId;
         cmtatsList.push(cmtatAddress);

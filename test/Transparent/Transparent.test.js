@@ -150,5 +150,27 @@ describe('Deploy TP with Factory', function () {
         computedCMTATAddress
       )
     })
+    it('testProxyRegistryListAndUnknownIdWithCounterSalt', async function () {
+      // useCustomSalt == false: salt derived from cmtatCounterId.
+      await this.FACTORY.connect(this.admin).deployCMTAT(
+        ethers.encodeBytes32String('ignored-0'),
+        this.admin,
+        this.CMTATArg
+      )
+      await this.FACTORY.connect(this.admin).deployCMTAT(
+        ethers.encodeBytes32String('ignored-1'),
+        this.admin,
+        this.CMTATArg
+      )
+      // cmtatsList is the id => address registry and agrees with CMTATProxyAddress
+      expect(await this.FACTORY.cmtatsList(0)).to.equal(
+        await this.FACTORY.CMTATProxyAddress(0)
+      )
+      expect(await this.FACTORY.cmtatsList(1)).to.equal(
+        await this.FACTORY.CMTATProxyAddress(1)
+      )
+      // unknown id returns the zero address instead of reverting
+      expect(await this.FACTORY.CMTATProxyAddress(2)).to.equal(ZERO_ADDRESS)
+    })
   })
 })

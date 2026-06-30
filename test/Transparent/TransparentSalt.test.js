@@ -132,5 +132,43 @@ describe('Deploy TP with Factory - Salt', function () {
         'CMTAT_Factory_SaltAlreadyUsed'
       )
     })
+    it('testTracksProxyRegistryByIdWithCustomSalt', async function () {
+      // useCustomSalt == true: deploy with two DIFFERENT caller-supplied salts.
+      // The id must stay sequential and decoupled from the salt, and the registry
+      // (CMTATProxyAddress / cmtatsList) must resolve each id to its proxy.
+      const salt0 = ethers.encodeBytes32String('salt-0')
+      const salt1 = ethers.encodeBytes32String('salt-1')
+      const predicted0 = await this.FACTORY.computedProxyAddress(
+        salt0,
+        this.admin,
+        this.CMTATArg
+      )
+      await this.FACTORY.connect(this.admin).deployCMTAT(
+        salt0,
+        this.admin,
+        this.CMTATArg
+      )
+      const predicted1 = await this.FACTORY.computedProxyAddress(
+        salt1,
+        this.admin,
+        this.CMTATArg
+      )
+      await this.FACTORY.connect(this.admin).deployCMTAT(
+        salt1,
+        this.admin,
+        this.CMTATArg
+      )
+      // id is sequential, independent of the custom salts used
+      expect(await this.FACTORY.cmtatCounterId()).to.equal(2)
+      // registry by id resolves to the deployed (predicted) addresses
+      expect(await this.FACTORY.CMTATProxyAddress(0)).to.equal(predicted0)
+      expect(await this.FACTORY.CMTATProxyAddress(1)).to.equal(predicted1)
+      // cmtatsList agrees with CMTATProxyAddress at every id
+      expect(await this.FACTORY.cmtatsList(0)).to.equal(predicted0)
+      expect(await this.FACTORY.cmtatsList(1)).to.equal(predicted1)
+      // unknown id returns the zero address instead of reverting
+      expect(await this.FACTORY.CMTATProxyAddress(2)).to.equal(ZERO_ADDRESS)
+      expect(await this.FACTORY.CMTATProxyAddress(999)).to.equal(ZERO_ADDRESS)
+    })
   })
 })
