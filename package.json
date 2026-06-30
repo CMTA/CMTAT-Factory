@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "test": "npx hardhat test",
+    "check:oz": "node scripts/check-oz-version.js",
     "lint:js": "npx eslint test",
     "lint:js:fix": "npx eslint test --fix",
     "lint:sol": "npx solium -d contracts",

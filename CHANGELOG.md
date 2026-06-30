@@ -34,6 +34,7 @@ Custom changelog tag: `Dependencies`, `Documentation`, `Testing`
 > Before a new release, perform the following tasks
 
 - Code: Update the version name defined in [ContractVersion.sol](contracts/libraries/ContractVersion.sol)
+- Verify the OpenZeppelin version matches the version required by the pinned CMTAT submodule: `npm run check:oz`
 - Run linter
 
 > npm run-script lint:all:prettier

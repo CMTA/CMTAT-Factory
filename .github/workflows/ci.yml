@@ -27,5 +27,8 @@ jobs:
       - name: Install Project Dependencies
         run: npm install
 
+      - name: Check OpenZeppelin version matches CMTAT requirement
+        run: npm run check:oz
+
       - name: Run Hardhat Test
         run: npx hardhat test
