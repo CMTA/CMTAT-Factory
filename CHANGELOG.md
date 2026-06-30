@@ -94,7 +94,7 @@ Commit: _pending release commit_
 
 ### Testing
 
-- Added tests for the proxy registry (the emitted `CMTATDeployed` address, `cmtatsList(id)`, and `CMTATProxyAddress(id)` all agree, in both counter-salt and custom-salt modes; unknown ids return the zero address), the `useCustomSalt` getter (true/false), and a uniform `version()` across all five factories.
+- Added tests for the proxy registry (the emitted `CMTATDeployed` address, `cmtatsList(id)`, and `CMTATProxyAddress(id)` all agree, in both counter-salt and custom-salt modes; unknown ids return the zero address), the `useCustomSalt` getter (true/false), a uniform `version()` across all five factories, and `supportsInterface` for the inherited ERC-165 and AccessControl interface ids (exercising the `super` chain in `ContractVersion`).
 
 ## 0.2.0
 

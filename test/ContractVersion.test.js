@@ -7,6 +7,8 @@ const {
 } = require('../CMTAT/test/deploymentUtils.js')
 
 const ERC8303_INTERFACE_ID = '0x54fd4d50'
+const ERC165_INTERFACE_ID = '0x01ffc9a7'
+const ACCESS_CONTROL_INTERFACE_ID = '0x7965db0b'
 const INVALID_INTERFACE_ID = '0xffffffff'
 const FACTORY_VERSION = '0.3.0'
 
@@ -75,6 +77,21 @@ describe('Factory ContractVersion', function () {
       expect(await factory.supportsInterface(INVALID_INTERFACE_ID)).to.equal(
         false
       )
+    }
+  })
+
+  it('testCanAdvertiseInheritedInterfacesAcrossFactories', async function () {
+    // Exercises the `super.supportsInterface` branch of ContractVersion: the
+    // call must chain through AccessControl down to ERC165, so both the ERC-165
+    // and the AccessControl interface ids resolve to true. (A direct ERC165
+    // call instead of `super` would skip AccessControl and break this.)
+    for (const factory of this.factories) {
+      expect(await factory.supportsInterface(ERC165_INTERFACE_ID)).to.equal(
+        true
+      )
+      expect(
+        await factory.supportsInterface(ACCESS_CONTROL_INTERFACE_ID)
+      ).to.equal(true)
     }
   })
 })
