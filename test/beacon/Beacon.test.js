@@ -72,11 +72,11 @@ describe('Deploy Beacon with Factory', function () {
       )
 
       await this.logs.wait()
-      const filter = this.FACTORY.filters.CMTAT
+      const filter = this.FACTORY.filters.CMTATDeployed
       let events = await this.FACTORY.queryFilter(filter, -1)
       let args = events[0].args
       // Check Id increment
-      expect(args[1]).to.equal(0)
+      expect(args[2]).to.equal(0)
       // Assert
       let CMTAT_ADDRESS = args[0]
       // Check address with ID
@@ -98,7 +98,7 @@ describe('Deploy Beacon with Factory', function () {
       // Check Id increment
       events = await this.FACTORY.queryFilter(filter, -1)
       args = events[0].args
-      expect(args[1]).to.equal(1)
+      expect(args[2]).to.equal(1)
 
       // Check address
       computedCMTATAddress = await this.FACTORY.computedProxyAddress(

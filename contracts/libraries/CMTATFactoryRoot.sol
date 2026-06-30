@@ -71,7 +71,7 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
      * @dev Custom-salt deployments use the caller-provided salt directly.
      */
     function nextDeploymentSalt() public view virtual returns(bytes32 saltBytes) {
-        return bytes32(keccak256(abi.encodePacked(cmtatCounterId)));
+        return keccak256(abi.encodePacked(cmtatCounterId));
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -109,7 +109,6 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     function _deployAndRegisterProxy(bytes memory bytecode, bytes32 deploymentSalt) internal returns (address cmtatAddress) {
         cmtatAddress = Create2.deploy(0, deploymentSalt, bytecode);
         cmtats[cmtatCounterId] = cmtatAddress;
-        emit CMTAT(cmtatAddress, cmtatCounterId);
         emit CMTATDeployed(cmtatAddress, msg.sender, cmtatCounterId, deploymentSalt);
         ++cmtatCounterId;
         cmtatsList.push(cmtatAddress);

@@ -96,10 +96,10 @@ describe('Deploy Light Beacon with Factory', function () {
         this.CMTATLightArg
       )
 
-      const filter = this.FACTORY.filters.CMTAT
+      const filter = this.FACTORY.filters.CMTATDeployed
       const events = await this.FACTORY.queryFilter(filter, -1)
       const args = events[0].args
-      expect(args[1]).to.equal(0)
+      expect(args[2]).to.equal(0)
 
       const CMTAT_ADDRESS = args[0]
       expect(await this.FACTORY.CMTATProxyAddress(0)).to.equal(CMTAT_ADDRESS)

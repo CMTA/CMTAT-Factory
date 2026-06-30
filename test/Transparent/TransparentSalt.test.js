@@ -78,10 +78,10 @@ describe('Deploy TP with Factory - Salt', function () {
       // Assert
       // Check  Id
       await this.logs.wait()
-      const filter = this.FACTORY.filters.CMTAT
+      const filter = this.FACTORY.filters.CMTATDeployed
       let events = await this.FACTORY.queryFilter(filter, -1)
       let args = events[0].args
-      expect(args[1]).to.equal(0)
+      expect(args[2]).to.equal(0)
       const CMTAT_ADDRESS = args[0]
       const MyContract = await ethers.getContractFactory(
         'CMTATStandardUpgradeable'
@@ -99,7 +99,7 @@ describe('Deploy TP with Factory - Salt', function () {
       // Check Id increment
       events = await this.FACTORY.queryFilter(filter, -1)
       args = events[0].args
-      expect(args[1]).to.equal(1)
+      expect(args[2]).to.equal(1)
       // Revert
       await expect(
         this.FACTORY.connect(this.admin).deployCMTAT(

@@ -180,14 +180,13 @@ function version() external view returns (string memory); // current: "0.3.0"
 
 ### Events
 
-Every successful deployment emits both events, once each, with the same incremental `id`:
+Every successful deployment emits one event:
 
 ```solidity
-event CMTAT(address indexed CMTAT, uint256 id);
 event CMTATDeployed(address indexed proxy, address indexed deployer, uint256 indexed id, bytes32 salt);
 ```
 
-`CMTATDeployed` is the richer event: it also records the `deployer` (`msg.sender`) and the effective `salt` used by CREATE2.
+It records the deployed `proxy`, the `deployer` (`msg.sender`), the incremental `id`, and the effective `salt` used by CREATE2.
 
 ### Deployment tracking
 

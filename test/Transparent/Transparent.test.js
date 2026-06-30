@@ -107,12 +107,12 @@ describe('Deploy TP with Factory', function () {
         this.CMTATArg
       )
       await this.logs.wait()
-      const filter = this.FACTORY.filters.CMTAT
+      const filter = this.FACTORY.filters.CMTATDeployed
       let events = await this.FACTORY.queryFilter(filter, -1)
       let args = events[0].args
       // Assert
       // Check  Id
-      expect(args[1]).to.equal(0)
+      expect(args[2]).to.equal(0)
       let CMTAT_ADDRESS = args[0]
       // Check address with ID
       expect(await this.FACTORY.CMTATProxyAddress(0)).to.equal(CMTAT_ADDRESS)
@@ -133,7 +133,7 @@ describe('Deploy TP with Factory', function () {
       // Check Id increment
       events = await this.FACTORY.queryFilter(filter, -1)
       args = events[0].args
-      expect(args[1]).to.equal(1)
+      expect(args[2]).to.equal(1)
       expect(await this.FACTORY.nextDeploymentSalt()).to.equal(
         ethers.keccak256(ethers.solidityPacked(['uint256'], [0x2]))
       )
