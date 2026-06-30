@@ -181,6 +181,26 @@ All factories inherit OpenZeppelin `AccessControl`. The constructor grants both 
 
 ## Factory contracts
 
+### Proxy patterns: Transparent vs UUPS vs Beacon
+
+All three patterns let a proxy delegate calls to an upgradeable implementation, but they differ in **where the upgrade logic lives**, **who controls upgrades**, and **whether proxies upgrade individually or together**. The table below summarises the differences as implemented in this repo.
+
+| | **UUPS** (`CMTAT_UUPS_FACTORY`) | **Transparent** (`CMTAT_TP_FACTORY`) | **Beacon** (`CMTAT_BEACON_FACTORY`) |
+| --- | --- | --- | --- |
+| Proxy contract | `ERC1967Proxy` | `TransparentUpgradeableProxy` | `BeaconProxy` (+ one shared `UpgradeableBeacon`) |
+| Where upgrade logic lives | In the **implementation** (`CMTATUpgradeableUUPS` inherits `UUPSUpgradeable`) | In the **proxy** | In the **beacon** |
+| Upgrade authority | `PROXY_UPGRADE_ROLE` on the token itself (`_authorizeUpgrade`) | A dedicated **`ProxyAdmin`** contract, one per proxy, owned by `proxyAdminOwner` | The single `UpgradeableBeacon`, owned by `beaconOwner` |
+| Upgrade granularity | Per proxy, independently | Per proxy, independently | **All proxies at once** (they share one implementation) |
+| Extra contract per deployment | None | One `ProxyAdmin` per proxy | None (one beacon created in the factory constructor) |
+| Per-deployment argument | `deployCMTAT(salt, cmtatArgument)` | `deployCMTAT(salt, proxyAdminOwner, cmtatArgument)` | `deployCMTAT(salt, cmtatArgument)` |
+| Factory constructor | `(logic, factoryAdmin, useCustomSalt)` | `(logic, factoryAdmin, useCustomSalt)` | `(implementation, factoryAdmin, beaconOwner, useCustomSalt)` |
+| Relative proxy size / gas | Smallest proxy (upgrade code is in the implementation) | Largest proxy (carries admin/upgrade routing) | Small proxy, but one extra `SLOAD` per call (proxy → beacon → implementation) |
+| Best when | You want the cheapest proxy and per-token upgrade control | You want per-token upgrades with admin isolated from the token's own roles | You want to upgrade many tokens in a single transaction |
+
+> The UUPS implementation must keep its upgrade logic across upgrades: upgrading to an implementation that lacks `UUPSUpgradeable` permanently removes upgradeability. Transparent and Beacon keep the upgrade machinery outside the implementation, so they are not exposed to this footgun.
+
+The CMTAT Light factories (`CMTAT_LIGHT_TP_FACTORY`, `CMTAT_LIGHT_BEACON_FACTORY`) use the Transparent and Beacon patterns respectively, with the same trade-offs.
+
 ### Note
 
 The struct `CMTAT_ARGUMENT` will be ABI encoded in function signature as: ` (address,(string,string,uint8),(string,(string,string,bytes32),string),(address))`.
