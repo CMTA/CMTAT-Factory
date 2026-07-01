@@ -744,7 +744,7 @@ aderyn -x mocks --output aderyn-report.md
 
 For more details and test scenario, you can read this article on the Taurus blog: [Making CMTAT Tokenization More Scalable and Cost-Effective with Proxy and Factory Contracts](https://www.taurushq.com/blog/cmtat-tokenization-deployment-with-proxy-and-factory/).
 
-This article uses the CMTAT version [2.5.1](https://github.com/CMTA/CMTAT/releases/tag/v2.5.1) when the factory code was still included in the CMTAT repository, corresponding to Factory release `0.1.0`. The current factory version is `0.3.0` (exposed on-chain through `version()`, see [Versioning (ERC-8303)](#versioning-erc-8303)).
+This article uses the CMTAT version [2.5.1](https://github.com/CMTA/CMTAT/releases/tag/v2.5.1) when the factory code was still included in the CMTAT repository, corresponding to Factory release `0.1.0`. The current factory version is `0.4.0` (exposed on-chain through `version()`, see [Versioning (ERC-8303)](#versioning-erc-8303)).
 
 ## Intellectual property
 
