@@ -208,6 +208,19 @@ It records the deployed `proxy`, the `deployer` (`msg.sender`), the incremental 
 - When `useCustomSalt == true`, the caller-supplied salt is used directly and is **one-time-use**: reusing a salt reverts with `FactoryErrors.CMTAT_Factory_SaltAlreadyUsed()`.
 - `computedProxyAddress(...)` takes an *effective* salt and mirrors the exact bytecode used by `deployCMTAT(...)`, while `computedNextProxyAddress(...)` applies the same salt-selection logic as a real deployment.
 
+> **⚠️ Warning — counter mode has no per-caller address reservation.**
+> When `useCustomSalt == false`, the salt is the shared `keccak256(abi.encodePacked(cmtatCounterId))`, so
+> `nextDeploymentSalt()` and `computedNextProxyAddress(...)` only predict the address of the *factory's* next
+> deployment — by whichever authorized deployer transacts first. If another `CMTAT_DEPLOYER_ROLE` holder deploys
+> before you, the counter advances and your token lands at a **different** address; anything you pre-funded or
+> pre-authorized at the predicted address is stranded.
+>
+> **The safer mode is to enable custom salts (`useCustomSalt == true`) and pass a unique, caller-chosen `salt`.**
+> A custom salt is one-time-use (reuse reverts with `CMTAT_Factory_SaltAlreadyUsed`), binds the predicted address
+> to *your* deployment, and cannot be shifted by another deployer — so `computedProxyAddress(...)` /
+> `computedNextProxyAddress(...)` give you a stable, reservable address you can safely pre-fund. Use counter mode
+> only for single-deployer or coordinated deployments.
+
 ### Access control
 
 All factories inherit OpenZeppelin `AccessControl`. The constructor grants both `DEFAULT_ADMIN_ROLE` and `CMTAT_DEPLOYER_ROLE` to `factoryAdmin`, and `deployCMTAT(...)` is gated by `onlyRole(CMTAT_DEPLOYER_ROLE)`.

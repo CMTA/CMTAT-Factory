@@ -66,6 +66,11 @@ Commit: _pending release commit_
   mode reserves a per-caller address (one-time-use via `customSaltUsed`), and the reentrant path is unreachable
   with the trusted CMTAT initializers and would only perturb off-chain event bookkeeping. See
   [`doc/audits/v0.3.0/audit_agent_report-feedback.md`](doc/audits/v0.3.0/audit_agent_report-feedback.md).
+- **NM-1 documentation clarification.** Added a `WARNING` NatSpec block to `nextDeploymentSalt()` and to
+  `computedNextProxyAddress(...)` on all five factories, plus a warning callout in the README "Salt behavior"
+  section, stating that in counter mode (`useCustomSalt == false`) a predicted address is only valid until the next
+  deployment by any authorized deployer, and that the safer mode is custom salts (`useCustomSalt == true`) with a
+  unique, caller-chosen, one-time-use salt. Documentation-only; no behavior change.
 
 ### Changed
 

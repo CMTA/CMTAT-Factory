@@ -70,6 +70,10 @@ contract CMTAT_BEACON_FACTORY is CMTATBeaconFactoryBase {
 
     /**
     * @notice get the proxy address using the same salt selection as deployCMTAT
+    * @dev WARNING: in counter mode (`useCustomSalt == false`) this prediction is only valid until the next
+    * deployment by ANY authorized deployer, because the salt is the shared `nextDeploymentSalt()`. Do not pre-fund
+    * or pre-authorize the returned address in a multi-deployer setup. For a stable, reservable address use
+    * custom-salt mode (`useCustomSalt == true`) with a unique caller-chosen salt (one-time-use).
     */
     function computedNextProxyAddress(
         bytes32 deploymentSaltInput,

@@ -68,6 +68,10 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     /**
      * @notice Returns the effective salt that will be used for the next deployment when custom salts are disabled.
      * @dev Custom-salt deployments use the caller-provided salt directly.
+     * @dev WARNING: this salt is derived from the shared `cmtatCounterId`, so it advances whenever ANY authorized
+     * deployer deploys. An address predicted from it is not reserved for a specific caller and can be front-run by
+     * another `CMTAT_DEPLOYER_ROLE` holder. For a stable, reservable address prefer custom-salt mode
+     * (`useCustomSalt == true`) with a unique caller-chosen salt, which is enforced one-time-use.
      */
     function nextDeploymentSalt() public view virtual returns(bytes32 saltBytes) {
         return keccak256(abi.encodePacked(cmtatCounterId));
