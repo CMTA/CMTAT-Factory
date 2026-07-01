@@ -700,7 +700,7 @@ This project is not audited !
 
 ### Tools
 
-Static-analysis reports are versioned under [`doc/audits/`](./doc/audits/); see the [audit overview](./doc/audits/AUDIT_OVERVIEW.md) for the consolidated results and triage. All runs exclude mocks and exclude dependencies / the CMTAT submodule from scope. **For v0.3.0, neither tool reports anything to fix.**
+Static-analysis reports are versioned under [`doc/audits/`](./doc/audits/); see the [audit overview](./doc/audits/AUDIT_OVERVIEW.md) for the consolidated results and triage. All runs exclude mocks and exclude dependencies / the CMTAT submodule from scope. **For v0.4.0, neither tool reports anything to fix.**
 
 #### [Slither](https://github.com/crytic/slither)
 
@@ -712,6 +712,7 @@ slither . --checklist --filter-paths "node_modules,CMTAT,test,forge-std,mocks" >
 
 | Version | Report | Feedback |
 | --- | --- | --- |
+| v0.4.0 | [slither-report.md](./doc/audits/v0.4.0/slither-report.md) | [feedback](./doc/audits/v0.4.0/slither-report-feedback.md) |
 | v0.3.0 | [slither-report.md](./doc/audits/v0.3.0/slither-report.md) | [feedback](./doc/audits/v0.3.0/slither-report-feedback.md) |
 | v0.2.0 | [slither-report.md](./doc/audits/v0.2.0/slither-report.md) | — |
 
@@ -725,6 +726,7 @@ aderyn -x mocks --output aderyn-report.md
 
 | Version | Report | Feedback |
 | --- | --- | --- |
+| v0.4.0 | [aderyn-report.md](./doc/audits/v0.4.0/aderyn-report.md) | [feedback](./doc/audits/v0.4.0/aderyn-report-feedback.md) |
 | v0.3.0 | [aderyn-report.md](./doc/audits/v0.3.0/aderyn-report.md) | [feedback](./doc/audits/v0.3.0/aderyn-report-feedback.md) |
 | v0.2.0 | [aderyn-report.md](./doc/audits/v0.2.0/aderyn-report.md) | — |
 

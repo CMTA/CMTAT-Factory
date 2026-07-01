@@ -14,6 +14,8 @@ In scope: the factory contracts under `contracts/` (`standard/`, `light/`, `libr
 
 | Version | Tool | Report | Feedback (triage) |
 | --- | --- | --- | --- |
+| v0.4.0 | Slither 0.11.5 | [slither-report.md](./v0.4.0/slither-report.md) | [feedback](./v0.4.0/slither-report-feedback.md) |
+| v0.4.0 | Aderyn 0.6.5 | [aderyn-report.md](./v0.4.0/aderyn-report.md) | [feedback](./v0.4.0/aderyn-report-feedback.md) |
 | v0.3.0 | Slither 0.11.5 | [slither-report.md](./v0.3.0/slither-report.md) | [feedback](./v0.3.0/slither-report-feedback.md) |
 | v0.3.0 | Aderyn 0.6.5 | [aderyn-report.md](./v0.3.0/aderyn-report.md) | [feedback](./v0.3.0/aderyn-report-feedback.md) |
 | v0.3.0 | Nethermind AuditAgent (AI) | [audit_agent_report_v0.3.0.pdf](./v0.3.0/audit_agent_report_v0.3.0.pdf) | [feedback](./v0.3.0/audit_agent_report-feedback.md) |
@@ -21,6 +23,20 @@ In scope: the factory contracts under `contracts/` (`standard/`, `light/`, `libr
 | v0.2.0 | Aderyn | [aderyn-report.md](./v0.2.0/aderyn-report.md) | — |
 
 All runs **exclude mocks** and exclude dependencies / the CMTAT submodule from scope.
+
+## v0.4.0 results
+
+| Tool | High | Medium | Low | Info | Anything to fix? |
+| --- | --- | --- | --- | --- | --- |
+| Slither | 0 | 0 | 0 | 0 | **No** — filtered checklist empty; unfiltered detectors resolve to `node_modules` / `CMTAT/` or the excluded `contracts/mocks/` test doubles. |
+| Aderyn | 1 | 0 | 5 | 0 | **No** — H-1 is a false positive (canonical CREATE2 init-code); L-1/L-2/L-4/L-5 are by-design / environment / benign OZ pattern; the new L-3 (`nonReentrant` not first modifier) is cosmetic (`onlyRole` makes no external call). |
+
+**Conclusion for v0.4.0: nothing to fix.** The only new item, Aderyn L-3, is a cosmetic modifier-ordering note introduced by the NM-2 guard; an optional `nonReentrant onlyRole(...)` reorder would silence it. See each feedback file.
+
+## Substantive findings addressed (internal review + AuditAgent, v0.4.0)
+
+- **NM-1 (AuditAgent, Low) — counter-mode address prediction is front-runnable.** Accepted as design (custom-salt mode already reserves a per-caller address); clarified with a `WARNING` NatSpec block on `nextDeploymentSalt()` / `computedNextProxyAddress(...)` and a README callout steering integrators to custom salts.
+- **NM-2 (AuditAgent, Info) — counter-derived salt reuse under reentrant init.** Hardened by inheriting OZ `ReentrancyGuard` and marking every `deployCMTAT(...)` entrypoint `nonReentrant`; covered by a regression test (`test/UUPS/ReentrancyGuard.test.js` + `contracts/mocks/ReentrancyDeployMock.sol`).
 
 ## v0.3.0 results
 
@@ -49,6 +65,6 @@ These came from internal review (not the static analyzers) and were fixed in thi
 ```bash
 # mocks excluded (default)
 slither . --checklist --filter-paths "node_modules,CMTAT,test,forge-std,mocks" \
-  > doc/audits/v0.3.0/slither-report.md
-aderyn -x mocks --output doc/audits/v0.3.0/aderyn-report.md
+  > doc/audits/v0.4.0/slither-report.md
+aderyn -x mocks --output doc/audits/v0.4.0/aderyn-report.md
 ```

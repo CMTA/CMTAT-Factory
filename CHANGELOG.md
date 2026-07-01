@@ -87,6 +87,9 @@ Commit: _pending release commit_
   (neither finding exploitable; both hardened in this release — NM-1 docs warning, NM-2 reentrancy guard).
 - Added `doc/script/convert_links_for_pdf.sh`, a helper that rewrites relative Markdown links to GitHub URLs for
   PDF generation while preserving image and external links.
+- Added versioned Slither (0.11.5) and Aderyn (0.6.5) static-analysis reports for v0.4.0 under `doc/audits/v0.4.0/`
+  with per-finding triage feedback (both tools: nothing to fix). Aderyn's new L-3 (`nonReentrant` not the first
+  modifier) is a cosmetic note from the NM-2 guard; Slither's factory-scoped result stays 0.
 
 ### Testing
 
