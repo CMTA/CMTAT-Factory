@@ -1,15 +1,13 @@
 # CMTAT Factory
 
-> This project is not audited
->
-> If you want to use this project, perform your own verification or send an email to [admin@cmta.ch](mailto:admin@cmta.ch).
-
 ## Introduction
 
 This project provides a modular deployment framework for [**CMTAT**](https://github.com/CMTA/CMTAT), a security token framework, using three upgradeability patterns: **UUPS proxy**, **Transparent proxy**, and **Beacon proxy**.
 Each factory contract automates deployment using **deterministic addresses (via CREATE2)** and initializes CMTAT instances with a structured set of parameters passed in arguments by the deployer.
 
 In addition to the three standard factories, two **CMTAT Light** factories (`CMTAT_LIGHT_TP_FACTORY` and `CMTAT_LIGHT_BEACON_FACTORY`) deploy the lighter `CMTATUpgradeableLight` implementation. They behave exactly like their standard Transparent/Beacon counterparts but take the smaller `CMTAT_LIGHT_ARGUMENT` initializer struct (admin + ERC20 attributes only).
+
+> **Note:** This project has not undergone an audit and is provided as-is without any warranties.
 
 ## Table of Contents
 
@@ -696,7 +694,7 @@ Please see [SECURITY.md](https://github.com/CMTA/CMTAT/blob/master/SECURITY.md) 
 
 ### Audit
 
-This project is not audited !
+> **Note:** This project has not undergone an audit and is provided as-is without any warranties.
 
 ### Tools
 
