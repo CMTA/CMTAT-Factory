@@ -50,7 +50,6 @@ Custom changelog tag: `Dependencies`, `Documentation`, `Testing`
 
 ## 0.4.0 - 2026/06/30
 
-Branch: `dev`
 Commit: _pending release commit_
 
 > The fix commits for the Nethermind AuditAgent findings (NM-1, NM-2) are slated for this release. The version
@@ -101,8 +100,7 @@ Commit: _pending release commit_
 
 ## 0.3.0 - 2026/06/30
 
-Branch: `dev`
-Commit: `1c77688`
+Commit: `18a8e66c70c810647694e5dc436e895a07016ec8`
 
 ### Added
 
