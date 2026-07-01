@@ -10,7 +10,7 @@ const ERC8303_INTERFACE_ID = '0x54fd4d50'
 const ERC165_INTERFACE_ID = '0x01ffc9a7'
 const ACCESS_CONTROL_INTERFACE_ID = '0x7965db0b'
 const INVALID_INTERFACE_ID = '0xffffffff'
-const FACTORY_VERSION = '0.3.0'
+const FACTORY_VERSION = '0.4.0'
 
 describe('Factory ContractVersion', function () {
   beforeEach(async function () {

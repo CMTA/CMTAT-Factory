@@ -48,10 +48,42 @@ Custom changelog tag: `Dependencies`, `Documentation`, `Testing`
 
 
 
-## 0.3.0 - 2026/06/30
+## 0.4.0 - 2026/06/30
 
 Branch: `dev`
 Commit: _pending release commit_
+
+> The fix commits for the Nethermind AuditAgent findings (NM-1, NM-2) are slated for this release. The version
+> constant is bumped now; the hardening commits land under this entry as they are made.
+
+### Security
+
+- Reviewed the Nethermind **AuditAgent** v0.3.0 report and added per-finding triage. **NM-1** (Low): the
+  counter-derived next-address helpers (`computedNextProxyAddress` / `nextDeploymentSalt`) are front-runnable
+  across authorized deployers, because in counter mode the effective CREATE2 salt is the shared
+  `keccak256(cmtatCounterId)`. **NM-2** (Info): that same counter-derived salt can be reused under reentrant proxy
+  initialization, since `Create2.deploy` runs before `++cmtatCounterId`. Both are accepted as design — custom-salt
+  mode reserves a per-caller address (one-time-use via `customSaltUsed`), and the reentrant path is unreachable
+  with the trusted CMTAT initializers and would only perturb off-chain event bookkeeping. See
+  [`doc/audits/v0.3.0/audit_agent_report-feedback.md`](doc/audits/v0.3.0/audit_agent_report-feedback.md).
+
+### Changed
+
+- Bumped the factory version constant to `0.4.0` (`ContractVersion.sol`) and synced every mirror (`package.json`,
+  the `version()` test, README, `AGENTS.md` / `CLAUDE.md`).
+
+### Documentation
+
+- Added the Nethermind AuditAgent v0.3.0 report (`doc/audits/v0.3.0/audit_agent_report_v0.3.0.pdf`) and its
+  per-finding triage feedback, and recorded both in [`doc/audits/AUDIT_OVERVIEW.md`](doc/audits/AUDIT_OVERVIEW.md)
+  (nothing to fix; two findings accepted as design).
+- Added `doc/script/convert_links_for_pdf.sh`, a helper that rewrites relative Markdown links to GitHub URLs for
+  PDF generation while preserving image and external links.
+
+## 0.3.0 - 2026/06/30
+
+Branch: `dev`
+Commit: `1c77688`
 
 ### Added
 

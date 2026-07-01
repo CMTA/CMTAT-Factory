@@ -173,7 +173,7 @@ All factories inherit `CMTATFactoryRoot` and share the following surface, in add
 Factories implement [ERC-8303](https://github.com/ethereum/ERCs/pull/1819) (still a draft pull request, not yet published on the Ethereum website) through `ContractVersion` and expose the factory version:
 
 ```solidity
-function version() external view returns (string memory); // current: "0.3.0"
+function version() external view returns (string memory); // current: "0.4.0"
 ```
 
 `supportsInterface(bytes4)` (ERC-165) returns `true` for `type(IERC8303).interfaceId`, in addition to the `AccessControl` interfaces.

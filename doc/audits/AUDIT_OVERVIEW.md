@@ -16,6 +16,7 @@ In scope: the factory contracts under `contracts/` (`standard/`, `light/`, `libr
 | --- | --- | --- | --- |
 | v0.3.0 | Slither 0.11.5 | [slither-report.md](./v0.3.0/slither-report.md) | [feedback](./v0.3.0/slither-report-feedback.md) |
 | v0.3.0 | Aderyn 0.6.5 | [aderyn-report.md](./v0.3.0/aderyn-report.md) | [feedback](./v0.3.0/aderyn-report-feedback.md) |
+| v0.3.0 | Nethermind AuditAgent (AI) | [audit_agent_report_v0.3.0.pdf](./v0.3.0/audit_agent_report_v0.3.0.pdf) | [feedback](./v0.3.0/audit_agent_report-feedback.md) |
 | v0.2.0 | Slither | [slither-report.md](./v0.2.0/slither-report.md) | — |
 | v0.2.0 | Aderyn | [aderyn-report.md](./v0.2.0/aderyn-report.md) | — |
 
@@ -27,6 +28,7 @@ All runs **exclude mocks** and exclude dependencies / the CMTAT submodule from s
 | --- | --- | --- | --- | --- | --- |
 | Slither | 0 | 0 | 0 | 0 | **No** — filtered checklist empty; all unfiltered detectors resolve to `node_modules` / `CMTAT/`. |
 | Aderyn | 1 | 0 | 4 | 0 | **No** — H-1 is a false positive (canonical CREATE2 init-code); the 4 Lows are by-design / environment / benign OZ pattern. |
+| AuditAgent (AI) | 0 | 0 | 1 | 1 | **No** — both findings are the deliberate shared counter-derived salt design (NM-1 cross-deployer race solved by custom-salt mode; NM-2 reentrant reuse unreachable with trusted CMTAT initializers, off-chain bookkeeping only). |
 
 **Conclusion for v0.3.0: nothing to fix.** See each feedback file for the per-finding reasoning, verified against the source.
 
