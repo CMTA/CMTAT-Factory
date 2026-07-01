@@ -40,7 +40,7 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase {
         bytes32 deploymentSaltInput,
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument
-    ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) nonReentrant returns(ERC1967Proxy cmtat)   {
+    ) public virtual nonReentrant onlyRole(CMTAT_DEPLOYER_ROLE) returns(ERC1967Proxy cmtat)   {
         bytes32 deploymentSalt = _checkAndDetermineDeploymentSalt(deploymentSaltInput);
         bytes memory bytecode = _getBytecode(
         // CMTAT function initialize

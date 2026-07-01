@@ -33,9 +33,9 @@ All runs **exclude mocks** and exclude dependencies / the CMTAT submodule from s
 | Tool | High | Medium | Low | Info | Anything to fix? |
 | --- | --- | --- | --- | --- | --- |
 | Slither | 0 | 0 | 0 | 0 | **No** — filtered checklist empty; unfiltered detectors resolve to `node_modules` / `CMTAT/` or the excluded `contracts/mocks/` test doubles. |
-| Aderyn | 1 | 0 | 5 | 0 | **No** — H-1 is a false positive (canonical CREATE2 init-code); L-1/L-2/L-4/L-5 are by-design / environment / benign OZ pattern; the new L-3 (`nonReentrant` not first modifier) is cosmetic (`onlyRole` makes no external call). |
+| Aderyn | 1 | 0 | 4 | 0 | **No** — H-1 is a false positive (canonical CREATE2 init-code); the four Lows are by-design / environment / benign OZ pattern. (The NM-2 guard transiently added a `nonReentrant`-not-first-modifier Low; it was fixed by reordering `deployCMTAT`'s modifiers to `nonReentrant onlyRole(...)`.) |
 
-**Conclusion for v0.4.0: nothing to fix.** The only new item, Aderyn L-3, is a cosmetic modifier-ordering note introduced by the NM-2 guard; an optional `nonReentrant onlyRole(...)` reorder would silence it. See each feedback file.
+**Conclusion for v0.4.0: nothing to fix.** The NM-2 guard's transient `nonReentrant`-not-first-modifier note was resolved by reordering the `deployCMTAT` modifiers; the final Aderyn set matches v0.3.0 (1 High false positive + 4 by-design/environment Lows). See each feedback file.
 
 ## Substantive findings addressed (internal review + AuditAgent, v0.4.0)
 

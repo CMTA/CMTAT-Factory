@@ -73,7 +73,8 @@ Commit: _pending release commit_
   public `deployCMTAT(...)` entrypoint is `nonReentrant`. This prevents a
   reentrant `deployCMTAT(...)` — triggered during a proxy's constructor/initializer, before `++cmtatCounterId` — from
   observing the same `cmtatCounterId` and reusing the auto-derived salt, so every automatic deployment keeps a
-  distinct counter and salt.
+  distinct counter and salt. The guard is declared first in the modifier list (`nonReentrant onlyRole(...)`) per
+  the Aderyn best-practice check.
 
 ### Changed
 
@@ -88,8 +89,8 @@ Commit: _pending release commit_
 - Added `doc/script/convert_links_for_pdf.sh`, a helper that rewrites relative Markdown links to GitHub URLs for
   PDF generation while preserving image and external links.
 - Added versioned Slither (0.11.5) and Aderyn (0.6.5) static-analysis reports for v0.4.0 under `doc/audits/v0.4.0/`
-  with per-finding triage feedback (both tools: nothing to fix). Aderyn's new L-3 (`nonReentrant` not the first
-  modifier) is a cosmetic note from the NM-2 guard; Slither's factory-scoped result stays 0.
+  with per-finding triage feedback (both tools: nothing to fix). The Aderyn set matches v0.3.0 (1 High false
+  positive + 4 by-design/environment Lows); Slither's factory-scoped result stays 0.
 
 ### Testing
 

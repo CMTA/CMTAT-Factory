@@ -3,7 +3,7 @@
 - **Tool:** Aderyn 0.6.5
 - **Command:** `aderyn -x mocks --output doc/audits/v0.4.0/aderyn-report.md`
 - **Scope:** 12 factory contracts (`contracts/`, 413 nSLOC) — **mocks excluded**.
-- **Result:** 1 High · 0 Medium · 5 Low · 0 Informational.
+- **Result:** 1 High · 0 Medium · 4 Low · 0 Informational.
 
 ## Per-finding triage
 
@@ -12,18 +12,27 @@
 | H-1 | High | 3 | **False positive** | `abi.encodePacked(type(Proxy).creationCode, abi.encode(args))` is the canonical CREATE2 init-code layout (raw creation bytecode followed by ABI-encoded constructor args). It is *not* the dangerous case the detector targets: the constructor args go through `abi.encode` (padded, unambiguous), so no two argument sets collide. `abi.encode`-ing the whole thing would produce **invalid init code** that CREATE2 cannot deploy. The same encoding is used by both `deployCMTAT` and `computedProxyAddress`, keeping prediction and deployment in sync. |
 | L-1 | Low | 6 | **By design** | `deployCMTAT` is intentionally gated by `onlyRole(CMTAT_DEPLOYER_ROLE)`, and the factory inherits OZ `AccessControl`. This permissioned deployment model is the documented design (README "Access control"); it is not a vulnerability. |
 | L-2 | Low | 11 | **By design / cosmetic** | `pragma solidity ^0.8.20;` is a deliberate caret range so the contracts can be imported as a library across compiler versions (matching upstream CMTAT). The build pins a single compiler (`0.8.34`) in `hardhat.config.js`, so deployed bytecode is deterministic. |
-| L-3 | Low | 5 | **Cosmetic (best-practice)** | New in v0.4.0. The NM-2 reentrancy guard is declared as `onlyRole(CMTAT_DEPLOYER_ROLE) nonReentrant` on the five `deployCMTAT` entrypoints, so `nonReentrant` is second. Aderyn's rule wants it first "to protect against reentrancy in other modifiers" — but the only preceding modifier here is `onlyRole`, whose `AccessControl._checkRole` performs a storage read and revert with **no external call**, so it cannot re-enter and the ordering has no security impact. Optional cleanup: reorder to `nonReentrant onlyRole(CMTAT_DEPLOYER_ROLE)` to follow the convention and silence the detector. |
-| L-4 | Low | 12 | **Environment** | PUSH0 (emitted from 0.8.20+ targeting Shanghai+) may be unsupported on some L2s. `hardhat.config.js` explicitly sets `evmVersion: 'prague'`; selecting an EVM target compatible with the destination chain is a deploy-time decision, not a code defect. |
-| L-5 | Low | 2 | **False positive** | `_grantRole(DEFAULT_ADMIN_ROLE, factoryAdmin)` / `_grantRole(CMTAT_DEPLOYER_ROLE, factoryAdmin)` in the constructor ignore the returned `bool`. That return only signals whether the role was newly granted; OZ's own `AccessControl`/`Ownable` constructors ignore it during initial setup. No security impact. |
+| L-3 | Low | 12 | **Environment** | PUSH0 (emitted from 0.8.20+ targeting Shanghai+) may be unsupported on some L2s. `hardhat.config.js` explicitly sets `evmVersion: 'prague'`; selecting an EVM target compatible with the destination chain is a deploy-time decision, not a code defect. |
+| L-4 | Low | 2 | **False positive** | `_grantRole(DEFAULT_ADMIN_ROLE, factoryAdmin)` / `_grantRole(CMTAT_DEPLOYER_ROLE, factoryAdmin)` in the constructor ignore the returned `bool`. That return only signals whether the role was newly granted; OZ's own `AccessControl`/`Ownable` constructors ignore it during initial setup. No security impact. |
+
+## Fixed since first v0.4.0 scan
+
+- **`nonReentrant` is not the first modifier (Low, 5 instances) — FIXED.** The NM-2 reentrancy guard was first
+  declared as `onlyRole(CMTAT_DEPLOYER_ROLE) nonReentrant` on the five `deployCMTAT` entrypoints, which Aderyn
+  flagged ("the `nonReentrant` modifier should be the first modifier"). It was never a vulnerability — the only
+  preceding modifier, `onlyRole`, does a storage read + revert with no external call — but the modifiers were
+  reordered to **`nonReentrant onlyRole(CMTAT_DEPLOYER_ROLE)`** to follow the convention and clear the detector.
+  The re-run below no longer reports it. All 42 tests still pass (reordering is behaviour-neutral for legitimate
+  and reverting calls alike).
 
 ## Delta from v0.3.0
 
 - v0.3.0 Aderyn reported **1 High, 4 Low** (H-1, L-1 Centralization, L-2 Unspecific pragma, L-3 PUSH0, L-4 Unchecked Return).
-- v0.4.0 keeps H-1 and the same underlying Lows, but adds one new detector and renumbers:
-  - **New L-3 — `nonReentrant` is not the first modifier** (5 instances), a direct consequence of adding the NM-2 reentrancy guard *after* `onlyRole` on each `deployCMTAT`. Cosmetic (see above).
-  - The former PUSH0 finding is now **L-4**, and the former Unchecked Return is now **L-5** — same findings, shifted by the inserted L-3.
+- v0.4.0 final: **1 High, 4 Low — the same set as v0.3.0.** The NM-2 guard transiently introduced a fifth Low
+  (`nonReentrant` not first modifier); reordering the `deployCMTAT` modifiers removed it, so the finding IDs match
+  v0.3.0 again (L-3 = PUSH0, L-4 = Unchecked Return).
 - No new High/Medium; nothing became exploitable.
 
 ## Executive triage
 
-**Nothing exploitable to fix.** The single High is a false positive on the standard CREATE2 init-code pattern; the Lows are by-design (permissioned deployment, caret pragma), environment-dependent (PUSH0/EVM target), or a benign OZ pattern (`_grantRole` return). The only new v0.4.0 item, L-3, is a cosmetic modifier-ordering note with no security impact — reordering `deployCMTAT`'s modifiers to `nonReentrant onlyRole(...)` is an optional style cleanup.
+**Nothing exploitable to fix.** The single High is a false positive on the standard CREATE2 init-code pattern; the four Lows are by-design (permissioned deployment, caret pragma), environment-dependent (PUSH0/EVM target), or a benign OZ pattern (`_grantRole` return). The lone v0.4.0-specific item — the `nonReentrant`-not-first modifier note — was resolved by reordering the `deployCMTAT` modifiers, so the current report is clean of it.

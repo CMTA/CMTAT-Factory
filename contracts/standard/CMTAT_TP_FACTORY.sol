@@ -42,7 +42,7 @@ contract CMTAT_TP_FACTORY is CMTATTransparentFactoryBase {
         address proxyAdminOwner,
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument
-    ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) nonReentrant returns(TransparentUpgradeableProxy cmtat)   {
+    ) public virtual nonReentrant onlyRole(CMTAT_DEPLOYER_ROLE) returns(TransparentUpgradeableProxy cmtat)   {
         return _deployTransparentProxy(deploymentSaltInput, proxyAdminOwner, _initializerData(cmtatArgument));
     }
 
