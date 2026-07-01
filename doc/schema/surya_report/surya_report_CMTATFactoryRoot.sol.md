@@ -15,7 +15,7 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTATFactoryRoot** | Implementation | AccessControl, ContractVersion, CMTATFactoryInvariant, ReentrancyGuard |||
+| **CMTATFactoryRoot** | Implementation | AccessControl, ContractVersion, CMTATFactoryInvariant |||
 | └ | <Constructor> | Public ❗️ | 🛑  |NO❗️ |
 | └ | CMTATProxyAddress | Public ❗️ |   |NO❗️ |
 | └ | supportsInterface | Public ❗️ |   |NO❗️ |

@@ -15,9 +15,9 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTAT_LIGHT_BEACON_FACTORY** | Implementation | CMTATBeaconFactoryBase |||
+| **CMTAT_LIGHT_BEACON_FACTORY** | Implementation | CMTATBeaconFactoryBase, ReentrancyGuard |||
 | └ | <Constructor> | Public ❗️ | 🛑  | CMTATBeaconFactoryBase |
-| └ | deployCMTAT | Public ❗️ | 🛑  | onlyRole nonReentrant |
+| └ | deployCMTAT | Public ❗️ | 🛑  | nonReentrant onlyRole |
 | └ | computedProxyAddress | Public ❗️ |   |NO❗️ |
 | └ | computedNextProxyAddress | Public ❗️ |   |NO❗️ |
 | └ | _initializerData | Internal 🔒 |   | |

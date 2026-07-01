@@ -227,7 +227,7 @@ All factories inherit OpenZeppelin `AccessControl`. The constructor grants both 
 
 ### Reentrancy protection
 
-`CMTATFactoryRoot` inherits OpenZeppelin `ReentrancyGuard`, and every factory's `deployCMTAT(...)` entrypoint is `nonReentrant`.
+Each concrete factory inherits OpenZeppelin `ReentrancyGuard` and marks its `deployCMTAT(...)` entrypoint `nonReentrant` (declared first, before `onlyRole`).
 
 This matters because in counter mode the effective salt is derived from `cmtatCounterId`, which is only incremented **after** `Create2.deploy`. Since `Create2.deploy` runs the proxy constructor — and its CMTAT initializer — before that increment, a reentrant `deployCMTAT(...)` call could otherwise observe the same `cmtatCounterId` and reuse the same auto-derived salt (Nethermind AuditAgent NM-2). The guard rejects any attempt to re-enter the deploy path mid-deployment, so every automatic deployment sees a distinct counter value and salt, keeping the deployment index and emitted events consistent.
 

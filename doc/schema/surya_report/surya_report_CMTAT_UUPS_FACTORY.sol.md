@@ -15,9 +15,9 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTAT_UUPS_FACTORY** | Implementation | CMTATFactoryBase |||
+| **CMTAT_UUPS_FACTORY** | Implementation | CMTATFactoryBase, ReentrancyGuard |||
 | └ | <Constructor> | Public ❗️ | 🛑  | CMTATFactoryBase |
-| └ | deployCMTAT | Public ❗️ | 🛑  | onlyRole nonReentrant |
+| └ | deployCMTAT | Public ❗️ | 🛑  | nonReentrant onlyRole |
 | └ | computedProxyAddress | Public ❗️ |   |NO❗️ |
 | └ | computedNextProxyAddress | Public ❗️ |   |NO❗️ |
 | └ | _deployBytecode | Internal 🔒 | 🛑  | |
