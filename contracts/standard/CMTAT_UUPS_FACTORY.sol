@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {CMTATUpgradeableUUPS} from "../../CMTAT/contracts/deployment/CMTATUpgradeableUUPS.sol";
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {CMTATFactoryBase} from "../libraries/CMTATFactoryBase.sol";
 
 
@@ -11,7 +12,7 @@ import {CMTATFactoryBase} from "../libraries/CMTATFactoryBase.sol";
 * @notice Factory to deploy CMTAT with a UUPS proxy
 * 
 */
-contract CMTAT_UUPS_FACTORY is CMTATFactoryBase {
+contract CMTAT_UUPS_FACTORY is CMTATFactoryBase, ReentrancyGuard {
     /**
     * @param logic_ contract implementation, cannot be zero
     * @param factoryAdmin admin

@@ -85,10 +85,10 @@ but one salt value is reused across two events and one counter-derived salt is s
   counter-derived salt value is never used. That breaks the cosmetic "one-counter-one-salt" assumption for off-chain
   indexers, not any on-chain safety property. Informational is fair.
 
-**Resolution (code, v0.4.0):** `CMTATFactoryRoot` now inherits OpenZeppelin `ReentrancyGuard`
-(`@openzeppelin/contracts/utils/ReentrancyGuard.sol`) and every factory's public `deployCMTAT(...)` entrypoint is
-marked `nonReentrant` (placed at the API boundary, next to `onlyRole`, and matching the repo's per-factory
-duplication convention). The guard state is shared through the common base, so any attempt to re-enter
+**Resolution (code, v0.4.0):** each concrete factory inherits OpenZeppelin `ReentrancyGuard`
+(`@openzeppelin/contracts/utils/ReentrancyGuard.sol`) — co-located with usage, in the same contract that applies
+the modifier — and marks its public `deployCMTAT(...)` entrypoint `nonReentrant onlyRole(...)` (guard first). Any
+attempt to re-enter
 `deployCMTAT(...)` during a proxy's constructor/initializer (before `++cmtatCounterId`) reverts with
 `ReentrancyGuardReentrantCall`, and consecutive automatic deployments are guaranteed distinct counter values and
 salts. Chosen over a CEI reorder because the guard preserves the `cmtatsList` index == id invariant without

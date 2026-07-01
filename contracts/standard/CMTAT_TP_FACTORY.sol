@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {CMTATStandardUpgradeable} from "../../CMTAT/contracts/deployment/CMTATStandardUpgradeable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {CMTATTransparentFactoryBase} from "../libraries/CMTATTransparentFactoryBase.sol";
 
 
@@ -10,7 +11,7 @@ import {CMTATTransparentFactoryBase} from "../libraries/CMTATTransparentFactoryB
 * @notice Factory to deploy CMTAT with a transparent proxy
 * 
 */
-contract CMTAT_TP_FACTORY is CMTATTransparentFactoryBase {
+contract CMTAT_TP_FACTORY is CMTATTransparentFactoryBase, ReentrancyGuard {
 
     /**
     * @param logic_ contract implementation, cannot be zero

@@ -68,8 +68,8 @@ Commit: _pending release commit_
   section, stating that in counter mode (`useCustomSalt == false`) a predicted address is only valid until the next
   deployment by any authorized deployer, and that the safer mode is custom salts (`useCustomSalt == true`) with a
   unique, caller-chosen, one-time-use salt. Documentation-only; no behavior change.
-- **NM-2 reentrancy guard.** `CMTATFactoryRoot` now inherits OpenZeppelin `ReentrancyGuard` and every factory's
-  public `deployCMTAT(...)` entrypoint is `nonReentrant`. This prevents a
+- **NM-2 reentrancy guard.** Each concrete factory inherits OpenZeppelin `ReentrancyGuard` (co-located with usage)
+  and marks its public `deployCMTAT(...)` entrypoint `nonReentrant`. This prevents a
   reentrant `deployCMTAT(...)` — triggered during a proxy's constructor/initializer, before `++cmtatCounterId` — from
   observing the same `cmtatCounterId` and reusing the auto-derived salt, so every automatic deployment keeps a
   distinct counter and salt. The guard is declared first in the modifier list (`nonReentrant onlyRole(...)`) per

@@ -40,7 +40,7 @@ All runs **exclude mocks** and exclude dependencies / the CMTAT submodule from s
 ## Substantive findings addressed (internal review + AuditAgent, v0.4.0)
 
 - **NM-1 (AuditAgent, Low) — counter-mode address prediction is front-runnable.** Accepted as design (custom-salt mode already reserves a per-caller address); clarified with a `WARNING` NatSpec block on `nextDeploymentSalt()` / `computedNextProxyAddress(...)` and a README callout steering integrators to custom salts.
-- **NM-2 (AuditAgent, Info) — counter-derived salt reuse under reentrant init.** Hardened by inheriting OZ `ReentrancyGuard` and marking every `deployCMTAT(...)` entrypoint `nonReentrant`; covered by a regression test (`test/UUPS/ReentrancyGuard.test.js` + `contracts/mocks/ReentrancyDeployMock.sol`).
+- **NM-2 (AuditAgent, Info) — counter-derived salt reuse under reentrant init.** Hardened by having each concrete factory inherit OZ `ReentrancyGuard` and mark its `deployCMTAT(...)` entrypoint `nonReentrant`; covered by a regression test (`test/UUPS/ReentrancyGuard.test.js` + `contracts/mocks/ReentrancyDeployMock.sol`).
 
 ## v0.3.0 results
 

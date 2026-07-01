@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 
 import {AccessControl} from '@openzeppelin/contracts/access/AccessControl.sol';
 import {Create2} from '@openzeppelin/contracts/utils/Create2.sol';
-import {ReentrancyGuard} from '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 import {ContractVersion} from "./ContractVersion.sol";
 import {CMTATFactoryInvariant} from "./CMTATFactoryInvariant.sol";
 import {FactoryErrors} from "./FactoryErrors.sol";
@@ -12,7 +11,7 @@ import {FactoryErrors} from "./FactoryErrors.sol";
 * @notice Code common to Beacon, TP and UUPS factory
 *
 */
-abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFactoryInvariant, ReentrancyGuard {
+abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFactoryInvariant {
     /* ============ State Variables ============ */
     /* ==== Public Variables ======== */
     address[] public cmtatsList;
@@ -111,9 +110,9 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     * @dev Deploy CMTAT proxy and register it in the factory index.
     * @dev Reentrancy window: Create2.deploy below runs the proxy constructor (and its CMTAT initializer) BEFORE
     * cmtatCounterId is incremented, so a re-entry into the deploy path could observe the same counter and reuse the
-    * same counter-derived salt (Nethermind AuditAgent NM-2). The public deployCMTAT entrypoints are `nonReentrant`
-    * (guard inherited from OpenZeppelin ReentrancyGuard), which blocks that re-entry. All five factories funnel
-    * through this function.
+    * same counter-derived salt (Nethermind AuditAgent NM-2). Each concrete factory inherits OpenZeppelin
+    * ReentrancyGuard and marks its public deployCMTAT entrypoint `nonReentrant`, which blocks that re-entry.
+    * All five factories funnel through this function.
     */
     function _deployAndRegisterProxy(bytes memory bytecode, bytes32 deploymentSalt) internal returns (address cmtatAddress) {
         cmtatAddress = Create2.deploy(0, deploymentSalt, bytecode);

@@ -3,13 +3,14 @@ pragma solidity ^0.8.20;
 
 import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
 import {CMTATStandardUpgradeable} from "../../CMTAT/contracts/deployment/CMTATStandardUpgradeable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {CMTATBeaconFactoryBase} from "../libraries/CMTATBeaconFactoryBase.sol";
 
 /**
 * @notice Factory to deploy beacon proxy
 * 
 */
-contract CMTAT_BEACON_FACTORY is CMTATBeaconFactoryBase {
+contract CMTAT_BEACON_FACTORY is CMTATBeaconFactoryBase, ReentrancyGuard {
     /**
      * @notice Deploys a factory that manages CMTAT Beacon proxies.
      * @dev 
