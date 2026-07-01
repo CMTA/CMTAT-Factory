@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./standard/CMTAT_BEACON_FACTORY.sol | [object Promise] |
+| ./libraries/ContractVersion.sol | [object Promise] |
 
 
 ### Contracts Description Table
@@ -15,12 +15,12 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTAT_BEACON_FACTORY** | Implementation | CMTATBeaconFactoryBase |||
-| └ | <Constructor> | Public ❗️ | 🛑  | CMTATBeaconFactoryBase |
-| └ | deployCMTAT | Public ❗️ | 🛑  | onlyRole nonReentrant |
-| └ | computedProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | computedNextProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | _initializerData | Internal 🔒 |   | |
+| **IERC8303** | Interface |  |||
+| └ | version | External ❗️ |   |NO❗️ |
+||||||
+| **ContractVersion** | Implementation | ERC165, IERC8303 |||
+| └ | version | Public ❗️ |   |NO❗️ |
+| └ | supportsInterface | Public ❗️ |   |NO❗️ |
 
 
 ### Legend

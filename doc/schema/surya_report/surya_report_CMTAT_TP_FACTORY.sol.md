@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./CMTAT_TP_FACTORY.sol | [object Promise] |
+| ./standard/CMTAT_TP_FACTORY.sol | [object Promise] |
 
 
 ### Contracts Description Table
@@ -15,12 +15,12 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTAT_TP_FACTORY** | Implementation | CMTATFactoryBase |||
-| └ | <Constructor> | Public ❗️ | 🛑  | CMTATFactoryBase |
-| └ | deployCMTAT | Public ❗️ | 🛑  | onlyRole |
+| **CMTAT_TP_FACTORY** | Implementation | CMTATTransparentFactoryBase |||
+| └ | <Constructor> | Public ❗️ | 🛑  | CMTATTransparentFactoryBase |
+| └ | deployCMTAT | Public ❗️ | 🛑  | onlyRole nonReentrant |
 | └ | computedProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | _deployBytecode | Internal 🔒 | 🛑  | |
-| └ | _getBytecode | Internal 🔒 |   | |
+| └ | computedNextProxyAddress | Public ❗️ |   |NO❗️ |
+| └ | _initializerData | Internal 🔒 |   | |
 
 
 ### Legend

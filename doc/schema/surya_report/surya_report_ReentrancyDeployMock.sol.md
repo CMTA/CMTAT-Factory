@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./standard/CMTAT_BEACON_FACTORY.sol | [object Promise] |
+| ./mocks/ReentrancyDeployMock.sol | [object Promise] |
 
 
 ### Contracts Description Table
@@ -15,12 +15,14 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTAT_BEACON_FACTORY** | Implementation | CMTATBeaconFactoryBase |||
-| └ | <Constructor> | Public ❗️ | 🛑  | CMTATBeaconFactoryBase |
-| └ | deployCMTAT | Public ❗️ | 🛑  | onlyRole nonReentrant |
-| └ | computedProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | computedNextProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | _initializerData | Internal 🔒 |   | |
+| **ReentrancyDeployAttacker** | Implementation |  |||
+| └ | configure | External ❗️ | 🛑  |NO❗️ |
+| └ | attack | External ❗️ | 🛑  |NO❗️ |
+||||||
+| **ReentrantInitLogicMock** | Implementation |  |||
+| └ | <Constructor> | Public ❗️ | 🛑  |NO❗️ |
+| └ | <Fallback> | External ❗️ |  💵 |NO❗️ |
+| └ | <Receive Ether> | External ❗️ |  💵 |NO❗️ |
 
 
 ### Legend

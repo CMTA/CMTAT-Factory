@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./CMTAT_UUPS_FACTORY.sol | [object Promise] |
+| ./standard/CMTAT_UUPS_FACTORY.sol | [object Promise] |
 
 
 ### Contracts Description Table
@@ -17,8 +17,9 @@
 ||||||
 | **CMTAT_UUPS_FACTORY** | Implementation | CMTATFactoryBase |||
 | └ | <Constructor> | Public ❗️ | 🛑  | CMTATFactoryBase |
-| └ | deployCMTAT | Public ❗️ | 🛑  | onlyRole |
+| └ | deployCMTAT | Public ❗️ | 🛑  | onlyRole nonReentrant |
 | └ | computedProxyAddress | Public ❗️ |   |NO❗️ |
+| └ | computedNextProxyAddress | Public ❗️ |   |NO❗️ |
 | └ | _deployBytecode | Internal 🔒 | 🛑  | |
 | └ | _getBytecode | Internal 🔒 |   | |
 
