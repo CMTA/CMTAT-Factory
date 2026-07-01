@@ -69,8 +69,8 @@ Commit: _pending release commit_
   section, stating that in counter mode (`useCustomSalt == false`) a predicted address is only valid until the next
   deployment by any authorized deployer, and that the safer mode is custom salts (`useCustomSalt == true`) with a
   unique, caller-chosen, one-time-use salt. Documentation-only; no behavior change.
-- **NM-2 reentrancy guard.** `CMTATFactoryRoot` now inherits OpenZeppelin `ReentrancyGuard` and the shared
-  deployment funnel `_deployAndRegisterProxy(...)` (used by all five factories) is `nonReentrant`. This prevents a
+- **NM-2 reentrancy guard.** `CMTATFactoryRoot` now inherits OpenZeppelin `ReentrancyGuard` and every factory's
+  public `deployCMTAT(...)` entrypoint is `nonReentrant`. This prevents a
   reentrant `deployCMTAT(...)` — triggered during a proxy's constructor/initializer, before `++cmtatCounterId` — from
   observing the same `cmtatCounterId` and reusing the auto-derived salt, so every automatic deployment keeps a
   distinct counter and salt.
@@ -84,9 +84,16 @@ Commit: _pending release commit_
 
 - Added the Nethermind AuditAgent v0.3.0 report (`doc/audits/v0.3.0/audit_agent_report_v0.3.0.pdf`) and its
   per-finding triage feedback, and recorded both in [`doc/audits/AUDIT_OVERVIEW.md`](doc/audits/AUDIT_OVERVIEW.md)
-  (nothing to fix; two findings accepted as design).
+  (neither finding exploitable; both hardened in this release — NM-1 docs warning, NM-2 reentrancy guard).
 - Added `doc/script/convert_links_for_pdf.sh`, a helper that rewrites relative Markdown links to GitHub URLs for
   PDF generation while preserving image and external links.
+
+### Testing
+
+- Added `test/UUPS/ReentrancyGuard.test.js` and `contracts/mocks/ReentrancyDeployMock.sol`: a malicious `logic`
+  mock re-enters `deployCMTAT` from the proxy initializer through a role-holding attacker. The armed case reverts
+  and registers nothing (the `nonReentrant` guard fires); a disarmed control deployment succeeds — isolating the
+  guard as the cause (NM-2). Suite: 42 passing.
 
 ## 0.3.0 - 2026/06/30
 

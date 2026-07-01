@@ -11,7 +11,7 @@ const DEPLOYMENT_DECIMAL = 0
 
 // Regression test for Nethermind AuditAgent NM-2: a deployCMTAT re-entry triggered from a proxy's
 // initializer (before cmtatCounterId is incremented) must be rejected by the nonReentrant guard on
-// the shared deployment funnel CMTATFactoryRoot._deployAndRegisterProxy.
+// the public deployCMTAT entrypoints (guard state inherited from CMTATFactoryRoot / OZ ReentrancyGuard).
 describe('Factory reentrancy guard (AuditAgent NM-2)', function () {
   beforeEach(async function () {
     Object.assign(this, await loadFixture(fixture))

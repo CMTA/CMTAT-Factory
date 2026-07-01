@@ -3,9 +3,9 @@ pragma solidity ^0.8.20;
 
 /**
 * @title Reentrancy test doubles for the CMTAT factories
-* @notice Test-only contracts that prove the `nonReentrant` guard on
-* `CMTATFactoryRoot._deployAndRegisterProxy` blocks a `deployCMTAT` re-entry triggered from a
-* proxy's initializer while the outer deployment is still in flight (Nethermind AuditAgent NM-2).
+* @notice Test-only contracts that prove the `nonReentrant` guard on the factories' public
+* `deployCMTAT(...)` entrypoints blocks a `deployCMTAT` re-entry triggered from a proxy's
+* initializer while the outer deployment is still in flight (Nethermind AuditAgent NM-2).
 * @dev Excluded from static analysis (the `mocks` folder is filtered by Slither/Aderyn).
 */
 

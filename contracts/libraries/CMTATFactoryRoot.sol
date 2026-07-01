@@ -109,13 +109,13 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
 
     /**
     * @dev Deploy CMTAT proxy and register it in the factory index.
-    * @dev nonReentrant: in counter mode the effective salt is derived from cmtatCounterId, which is only
-    * incremented AFTER Create2.deploy. Because Create2.deploy runs the proxy constructor (and its CMTAT
-    * initializer) before that increment, a reentrant deployCMTAT could observe the same cmtatCounterId and reuse
-    * the same automatic salt (Nethermind AuditAgent NM-2). The guard forbids reentering the deploy path, so every
-    * automatic deployment sees a distinct counter and salt. All five factories funnel through this function.
+    * @dev Reentrancy window: Create2.deploy below runs the proxy constructor (and its CMTAT initializer) BEFORE
+    * cmtatCounterId is incremented, so a re-entry into the deploy path could observe the same counter and reuse the
+    * same counter-derived salt (Nethermind AuditAgent NM-2). The public deployCMTAT entrypoints are `nonReentrant`
+    * (guard inherited from OpenZeppelin ReentrancyGuard), which blocks that re-entry. All five factories funnel
+    * through this function.
     */
-    function _deployAndRegisterProxy(bytes memory bytecode, bytes32 deploymentSalt) internal nonReentrant returns (address cmtatAddress) {
+    function _deployAndRegisterProxy(bytes memory bytecode, bytes32 deploymentSalt) internal returns (address cmtatAddress) {
         cmtatAddress = Create2.deploy(0, deploymentSalt, bytecode);
         // cmtatsList index == cmtatCounterId, so the array doubles as the id => address registry.
         emit CMTATDeployed(cmtatAddress, msg.sender, cmtatCounterId, deploymentSalt);

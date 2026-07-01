@@ -8,19 +8,19 @@
 
 ## Outcome
 
-**Nothing to fix (0 fixed / 2 accepted-as-design / 0 rejected).** Both findings describe the *same* intrinsic
+**Both addressed in v0.4.0 (0 exploitable / 2 hardened).** Both findings describe the *same* intrinsic
 property of the shared counter-derived CREATE2 salt (`keccak256(cmtatCounterId)`), seen from two angles
-(cross-deployer front-running, and reentrant reuse). Both are real behaviors, neither is exploitable for fund loss
-or state corruption, and the factory already ships the mechanism (custom-salt mode) that removes the cross-deployer
-race for anyone who needs a reserved address. A small documentation clarification and an optional `nonReentrant`
-hardening are noted below as improvements, not required fixes.
+(cross-deployer front-running, and reentrant reuse). Neither is exploitable for fund loss or state corruption, and
+the factory already shipped custom-salt mode as the reserved-address mechanism. This release adds the two
+hardenings anyway: **NM-1** — a documentation warning steering integrators to custom-salt mode; **NM-2** — an
+OpenZeppelin `ReentrancyGuard` on every `deployCMTAT(...)` entrypoint.
 
 ## Per-finding triage
 
 | ID | Severity (tool → ours) | Disposition | Status / commit |
 | --- | --- | --- | --- |
-| NM-1 | Low → Low/Info | **Accepted as design** | No code change (docs clarification optional) |
-| NM-2 | Info → Info | **Accepted as design** | No code change (`nonReentrant` hardening optional) |
+| NM-1 | Low → Low/Info | **Accepted as design; documented** | Docs warning added (v0.4.0) |
+| NM-2 | Info → Info | **Fixed (defense-in-depth)** | `nonReentrant` on all `deployCMTAT(...)` (v0.4.0) |
 
 ---
 
@@ -51,9 +51,12 @@ deploy lands at a different address — stranding whatever Alice pre-sent to the
   pre-funding a *non-reserved* predicted address is an off-chain decision. Low (arguably Informational for this repo's
   single-/coordinated-deployer model) is fair.
 
-**Optional improvement (not a fix):** add a one-line natspec/README caveat on `computedNextProxyAddress` /
-`nextDeploymentSalt` that, in counter mode, the prediction is only stable while no other deployment intervenes, and
-that custom-salt mode should be used to reserve a specific address across multiple deployers.
+**Resolution (docs, v0.4.0):** added a `WARNING` NatSpec `@dev` block to `nextDeploymentSalt()`
+(`CMTATFactoryRoot.sol`) and to `computedNextProxyAddress(...)` on all five factories, plus a warning callout in
+the README "Salt behavior" section. All state that, in counter mode, the predicted address is only valid until the
+next deployment by any authorized deployer, and that the safer mode is custom salts (`useCustomSalt == true`) with
+a unique caller-chosen, one-time-use salt that reserves the address. No behavior change — the code already exposed
+custom-salt mode as the mitigation; this makes the guidance explicit.
 
 ---
 
@@ -66,7 +69,7 @@ CMTAT initializer during construction. If that initializer path reenters `deploy
 automatic salt. Because the two init codes differ, the two CREATE2 addresses still differ, so both deploys succeed —
 but one salt value is reused across two events and one counter-derived salt is skipped.
 
-**Verdict: Accepted as design / informational — no required code change.**
+**Verdict: Not exploitable as described, but Fixed (defense-in-depth) in v0.4.0.**
 
 - The mechanism is correctly identified (deploy-before-increment), but the path is **not reachable with the
   implementations these factories deploy.** Reentry requires the proxy's initializer to hand control to an
@@ -82,11 +85,18 @@ but one salt value is reused across two events and one counter-derived salt is s
   counter-derived salt value is never used. That breaks the cosmetic "one-counter-one-salt" assumption for off-chain
   indexers, not any on-chain safety property. Informational is fair.
 
-**Optional hardening (defense-in-depth, not required):** add OZ `ReentrancyGuard` and mark the public `deployCMTAT`
-entrypoints `nonReentrant`. This is the clean option. Note a naive CEI reorder (moving `++cmtatCounterId` before
-`Create2.deploy`) must still preserve `cmtatsList` index == id under reentrancy, so a `nonReentrant` guard is
-preferred over reordering. If neither is adopted, this stays an accepted informational item — its safety rests on the
-trusted, non-reentrant CMTAT initializers actually deployed.
+**Resolution (code, v0.4.0):** `CMTATFactoryRoot` now inherits OpenZeppelin `ReentrancyGuard`
+(`@openzeppelin/contracts/utils/ReentrancyGuard.sol`) and every factory's public `deployCMTAT(...)` entrypoint is
+marked `nonReentrant` (placed at the API boundary, next to `onlyRole`, and matching the repo's per-factory
+duplication convention). The guard state is shared through the common base, so any attempt to re-enter
+`deployCMTAT(...)` during a proxy's constructor/initializer (before `++cmtatCounterId`) reverts with
+`ReentrancyGuardReentrantCall`, and consecutive automatic deployments are guaranteed distinct counter values and
+salts. Chosen over a CEI reorder because the guard preserves the `cmtatsList` index == id invariant without
+reordering deploy/emit/increment. Covered by a regression test
+(`test/UUPS/ReentrancyGuard.test.js`): a malicious `logic` mock (`contracts/mocks/ReentrancyDeployMock.sol`)
+re-enters `deployCMTAT` from the proxy initializer through a role-holding attacker — the armed case reverts and
+registers nothing, while a disarmed control deployment succeeds, isolating the guard as the cause. Full suite: 42
+passing.
 
 ---
 
@@ -100,9 +110,10 @@ trusted, non-reentrant CMTAT initializers actually deployed.
 
 ## Executive triage
 
-**Nothing to fix.** NM-1 and NM-2 are two views of the deliberate shared counter-derived salt design. NM-1's
-cross-deployer race is removed by the already-shipped custom-salt mode for anyone needing a reserved address; NM-2's
+**Neither is exploitable; both hardened in v0.4.0.** NM-1 and NM-2 are two views of the deliberate shared
+counter-derived salt design. NM-1's cross-deployer race is removed by the already-shipped custom-salt mode for
+anyone needing a reserved address — now made explicit with a documentation warning steering integrators to it. NM-2's
 reentrant reuse is unreachable with the trusted CMTAT initializers and, even hypothetically, only perturbs off-chain
-event bookkeeping while every on-chain invariant (unique address, unique id, `cmtatsList` index == id) holds. Suggested
-follow-ups are optional quality improvements: a one-line doc caveat on the prediction helpers (NM-1) and an optional
-`nonReentrant` guard on `deployCMTAT` (NM-2).
+event bookkeeping while every on-chain invariant (unique address, unique id, `cmtatsList` index == id) holds — it is
+nonetheless closed defensively by an OpenZeppelin `ReentrancyGuard` (`nonReentrant`) on every factory's
+`deployCMTAT(...)` entrypoint.

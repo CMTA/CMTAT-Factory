@@ -51,7 +51,7 @@ contract CMTAT_BEACON_FACTORY is CMTATBeaconFactoryBase {
          bytes32 deploymentSaltInput,
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument
-    ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) returns(BeaconProxy cmtat)   {
+    ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) nonReentrant returns(BeaconProxy cmtat)   {
         return _deployBeaconProxy(deploymentSaltInput, _initializerData(cmtatArgument));
     }
 

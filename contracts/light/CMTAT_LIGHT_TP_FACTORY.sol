@@ -33,7 +33,7 @@ contract CMTAT_LIGHT_TP_FACTORY is CMTATTransparentFactoryBase {
         bytes32 deploymentSaltInput,
         address proxyAdminOwner,
         CMTAT_LIGHT_ARGUMENT calldata cmtatArgument
-    ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) returns(TransparentUpgradeableProxy cmtat)   {
+    ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) nonReentrant returns(TransparentUpgradeableProxy cmtat)   {
         return _deployTransparentProxy(deploymentSaltInput, proxyAdminOwner, _initializerData(cmtatArgument));
     }
 

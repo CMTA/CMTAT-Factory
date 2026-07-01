@@ -28,7 +28,7 @@ All runs **exclude mocks** and exclude dependencies / the CMTAT submodule from s
 | --- | --- | --- | --- | --- | --- |
 | Slither | 0 | 0 | 0 | 0 | **No** — filtered checklist empty; all unfiltered detectors resolve to `node_modules` / `CMTAT/`. |
 | Aderyn | 1 | 0 | 4 | 0 | **No** — H-1 is a false positive (canonical CREATE2 init-code); the 4 Lows are by-design / environment / benign OZ pattern. |
-| AuditAgent (AI) | 0 | 0 | 1 | 1 | **No** — both findings are the deliberate shared counter-derived salt design (NM-1 cross-deployer race solved by custom-salt mode; NM-2 reentrant reuse unreachable with trusted CMTAT initializers, off-chain bookkeeping only). |
+| AuditAgent (AI) | 0 | 0 | 1 | 1 | **No** (not exploitable) — both are the deliberate shared counter-derived salt design; hardened in v0.4.0 anyway (NM-1 docs warning steering to custom-salt mode; NM-2 `nonReentrant` on the `deployCMTAT(...)` entrypoints). |
 
 **Conclusion for v0.3.0: nothing to fix.** See each feedback file for the per-finding reasoning, verified against the source.
 

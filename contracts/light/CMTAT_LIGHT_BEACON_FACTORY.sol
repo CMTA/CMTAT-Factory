@@ -40,7 +40,7 @@ contract CMTAT_LIGHT_BEACON_FACTORY is CMTATBeaconFactoryBase {
     function deployCMTAT(
         bytes32 deploymentSaltInput,
         CMTAT_LIGHT_ARGUMENT calldata cmtatArgument
-    ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) returns(BeaconProxy cmtat)   {
+    ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) nonReentrant returns(BeaconProxy cmtat)   {
         return _deployBeaconProxy(deploymentSaltInput, _initializerData(cmtatArgument));
     }
 
