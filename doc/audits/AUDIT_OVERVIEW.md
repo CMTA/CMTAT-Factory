@@ -18,11 +18,15 @@ In scope: the factory contracts under `contracts/` (`standard/`, `light/`, `libr
 | v0.4.0 | Aderyn 0.6.5 | [aderyn-report.md](./v0.4.0/aderyn-report.md) | [feedback](./v0.4.0/aderyn-report-feedback.md) |
 | v0.3.0 | Slither 0.11.5 | [slither-report.md](./v0.3.0/slither-report.md) | [feedback](./v0.3.0/slither-report-feedback.md) |
 | v0.3.0 | Aderyn 0.6.5 | [aderyn-report.md](./v0.3.0/aderyn-report.md) | [feedback](./v0.3.0/aderyn-report-feedback.md) |
-| v0.3.0 | Nethermind AuditAgent (AI) | [audit_agent_report_v0.3.0.pdf](./v0.3.0/audit_agent_report_v0.3.0.pdf) | [feedback](./v0.3.0/audit_agent_report-feedback.md) |
+| v0.3.0 | [Nethermind AuditAgent](https://auditagent.nethermind.io/) (AI) | [audit_agent_report_v0.3.0.pdf](./v0.3.0/audit_agent_report_v0.3.0.pdf) | [feedback](./v0.3.0/audit_agent_report-feedback.md) |
 | v0.2.0 | Slither | [slither-report.md](./v0.2.0/slither-report.md) | — |
 | v0.2.0 | Aderyn | [aderyn-report.md](./v0.2.0/aderyn-report.md) | — |
 
 All runs **exclude mocks** and exclude dependencies / the CMTAT submodule from scope.
+
+> **Note:** the [Nethermind AuditAgent](https://auditagent.nethermind.io/) scan was performed by an AI-powered
+> automated tool, not a formal human-led audit. Its findings are AI-generated leads, independently verified against
+> the source in the linked feedback file.
 
 ## v0.4.0 results
 

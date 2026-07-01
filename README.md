@@ -730,6 +730,16 @@ aderyn -x mocks --output aderyn-report.md
 | v0.3.0 | [aderyn-report.md](./doc/audits/v0.3.0/aderyn-report.md) | [feedback](./doc/audits/v0.3.0/aderyn-report-feedback.md) |
 | v0.2.0 | [aderyn-report.md](./doc/audits/v0.2.0/aderyn-report.md) | — |
 
+#### [Nethermind AuditAgent](https://auditagent.nethermind.io/)
+
+[Nethermind AuditAgent](https://auditagent.nethermind.io/) is an AI-powered automated smart-contract scanner. The report was independently verified against the source in the linked feedback file.
+
+> Note: This scan was performed by an AI-powered automated tool, not a formal human-led audit.
+
+| Version | Result | Report | Feedback |
+| --- | --- | --- | --- |
+| v0.3.0 | 0 High · 0 Medium · 1 Low · 1 Info — **nothing to fix** (both accepted as design; hardened in v0.4.0) | [audit_agent_report_v0.3.0.pdf](./doc/audits/v0.3.0/audit_agent_report_v0.3.0.pdf) | [feedback](./doc/audits/v0.3.0/audit_agent_report-feedback.md) |
+
 
 
 ## Further reading
