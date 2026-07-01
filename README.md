@@ -225,6 +225,12 @@ It records the deployed `proxy`, the `deployer` (`msg.sender`), the incremental 
 
 All factories inherit OpenZeppelin `AccessControl`. The constructor grants both `DEFAULT_ADMIN_ROLE` and `CMTAT_DEPLOYER_ROLE` to `factoryAdmin`, and `deployCMTAT(...)` is gated by `onlyRole(CMTAT_DEPLOYER_ROLE)`.
 
+### Reentrancy protection
+
+`CMTATFactoryRoot` inherits OpenZeppelin `ReentrancyGuard`, and the shared deployment funnel `_deployAndRegisterProxy(...)` (used by all five factories) is `nonReentrant`.
+
+This matters because in counter mode the effective salt is derived from `cmtatCounterId`, which is only incremented **after** `Create2.deploy`. Since `Create2.deploy` runs the proxy constructor — and its CMTAT initializer — before that increment, a reentrant `deployCMTAT(...)` call could otherwise observe the same `cmtatCounterId` and reuse the same auto-derived salt (Nethermind AuditAgent NM-2). The guard rejects any attempt to re-enter the deploy path mid-deployment, so every automatic deployment sees a distinct counter value and salt, keeping the deployment index and emitted events consistent.
+
 ## Factory contracts
 
 ### Proxy patterns: Transparent vs UUPS vs Beacon

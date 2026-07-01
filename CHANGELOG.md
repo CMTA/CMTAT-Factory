@@ -62,15 +62,18 @@ Commit: _pending release commit_
   counter-derived next-address helpers (`computedNextProxyAddress` / `nextDeploymentSalt`) are front-runnable
   across authorized deployers, because in counter mode the effective CREATE2 salt is the shared
   `keccak256(cmtatCounterId)`. **NM-2** (Info): that same counter-derived salt can be reused under reentrant proxy
-  initialization, since `Create2.deploy` runs before `++cmtatCounterId`. Both are accepted as design — custom-salt
-  mode reserves a per-caller address (one-time-use via `customSaltUsed`), and the reentrant path is unreachable
-  with the trusted CMTAT initializers and would only perturb off-chain event bookkeeping. See
+  initialization, since `Create2.deploy` runs before `++cmtatCounterId`. See
   [`doc/audits/v0.3.0/audit_agent_report-feedback.md`](doc/audits/v0.3.0/audit_agent_report-feedback.md).
 - **NM-1 documentation clarification.** Added a `WARNING` NatSpec block to `nextDeploymentSalt()` and to
   `computedNextProxyAddress(...)` on all five factories, plus a warning callout in the README "Salt behavior"
   section, stating that in counter mode (`useCustomSalt == false`) a predicted address is only valid until the next
   deployment by any authorized deployer, and that the safer mode is custom salts (`useCustomSalt == true`) with a
   unique, caller-chosen, one-time-use salt. Documentation-only; no behavior change.
+- **NM-2 reentrancy guard.** `CMTATFactoryRoot` now inherits OpenZeppelin `ReentrancyGuard` and the shared
+  deployment funnel `_deployAndRegisterProxy(...)` (used by all five factories) is `nonReentrant`. This prevents a
+  reentrant `deployCMTAT(...)` — triggered during a proxy's constructor/initializer, before `++cmtatCounterId` — from
+  observing the same `cmtatCounterId` and reusing the auto-derived salt, so every automatic deployment keeps a
+  distinct counter and salt.
 
 ### Changed
 
