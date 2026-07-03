@@ -15,10 +15,14 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTATFactoryRoot** | Implementation | AccessControl, CMTATFactoryInvariant |||
+| **CMTATFactoryRoot** | Implementation | AccessControl, ContractVersion, CMTATFactoryInvariant |||
 | └ | <Constructor> | Public ❗️ | 🛑  |NO❗️ |
 | └ | CMTATProxyAddress | Public ❗️ |   |NO❗️ |
+| └ | supportsInterface | Public ❗️ |   |NO❗️ |
+| └ | nextDeploymentSalt | Public ❗️ |   |NO❗️ |
 | └ | _checkAndDetermineDeploymentSalt | Internal 🔒 | 🛑  | |
+| └ | _computeDeploymentSalt | Internal 🔒 |   | |
+| └ | _deployAndRegisterProxy | Internal 🔒 | 🛑  | |
 
 
 ### Legend

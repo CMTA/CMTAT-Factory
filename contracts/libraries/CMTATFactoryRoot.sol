@@ -9,7 +9,7 @@ import {CMTATFactoryInvariant} from "./CMTATFactoryInvariant.sol";
 import {FactoryErrors} from "./FactoryErrors.sol";
 /**
 * @notice Code common to Beacon, TP and UUPS factory
-* 
+*
 */
 abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFactoryInvariant {
     /* ============ State Variables ============ */
@@ -68,6 +68,10 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     /**
      * @notice Returns the effective salt that will be used for the next deployment when custom salts are disabled.
      * @dev Custom-salt deployments use the caller-provided salt directly.
+     * @dev WARNING: this salt is derived from the shared `cmtatCounterId`, so it advances whenever ANY authorized
+     * deployer deploys. An address predicted from it is not reserved for a specific caller and can be front-run by
+     * another `CMTAT_DEPLOYER_ROLE` holder. For a stable, reservable address prefer custom-salt mode
+     * (`useCustomSalt == true`) with a unique caller-chosen salt, which is enforced one-time-use.
      */
     function nextDeploymentSalt() public view virtual returns(bytes32 saltBytes) {
         return keccak256(abi.encodePacked(cmtatCounterId));
@@ -104,6 +108,11 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
 
     /**
     * @dev Deploy CMTAT proxy and register it in the factory index.
+    * @dev Reentrancy window: Create2.deploy below runs the proxy constructor (and its CMTAT initializer) BEFORE
+    * cmtatCounterId is incremented, so a re-entry into the deploy path could observe the same counter and reuse the
+    * same counter-derived salt (Nethermind AuditAgent NM-2). Each concrete factory inherits OpenZeppelin
+    * ReentrancyGuard and marks its public deployCMTAT entrypoint `nonReentrant`, which blocks that re-entry.
+    * All five factories funnel through this function.
     */
     function _deployAndRegisterProxy(bytes memory bytecode, bytes32 deploymentSalt) internal returns (address cmtatAddress) {
         cmtatAddress = Create2.deploy(0, deploymentSalt, bytecode);

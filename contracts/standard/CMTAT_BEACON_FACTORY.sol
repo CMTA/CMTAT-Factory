@@ -3,13 +3,14 @@ pragma solidity ^0.8.20;
 
 import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
 import {CMTATStandardUpgradeable} from "../../CMTAT/contracts/deployment/CMTATStandardUpgradeable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {CMTATBeaconFactoryBase} from "../libraries/CMTATBeaconFactoryBase.sol";
 
 /**
 * @notice Factory to deploy beacon proxy
 * 
 */
-contract CMTAT_BEACON_FACTORY is CMTATBeaconFactoryBase {
+contract CMTAT_BEACON_FACTORY is CMTATBeaconFactoryBase, ReentrancyGuard {
     /**
      * @notice Deploys a factory that manages CMTAT Beacon proxies.
      * @dev 
@@ -51,7 +52,7 @@ contract CMTAT_BEACON_FACTORY is CMTATBeaconFactoryBase {
          bytes32 deploymentSaltInput,
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument
-    ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) returns(BeaconProxy cmtat)   {
+    ) public virtual nonReentrant onlyRole(CMTAT_DEPLOYER_ROLE) returns(BeaconProxy cmtat)   {
         return _deployBeaconProxy(deploymentSaltInput, _initializerData(cmtatArgument));
     }
 
@@ -70,6 +71,10 @@ contract CMTAT_BEACON_FACTORY is CMTATBeaconFactoryBase {
 
     /**
     * @notice get the proxy address using the same salt selection as deployCMTAT
+    * @dev WARNING: in counter mode (`useCustomSalt == false`) this prediction is only valid until the next
+    * deployment by ANY authorized deployer, because the salt is the shared `nextDeploymentSalt()`. Do not pre-fund
+    * or pre-authorize the returned address in a multi-deployer setup. For a stable, reservable address use
+    * custom-salt mode (`useCustomSalt == true`) with a unique caller-chosen salt (one-time-use).
     */
     function computedNextProxyAddress(
         bytes32 deploymentSaltInput,

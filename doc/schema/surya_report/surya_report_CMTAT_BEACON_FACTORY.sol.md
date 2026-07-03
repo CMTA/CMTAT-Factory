@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./CMTAT_BEACON_FACTORY.sol | [object Promise] |
+| ./standard/CMTAT_BEACON_FACTORY.sol | [object Promise] |
 
 
 ### Contracts Description Table
@@ -15,13 +15,12 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTAT_BEACON_FACTORY** | Implementation | AccessControl, CMTATFactoryRoot |||
-| └ | <Constructor> | Public ❗️ | 🛑  | CMTATFactoryRoot |
-| └ | deployCMTAT | Public ❗️ | 🛑  | onlyRole |
+| **CMTAT_BEACON_FACTORY** | Implementation | CMTATBeaconFactoryBase, ReentrancyGuard |||
+| └ | <Constructor> | Public ❗️ | 🛑  | CMTATBeaconFactoryBase |
+| └ | deployCMTAT | Public ❗️ | 🛑  | nonReentrant onlyRole |
 | └ | computedProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | implementation | Public ❗️ |   |NO❗️ |
-| └ | _deployBytecode | Internal 🔒 | 🛑  | |
-| └ | _getBytecode | Internal 🔒 |   | |
+| └ | computedNextProxyAddress | Public ❗️ |   |NO❗️ |
+| └ | _initializerData | Internal 🔒 |   | |
 
 
 ### Legend

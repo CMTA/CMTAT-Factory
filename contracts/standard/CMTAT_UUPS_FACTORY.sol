@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {CMTATUpgradeableUUPS} from "../../CMTAT/contracts/deployment/CMTATUpgradeableUUPS.sol";
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {CMTATFactoryBase} from "../libraries/CMTATFactoryBase.sol";
 
 
@@ -11,7 +12,7 @@ import {CMTATFactoryBase} from "../libraries/CMTATFactoryBase.sol";
 * @notice Factory to deploy CMTAT with a UUPS proxy
 * 
 */
-contract CMTAT_UUPS_FACTORY is CMTATFactoryBase {
+contract CMTAT_UUPS_FACTORY is CMTATFactoryBase, ReentrancyGuard {
     /**
     * @param logic_ contract implementation, cannot be zero
     * @param factoryAdmin admin
@@ -40,7 +41,7 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase {
         bytes32 deploymentSaltInput,
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument
-    ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) returns(ERC1967Proxy cmtat)   {
+    ) public virtual nonReentrant onlyRole(CMTAT_DEPLOYER_ROLE) returns(ERC1967Proxy cmtat)   {
         bytes32 deploymentSalt = _checkAndDetermineDeploymentSalt(deploymentSaltInput);
         bytes memory bytecode = _getBytecode(
         // CMTAT function initialize
@@ -68,6 +69,10 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase {
 
     /**
     * @notice get the proxy address using the same salt selection as deployCMTAT
+    * @dev WARNING: in counter mode (`useCustomSalt == false`) this prediction is only valid until the next
+    * deployment by ANY authorized deployer, because the salt is the shared `nextDeploymentSalt()`. Do not pre-fund
+    * or pre-authorize the returned address in a multi-deployer setup. For a stable, reservable address use
+    * custom-salt mode (`useCustomSalt == true`) with a unique caller-chosen salt (one-time-use).
     */
     function computedNextProxyAddress(
         bytes32 deploymentSaltInput,

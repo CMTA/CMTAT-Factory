@@ -48,10 +48,59 @@ Custom changelog tag: `Dependencies`, `Documentation`, `Testing`
 
 
 
+## 0.4.0 - 2026/07/03
+
+Commit: _pending release commit_
+
+> The fix commits for the Nethermind AuditAgent findings (NM-1, NM-2) are slated for this release. The version
+> constant is bumped now; the hardening commits land under this entry as they are made.
+
+### Security
+
+- Reviewed the Nethermind **AuditAgent** v0.3.0 report and added per-finding triage. **NM-1** (Low): the
+  counter-derived next-address helpers (`computedNextProxyAddress` / `nextDeploymentSalt`) are front-runnable
+  across authorized deployers, because in counter mode the effective CREATE2 salt is the shared
+  `keccak256(cmtatCounterId)`. **NM-2** (Info): that same counter-derived salt can be reused under reentrant proxy
+  initialization, since `Create2.deploy` runs before `++cmtatCounterId`. See
+  [`doc/audits/v0.3.0/audit_agent_report-feedback.md`](doc/audits/v0.3.0/audit_agent_report-feedback.md).
+- **NM-1 documentation clarification.** Added a `WARNING` NatSpec block to `nextDeploymentSalt()` and to
+  `computedNextProxyAddress(...)` on all five factories, plus a warning callout in the README "Salt behavior"
+  section, stating that in counter mode (`useCustomSalt == false`) a predicted address is only valid until the next
+  deployment by any authorized deployer, and that the safer mode is custom salts (`useCustomSalt == true`) with a
+  unique, caller-chosen, one-time-use salt. Documentation-only; no behavior change.
+- **NM-2 reentrancy guard.** Each concrete factory inherits OpenZeppelin `ReentrancyGuard` (co-located with usage)
+  and marks its public `deployCMTAT(...)` entrypoint `nonReentrant`. This prevents a
+  reentrant `deployCMTAT(...)` — triggered during a proxy's constructor/initializer, before `++cmtatCounterId` — from
+  observing the same `cmtatCounterId` and reusing the auto-derived salt, so every automatic deployment keeps a
+  distinct counter and salt. The guard is declared first in the modifier list (`nonReentrant onlyRole(...)`) per
+  the Aderyn best-practice check.
+
+### Changed
+
+- Bumped the factory version constant to `0.4.0` (`ContractVersion.sol`) and synced every mirror (`package.json`,
+  the `version()` test, README, `AGENTS.md` / `CLAUDE.md`).
+
+### Documentation
+
+- Added the Nethermind AuditAgent v0.3.0 report (`doc/audits/v0.3.0/audit_agent_report_v0.3.0.pdf`) and its
+  per-finding triage feedback, and recorded both in [`doc/audits/AUDIT_OVERVIEW.md`](doc/audits/AUDIT_OVERVIEW.md)
+  (neither finding exploitable; both hardened in this release — NM-1 docs warning, NM-2 reentrancy guard).
+- Added `doc/script/convert_links_for_pdf.sh`, a helper that rewrites relative Markdown links to GitHub URLs for
+  PDF generation while preserving image and external links.
+- Added versioned Slither (0.11.5) and Aderyn (0.6.5) static-analysis reports for v0.4.0 under `doc/audits/v0.4.0/`
+  with per-finding triage feedback (both tools: nothing to fix). The Aderyn set matches v0.3.0 (1 High false
+  positive + 4 by-design/environment Lows); Slither's factory-scoped result stays 0.
+
+### Testing
+
+- Added `test/UUPS/ReentrancyGuard.test.js` and `contracts/mocks/ReentrancyDeployMock.sol`: a malicious `logic`
+  mock re-enters `deployCMTAT` from the proxy initializer through a role-holding attacker. The armed case reverts
+  and registers nothing (the `nonReentrant` guard fires); a disarmed control deployment succeeds — isolating the
+  guard as the cause (NM-2). Suite: 42 passing.
+
 ## 0.3.0 - 2026/06/30
 
-Branch: `dev`
-Commit: _pending release commit_
+Commit: `18a8e66c70c810647694e5dc436e895a07016ec8`
 
 ### Added
 

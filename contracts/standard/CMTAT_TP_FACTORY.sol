@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {CMTATStandardUpgradeable} from "../../CMTAT/contracts/deployment/CMTATStandardUpgradeable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {CMTATTransparentFactoryBase} from "../libraries/CMTATTransparentFactoryBase.sol";
 
 
@@ -10,7 +11,7 @@ import {CMTATTransparentFactoryBase} from "../libraries/CMTATTransparentFactoryB
 * @notice Factory to deploy CMTAT with a transparent proxy
 * 
 */
-contract CMTAT_TP_FACTORY is CMTATTransparentFactoryBase {
+contract CMTAT_TP_FACTORY is CMTATTransparentFactoryBase, ReentrancyGuard {
 
     /**
     * @param logic_ contract implementation, cannot be zero
@@ -42,7 +43,7 @@ contract CMTAT_TP_FACTORY is CMTATTransparentFactoryBase {
         address proxyAdminOwner,
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument
-    ) public virtual onlyRole(CMTAT_DEPLOYER_ROLE) returns(TransparentUpgradeableProxy cmtat)   {
+    ) public virtual nonReentrant onlyRole(CMTAT_DEPLOYER_ROLE) returns(TransparentUpgradeableProxy cmtat)   {
         return _deployTransparentProxy(deploymentSaltInput, proxyAdminOwner, _initializerData(cmtatArgument));
     }
 
@@ -63,6 +64,10 @@ contract CMTAT_TP_FACTORY is CMTATTransparentFactoryBase {
 
     /**
     * @notice get the proxy address using the same salt selection as deployCMTAT
+    * @dev WARNING: in counter mode (`useCustomSalt == false`) this prediction is only valid until the next
+    * deployment by ANY authorized deployer, because the salt is the shared `nextDeploymentSalt()`. Do not pre-fund
+    * or pre-authorize the returned address in a multi-deployer setup. For a stable, reservable address use
+    * custom-salt mode (`useCustomSalt == true`) with a unique caller-chosen salt (one-time-use).
     */
     function computedNextProxyAddress(
         bytes32 deploymentSaltInput,

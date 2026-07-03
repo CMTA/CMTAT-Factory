@@ -1,15 +1,13 @@
 # CMTAT Factory
 
-> This project is not audited
->
-> If you want to use this project, perform your own verification or send an email to [admin@cmta.ch](mailto:admin@cmta.ch).
-
 ## Introduction
 
 This project provides a modular deployment framework for [**CMTAT**](https://github.com/CMTA/CMTAT), a security token framework, using three upgradeability patterns: **UUPS proxy**, **Transparent proxy**, and **Beacon proxy**.
 Each factory contract automates deployment using **deterministic addresses (via CREATE2)** and initializes CMTAT instances with a structured set of parameters passed in arguments by the deployer.
 
 In addition to the three standard factories, two **CMTAT Light** factories (`CMTAT_LIGHT_TP_FACTORY` and `CMTAT_LIGHT_BEACON_FACTORY`) deploy the lighter `CMTATUpgradeableLight` implementation. They behave exactly like their standard Transparent/Beacon counterparts but take the smaller `CMTAT_LIGHT_ARGUMENT` initializer struct (admin + ERC20 attributes only).
+
+> **Note:** This project has not undergone an audit and is provided as-is without any warranties.
 
 ## Table of Contents
 
@@ -156,7 +154,7 @@ Every factory deploys its proxies with the **`CREATE2`** opcode instead of the d
   address = keccak256(0xff ++ deployerAddress ++ salt ++ keccak256(init_code))[12:]
   ```
 
-  The address depends only on the **deployer address**, a caller-chosen **`salt`**, and the **`init_code`** (creation bytecode + ABI-encoded constructor arguments) — **not** on the nonce. Given those three inputs the address is fully deterministic and can be computed *before* deploying (a "counterfactual" address).
+  The address depends only on the **deployer address** — here the **factory contract address**, since the proxy is deployed through `Create2.deploy` executed inside the factory — a caller-chosen **`salt`**, and the **`init_code`** (creation bytecode + ABI-encoded constructor arguments) — **not** on the nonce. Given those three inputs the address is fully deterministic and can be computed *before* deploying (a "counterfactual" address).
 
 **Why this project uses `CREATE2`**
 
@@ -173,7 +171,7 @@ All factories inherit `CMTATFactoryRoot` and share the following surface, in add
 Factories implement [ERC-8303](https://github.com/ethereum/ERCs/pull/1819) (still a draft pull request, not yet published on the Ethereum website) through `ContractVersion` and expose the factory version:
 
 ```solidity
-function version() external view returns (string memory); // current: "0.3.0"
+function version() external view returns (string memory); // current: "0.4.0"
 ```
 
 `supportsInterface(bytes4)` (ERC-165) returns `true` for `type(IERC8303).interfaceId`, in addition to the `AccessControl` interfaces.
@@ -208,9 +206,28 @@ It records the deployed `proxy`, the `deployer` (`msg.sender`), the incremental 
 - When `useCustomSalt == true`, the caller-supplied salt is used directly and is **one-time-use**: reusing a salt reverts with `FactoryErrors.CMTAT_Factory_SaltAlreadyUsed()`.
 - `computedProxyAddress(...)` takes an *effective* salt and mirrors the exact bytecode used by `deployCMTAT(...)`, while `computedNextProxyAddress(...)` applies the same salt-selection logic as a real deployment.
 
+> **⚠️ Warning — counter mode has no per-caller address reservation.**
+> When `useCustomSalt == false`, the salt is the shared `keccak256(abi.encodePacked(cmtatCounterId))`, so
+> `nextDeploymentSalt()` and `computedNextProxyAddress(...)` only predict the address of the *factory's* next
+> deployment — by whichever authorized deployer transacts first. If another `CMTAT_DEPLOYER_ROLE` holder deploys
+> before you, the counter advances and your token lands at a **different** address; anything you pre-funded or
+> pre-authorized at the predicted address is stranded.
+>
+> **The safer mode is to enable custom salts (`useCustomSalt == true`) and pass a unique, caller-chosen `salt`.**
+> A custom salt is one-time-use (reuse reverts with `CMTAT_Factory_SaltAlreadyUsed`), binds the predicted address
+> to *your* deployment, and cannot be shifted by another deployer — so `computedProxyAddress(...)` /
+> `computedNextProxyAddress(...)` give you a stable, reservable address you can safely pre-fund. Use counter mode
+> only for single-deployer or coordinated deployments.
+
 ### Access control
 
 All factories inherit OpenZeppelin `AccessControl`. The constructor grants both `DEFAULT_ADMIN_ROLE` and `CMTAT_DEPLOYER_ROLE` to `factoryAdmin`, and `deployCMTAT(...)` is gated by `onlyRole(CMTAT_DEPLOYER_ROLE)`.
+
+### Reentrancy protection
+
+Each concrete factory inherits OpenZeppelin `ReentrancyGuard` and marks its `deployCMTAT(...)` entrypoint `nonReentrant` (declared first, before `onlyRole`).
+
+This matters because in counter mode the effective salt is derived from `cmtatCounterId`, which is only incremented **after** `Create2.deploy`. Since `Create2.deploy` runs the proxy constructor — and its CMTAT initializer — before that increment, a reentrant `deployCMTAT(...)` call could otherwise observe the same `cmtatCounterId` and reuse the same auto-derived salt (Nethermind AuditAgent NM-2). The guard rejects any attempt to re-enter the deploy path mid-deployment, so every automatic deployment sees a distinct counter value and salt, keeping the deployment index and emitted events consistent.
 
 ## Factory contracts
 
@@ -677,11 +694,11 @@ Please see [SECURITY.md](https://github.com/CMTA/CMTAT/blob/master/SECURITY.md) 
 
 ### Audit
 
-This project is not audited !
+> **Note:** This project has not undergone an audit and is provided as-is without any warranties.
 
 ### Tools
 
-Static-analysis reports are versioned under [`doc/audits/`](./doc/audits/); see the [audit overview](./doc/audits/AUDIT_OVERVIEW.md) for the consolidated results and triage. All runs exclude mocks and exclude dependencies / the CMTAT submodule from scope. **For v0.3.0, neither tool reports anything to fix.**
+Static-analysis reports are versioned under [`doc/audits/`](./doc/audits/); see the [audit overview](./doc/audits/AUDIT_OVERVIEW.md) for the consolidated results and triage. All runs exclude mocks and exclude dependencies / the CMTAT submodule from scope. **For v0.4.0, neither tool reports anything to fix.**
 
 #### [Slither](https://github.com/crytic/slither)
 
@@ -693,6 +710,7 @@ slither . --checklist --filter-paths "node_modules,CMTAT,test,forge-std,mocks" >
 
 | Version | Report | Feedback |
 | --- | --- | --- |
+| v0.4.0 | [slither-report.md](./doc/audits/v0.4.0/slither-report.md) | [feedback](./doc/audits/v0.4.0/slither-report-feedback.md) |
 | v0.3.0 | [slither-report.md](./doc/audits/v0.3.0/slither-report.md) | [feedback](./doc/audits/v0.3.0/slither-report-feedback.md) |
 | v0.2.0 | [slither-report.md](./doc/audits/v0.2.0/slither-report.md) | — |
 
@@ -706,8 +724,19 @@ aderyn -x mocks --output aderyn-report.md
 
 | Version | Report | Feedback |
 | --- | --- | --- |
+| v0.4.0 | [aderyn-report.md](./doc/audits/v0.4.0/aderyn-report.md) | [feedback](./doc/audits/v0.4.0/aderyn-report-feedback.md) |
 | v0.3.0 | [aderyn-report.md](./doc/audits/v0.3.0/aderyn-report.md) | [feedback](./doc/audits/v0.3.0/aderyn-report-feedback.md) |
 | v0.2.0 | [aderyn-report.md](./doc/audits/v0.2.0/aderyn-report.md) | — |
+
+#### [Nethermind AuditAgent](https://auditagent.nethermind.io/)
+
+[Nethermind AuditAgent](https://auditagent.nethermind.io/) is an AI-powered automated smart-contract scanner. The report was independently verified against the source in the linked feedback file.
+
+> Note: This scan was performed by an AI-powered automated tool, not a formal human-led audit.
+
+| Version | Result | Report | Feedback |
+| --- | --- | --- | --- |
+| v0.3.0 | 0 High · 0 Medium · 1 Low · 1 Info — **nothing to fix** (both accepted as design; hardened in v0.4.0) | [audit_agent_report_v0.3.0.pdf](./doc/audits/v0.3.0/audit_agent_report_v0.3.0.pdf) | [feedback](./doc/audits/v0.3.0/audit_agent_report-feedback.md) |
 
 
 
@@ -715,8 +744,8 @@ aderyn -x mocks --output aderyn-report.md
 
 For more details and test scenario, you can read this article on the Taurus blog: [Making CMTAT Tokenization More Scalable and Cost-Effective with Proxy and Factory Contracts](https://www.taurushq.com/blog/cmtat-tokenization-deployment-with-proxy-and-factory/).
 
-This article uses the CMTAT version [2.5.1](https://github.com/CMTA/CMTAT/releases/tag/v2.5.1) when the factory code was still included in the CMTAT repository, corresponding to Factory release `0.1.0`. The current factory version is `0.3.0` (exposed on-chain through `version()`, see [Versioning (ERC-8303)](#versioning-erc-8303)).
+This article uses the CMTAT version [2.5.1](https://github.com/CMTA/CMTAT/releases/tag/v2.5.1) when the factory code was still included in the CMTAT repository, corresponding to Factory release `0.1.0`. The current factory version is `0.4.0` (exposed on-chain through `version()`, see [Versioning (ERC-8303)](#versioning-erc-8303)).
 
 ## Intellectual property
 
-The code is copyright (c) Capital Market and Technology Association, 2018-2025, and is released under [Mozilla Public License 2.0](./LICENSE.md).
+The code is copyright (c) Capital Market and Technology Association, 2025-2026, and is released under [Mozilla Public License 2.0](./LICENSE.md).

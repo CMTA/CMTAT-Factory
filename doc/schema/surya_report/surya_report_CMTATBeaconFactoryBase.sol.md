@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./standard/CMTAT_TP_FACTORY.sol | [object Promise] |
+| ./libraries/CMTATBeaconFactoryBase.sol | [object Promise] |
 
 
 ### Contracts Description Table
@@ -15,12 +15,14 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTAT_TP_FACTORY** | Implementation | CMTATTransparentFactoryBase, ReentrancyGuard |||
-| └ | <Constructor> | Public ❗️ | 🛑  | CMTATTransparentFactoryBase |
-| └ | deployCMTAT | Public ❗️ | 🛑  | nonReentrant onlyRole |
-| └ | computedProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | computedNextProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | _initializerData | Internal 🔒 |   | |
+| **CMTATBeaconFactoryBase** | Implementation | CMTATFactoryRoot |||
+| └ | <Constructor> | Public ❗️ | 🛑  | CMTATFactoryRoot |
+| └ | implementation | Public ❗️ |   |NO❗️ |
+| └ | _deployBeaconProxy | Internal 🔒 | 🛑  | |
+| └ | _computedBeaconProxyAddress | Internal 🔒 |   | |
+| └ | _computedNextBeaconProxyAddress | Internal 🔒 |   | |
+| └ | _deployBeaconProxyBytecode | Internal 🔒 | 🛑  | |
+| └ | _getBeaconProxyBytecode | Internal 🔒 |   | |
 
 
 ### Legend

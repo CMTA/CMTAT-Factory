@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./standard/CMTAT_TP_FACTORY.sol | [object Promise] |
+| ./libraries/CMTATTransparentFactoryBase.sol | [object Promise] |
 
 
 ### Contracts Description Table
@@ -15,12 +15,14 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTAT_TP_FACTORY** | Implementation | CMTATTransparentFactoryBase, ReentrancyGuard |||
-| └ | <Constructor> | Public ❗️ | 🛑  | CMTATTransparentFactoryBase |
-| └ | deployCMTAT | Public ❗️ | 🛑  | nonReentrant onlyRole |
-| └ | computedProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | computedNextProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | _initializerData | Internal 🔒 |   | |
+| **CMTATTransparentFactoryBase** | Implementation | CMTATFactoryBase |||
+| └ | <Constructor> | Public ❗️ | 🛑  | CMTATFactoryBase |
+| └ | _deployTransparentProxy | Internal 🔒 | 🛑  | |
+| └ | _computedTransparentProxyAddress | Internal 🔒 |   | |
+| └ | _computedNextTransparentProxyAddress | Internal 🔒 |   | |
+| └ | _deployTransparentProxyBytecode | Internal 🔒 | 🛑  | |
+| └ | _checkProxyAdminOwner | Internal 🔒 |   | |
+| └ | _getTransparentProxyBytecode | Internal 🔒 |   | |
 
 
 ### Legend

@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./standard/CMTAT_TP_FACTORY.sol | [object Promise] |
+| ./light/CMTAT_LIGHT_TP_FACTORY.sol | [object Promise] |
 
 
 ### Contracts Description Table
@@ -15,7 +15,7 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTAT_TP_FACTORY** | Implementation | CMTATTransparentFactoryBase, ReentrancyGuard |||
+| **CMTAT_LIGHT_TP_FACTORY** | Implementation | CMTATTransparentFactoryBase, ReentrancyGuard |||
 | └ | <Constructor> | Public ❗️ | 🛑  | CMTATTransparentFactoryBase |
 | └ | deployCMTAT | Public ❗️ | 🛑  | nonReentrant onlyRole |
 | └ | computedProxyAddress | Public ❗️ |   |NO❗️ |
