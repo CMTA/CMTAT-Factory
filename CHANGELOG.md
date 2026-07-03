@@ -48,7 +48,7 @@ Custom changelog tag: `Dependencies`, `Documentation`, `Testing`
 
 
 
-## 0.4.0 - 2026/06/30
+## 0.4.0 - 2026/07/03
 
 Commit: _pending release commit_
 
