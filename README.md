@@ -154,13 +154,35 @@ Every factory deploys its proxies with the **`CREATE2`** opcode instead of the d
   address = keccak256(0xff ++ deployerAddress ++ salt ++ keccak256(init_code))[12:]
   ```
 
-  The address depends only on the **deployer address**, a caller-chosen **`salt`**, and the **`init_code`** (creation bytecode + ABI-encoded constructor arguments) — **not** on the nonce. Given those three inputs the address is fully deterministic and can be computed *before* deploying (a "counterfactual" address).
+  The address depends only on the **deployer address** — here the **factory contract address**, since the proxy is deployed through `Create2.deploy` executed inside the factory — a caller-chosen **`salt`**, and the **`init_code`** (creation bytecode + ABI-encoded constructor arguments) — **not** on the nonce. Given those three inputs the address is fully deterministic and can be computed *before* deploying (a "counterfactual" address).
 
 **Why this project uses `CREATE2`**
 
 - It lets you compute a token's address ahead of time via `computedProxyAddress(...)` / `computedNextProxyAddress(...)` and, for example, fund it or reference it before it exists on-chain.
 - Because `init_code` is part of the hash, the predicted address is bound to the exact proxy bytecode **and** the CMTAT initializer arguments. Changing any constructor arg, proxy type, or initializer payload changes the resulting address — which is why the deploy path and the address-prediction path must stay byte-for-byte in sync.
 - A given `(deployer, salt, init_code)` triple maps to exactly one address, so a salt can only be used once. The factory enforces this for custom salts (`CMTAT_Factory_SaltAlreadyUsed`) and, in non-custom mode, derives a fresh salt from `cmtatCounterId` for each deployment. See [Salt behavior](#salt-behavior).
+
+**Deploying the same token address on several blockchains**
+
+Because the `CREATE2` address is a pure function of `(deployerAddress, salt, init_code)`, obtaining the **same token address on different chains** requires all three inputs to be identical on each chain:
+
+- the **factory must be deployed at the same address** on every target chain (it is the `deployerAddress`), which in turn means the factory itself has to be deployed deterministically — e.g. from the same EOA at the same nonce, or through a cross-chain deterministic deployer;
+- the **same `salt`** must be used;
+- the **same `init_code`** must be produced, i.e. identical proxy bytecode **and** identical CMTAT initializer arguments (same admin, ERC20 attributes, engines, etc.).
+
+If any of these differs on one chain, the resulting token address will differ there.
+
+**Going further: `CREATE3`**
+
+`CREATE2` binds the address to `init_code`, which is convenient (the address commits to the exact code and constructor arguments) but also constraining for cross-chain deployments: the constructor arguments — and therefore the encoded `init_code` — must be byte-for-byte identical on every chain to keep the same address.
+
+`CREATE3` removes that constraint. It computes the final address from **only** `(deployerAddress, salt)`, independent of `init_code`. Under the hood it deploys a tiny, fixed proxy/factory with `CREATE2` (whose bytecode is constant, so its address depends only on the salt) and that intermediary then `CREATE`s the real contract. Practical consequences:
+
+- The same address can be reproduced across chains **even if the constructor arguments or the proxy bytecode differ** per chain — only the deploying factory address and the salt need to match.
+- Address prediction no longer depends on the initializer payload, so the deploy path and the prediction path can no longer drift because of an argument change.
+- Trade-offs: an extra deployment hop (slightly higher gas), and the address no longer cryptographically commits to the deployed code, so integrity has to be checked another way.
+
+OpenZeppelin now provides a [`Create3` library](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/README.adoc) (currently on `master`; not yet in the pinned `5.6.1`, which ships `Create2` only). Migrating the factories to `CREATE3` would help if cross-chain addresses with per-chain configuration are needed.
 
 ## Common factory API
 
