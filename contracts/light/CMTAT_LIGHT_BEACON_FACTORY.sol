@@ -53,7 +53,7 @@ contract CMTAT_LIGHT_BEACON_FACTORY is CMTATBeaconFactoryBase, ReentrancyGuard {
     */
     function computedProxyAddress(
         bytes32 effectiveDeploymentSalt,
-        CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
+        CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) public view virtual returns (address cmtatProxy) {
         return _computedBeaconProxyAddress(effectiveDeploymentSalt, _initializerData(cmtatArgument));
     }
 
@@ -66,7 +66,7 @@ contract CMTAT_LIGHT_BEACON_FACTORY is CMTATBeaconFactoryBase, ReentrancyGuard {
     */
     function computedNextProxyAddress(
         bytes32 deploymentSaltInput,
-        CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
+        CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) public view virtual returns (address cmtatProxy) {
         return _computedNextBeaconProxyAddress(deploymentSaltInput, _initializerData(cmtatArgument));
     }
 

@@ -100,13 +100,6 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     }
 
     /**
-    * @dev Mirrors deployment salt selection without mutating customSaltUsed.
-    */
-    function _computeDeploymentSalt(bytes32 deploymentSaltInput) internal view virtual returns(bytes32 saltBytes){
-        return useCustomSalt ? deploymentSaltInput : nextDeploymentSalt();
-    }
-
-    /**
     * @dev Deploy CMTAT proxy and register it in the factory index.
     * @dev Reentrancy window: Create2.deploy below runs the proxy constructor (and its CMTAT initializer) BEFORE
     * cmtatCounterId is incremented, so a re-entry into the deploy path could observe the same counter and reuse the
@@ -120,5 +113,12 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
         emit CMTATDeployed(cmtatAddress, msg.sender, cmtatCounterId, deploymentSalt);
         ++cmtatCounterId;
         cmtatsList.push(cmtatAddress);
+    }
+
+    /**
+    * @dev Mirrors deployment salt selection without mutating customSaltUsed.
+    */
+    function _computeDeploymentSalt(bytes32 deploymentSaltInput) internal view virtual returns(bytes32 saltBytes){
+        return useCustomSalt ? deploymentSaltInput : nextDeploymentSalt();
     }
 }

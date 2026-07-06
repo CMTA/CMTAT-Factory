@@ -55,9 +55,9 @@ contract ReentrantInitLogicMock {
         ATTACKER = attacker_;
     }
 
+    receive() external payable {}
+
     fallback() external payable {
         ReentrancyDeployAttacker(ATTACKER).attack();
     }
-
-    receive() external payable {}
 }

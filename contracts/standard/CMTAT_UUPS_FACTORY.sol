@@ -60,7 +60,7 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase, ReentrancyGuard {
     function computedProxyAddress(
         bytes32 effectiveDeploymentSalt,
         // CMTAT function initialize
-        CMTAT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
+        CMTAT_ARGUMENT calldata cmtatArgument) public view virtual returns (address cmtatProxy) {
         bytes memory bytecode =  _getBytecode(
         // CMTAT function initialize
         cmtatArgument);
@@ -76,7 +76,7 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase, ReentrancyGuard {
     */
     function computedNextProxyAddress(
         bytes32 deploymentSaltInput,
-        CMTAT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
+        CMTAT_ARGUMENT calldata cmtatArgument) public view virtual returns (address cmtatProxy) {
         return computedProxyAddress(
             _computeDeploymentSalt(deploymentSaltInput),
             cmtatArgument

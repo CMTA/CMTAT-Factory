@@ -33,6 +33,15 @@ abstract contract CMTATTransparentFactoryBase is CMTATFactoryBase {
     }
 
     /**
+    * @dev Deploy CMTAT and push the created CMTAT in the list.
+    */
+    function _deployTransparentProxyBytecode(bytes memory bytecode, bytes32 deploymentSalt) internal returns (TransparentUpgradeableProxy cmtat) {
+        address cmtatAddress = _deployAndRegisterProxy(bytecode, deploymentSalt);
+        cmtat = TransparentUpgradeableProxy(payable(cmtatAddress));
+        return cmtat;
+    }
+
+    /**
     * @dev Compute a transparent proxy address for an already-derived effective salt.
     */
     function _computedTransparentProxyAddress(
@@ -58,15 +67,6 @@ abstract contract CMTATTransparentFactoryBase is CMTATFactoryBase {
             proxyAdminOwner,
             initializerData
         );
-    }
-
-    /**
-    * @dev Deploy CMTAT and push the created CMTAT in the list.
-    */
-    function _deployTransparentProxyBytecode(bytes memory bytecode, bytes32 deploymentSalt) internal returns (TransparentUpgradeableProxy cmtat) {
-        address cmtatAddress = _deployAndRegisterProxy(bytecode, deploymentSalt);
-        cmtat = TransparentUpgradeableProxy(payable(cmtatAddress));
-        return cmtat;
     }
 
     /**

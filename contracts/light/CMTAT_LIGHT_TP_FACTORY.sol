@@ -47,7 +47,7 @@ contract CMTAT_LIGHT_TP_FACTORY is CMTATTransparentFactoryBase, ReentrancyGuard 
     function computedProxyAddress(
         bytes32 effectiveDeploymentSalt,
         address proxyAdminOwner,
-        CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
+        CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) public view virtual returns (address cmtatProxy) {
         return _computedTransparentProxyAddress(effectiveDeploymentSalt, proxyAdminOwner, _initializerData(cmtatArgument));
     }
 
@@ -61,7 +61,7 @@ contract CMTAT_LIGHT_TP_FACTORY is CMTATTransparentFactoryBase, ReentrancyGuard 
     function computedNextProxyAddress(
         bytes32 deploymentSaltInput,
         address proxyAdminOwner,
-        CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) public virtual view returns (address cmtatProxy) {
+        CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) public view virtual returns (address cmtatProxy) {
         return _computedNextTransparentProxyAddress(deploymentSaltInput, proxyAdminOwner, _initializerData(cmtatArgument));
     }
 

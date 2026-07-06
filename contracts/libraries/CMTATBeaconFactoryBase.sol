@@ -35,7 +35,7 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
     * @notice get the implementation address from the beacon
     * @return beaconImplementation Address of the CMTAT implementation contract.
     */
-    function implementation() public virtual view returns (address beaconImplementation) {
+    function implementation() public view virtual returns (address beaconImplementation) {
         return beacon.implementation();
     }
 
@@ -49,6 +49,15 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
         bytes32 deploymentSalt = _checkAndDetermineDeploymentSalt(deploymentSaltInput);
         bytes memory bytecode = _getBeaconProxyBytecode(initializerData);
         cmtat = _deployBeaconProxyBytecode(bytecode, deploymentSalt);
+        return cmtat;
+    }
+
+    /**
+    * @dev Deploy CMTAT and push the created CMTAT in the list.
+    */
+    function _deployBeaconProxyBytecode(bytes memory bytecode, bytes32 deploymentSalt) internal returns (BeaconProxy cmtat) {
+        address cmtatAddress = _deployAndRegisterProxy(bytecode, deploymentSalt);
+        cmtat = BeaconProxy(payable(cmtatAddress));
         return cmtat;
     }
 
@@ -74,15 +83,6 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
             _computeDeploymentSalt(deploymentSaltInput),
             initializerData
         );
-    }
-
-    /**
-    * @dev Deploy CMTAT and push the created CMTAT in the list.
-    */
-    function _deployBeaconProxyBytecode(bytes memory bytecode, bytes32 deploymentSalt) internal returns (BeaconProxy cmtat) {
-        address cmtatAddress = _deployAndRegisterProxy(bytecode, deploymentSalt);
-        cmtat = BeaconProxy(payable(cmtatAddress));
-        return cmtat;
     }
 
     /**
