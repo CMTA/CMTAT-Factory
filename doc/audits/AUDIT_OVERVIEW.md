@@ -14,6 +14,7 @@ In scope: the factory contracts under `contracts/` (`standard/`, `light/`, `libr
 
 | Version | Tool | Report | Feedback (triage) |
 | --- | --- | --- | --- |
+| v0.5.0 | Claude Code (code-quality review, not a security audit) | [CLAUDE_ANALYSIS.md](./v0.5.0/CLAUDE_ANALYSIS.md) | — (verdicts inline) |
 | v0.4.0 | Slither 0.11.5 | [slither-report.md](./v0.4.0/slither-report.md) | [feedback](./v0.4.0/slither-report-feedback.md) |
 | v0.4.0 | Aderyn 0.6.5 | [aderyn-report.md](./v0.4.0/aderyn-report.md) | [feedback](./v0.4.0/aderyn-report-feedback.md) |
 | v0.3.0 | Slither 0.11.5 | [slither-report.md](./v0.3.0/slither-report.md) | [feedback](./v0.3.0/slither-report-feedback.md) |
@@ -27,6 +28,20 @@ All runs **exclude mocks** and exclude dependencies / the CMTAT submodule from s
 > **Note:** the [Nethermind AuditAgent](https://auditagent.nethermind.io/) scan was performed by an AI-powered
 > automated tool, not a formal human-led audit. Its findings are AI-generated leads, independently verified against
 > the source in the linked feedback file.
+
+## v0.5.0 results
+
+| Review | Vulnerabilities | Quality findings | Anything to fix? |
+| --- | --- | --- | --- |
+| [Claude Code code-quality review](./v0.5.0/CLAUDE_ANALYSIS.md) | **0** | 21 rows: 5 fixed, 2 open, 14 deliberately left | **No security fix.** One measured gas saving applied (-114 gas in the deployment funnel) and four documentation mismatches corrected. |
+
+**Conclusion for v0.5.0: nothing to fix.** This was a code-quality pass, not a vulnerability hunt: no
+finding lets an unauthorized party move value, bypass `CMTAT_DEPLOYER_ROLE`, or brick a factory. Two items
+are left open for a maintainer decision - `virtual` consistency on internal functions (E-1) and the absence
+of a public way to ask whether a one-shot custom salt is still available (H-1). Notable "keep it" verdicts
+recorded so they are not re-opened: the concrete CMTAT import used for the initializer selector costs **0
+bytes** of deployed bytecode and makes an upstream signature change fail loudly (I-2), and the beacon
+factory's zero-implementation fallback is deliberate (H-2).
 
 ## v0.4.0 results
 

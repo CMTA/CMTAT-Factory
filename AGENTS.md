@@ -68,9 +68,12 @@ CMTATFactoryInvariant
 |- CMTAT_DEPLOYER_ROLE
 |- CMTATDeployed event
 
+ContractVersion
+|- ERC165 + IERC8303
+|- VERSION = "0.5.0" exposed through version()
+
 CMTATFactoryRoot
-|- AccessControl
-|- VERSION = "0.5.0"
+|- AccessControl + ContractVersion + CMTATFactoryInvariant
 |- cmtatsList / cmtatCounterId / CMTATProxyAddress(id)
 |- useCustomSalt
 |- _checkAndDetermineDeploymentSalt(...)
@@ -107,7 +110,7 @@ CMTATBeaconFactoryBase
 
 ## Deployment Flow
 
-For all three factories, deployment follows the same high-level sequence:
+For all five factories, deployment follows the same high-level sequence:
 
 1. Caller must hold `CMTAT_DEPLOYER_ROLE`.
 2. Factory derives the effective salt through `_checkAndDetermineDeploymentSalt`.
@@ -204,9 +207,12 @@ contracts/
 |  |- CMTAT_LIGHT_TP_FACTORY.sol
 |  `- CMTAT_LIGHT_BEACON_FACTORY.sol
 `- libraries/
-   |- CMTATFactoryBase.sol
-   |- CMTATFactoryRoot.sol
    |- CMTATFactoryInvariant.sol
+   |- ContractVersion.sol
+   |- CMTATFactoryRoot.sol
+   |- CMTATFactoryBase.sol
+   |- CMTATTransparentFactoryBase.sol
+   |- CMTATBeaconFactoryBase.sol
    `- FactoryErrors.sol
 
 test/
@@ -233,7 +239,7 @@ doc/
 - Shared constants live in `test/utils.js`.
 - Most test fixtures come from `CMTAT/test/deploymentUtils.js`.
 
-When changing shared factory logic in `CMTATFactoryRoot` or `CMTATFactoryInvariant`, update tests across all three factory families.
+When changing shared factory logic in `CMTATFactoryRoot` or `CMTATFactoryInvariant`, update tests across all four test families (`UUPS/`, `Transparent/`, `beacon/`, `Light/`).
 
 ## Editing Guidance
 

@@ -40,12 +40,13 @@ See [Proxy patterns: Transparent vs UUPS vs Beacon](./doc/README.md#proxy-patter
 All factories share the following surface (see [Common factory API](./doc/README.md#common-factory-api) for details):
 
 ```solidity
-function deployCMTAT(bytes32 deploymentSaltInput, /* [address proxyAdminOwner,] */ CMTAT_ARGUMENT calldata) external returns (address);
-function computedProxyAddress(bytes32 deploymentSalt, /* [address proxyAdminOwner,] */ CMTAT_ARGUMENT calldata) external view returns (address);
-function computedNextProxyAddress(/* ... same trailing args ... */) external view returns (address);
-function nextDeploymentSalt() external view returns (bytes32);
-function CMTATProxyAddress(uint256 id) external view returns (address);
-function version() external view returns (string memory);
+// returns the concrete proxy type: ERC1967Proxy, TransparentUpgradeableProxy or BeaconProxy
+function deployCMTAT(bytes32 deploymentSaltInput, /* [address proxyAdminOwner,] */ CMTAT_ARGUMENT calldata) public returns (Proxy);
+function computedProxyAddress(bytes32 deploymentSalt, /* [address proxyAdminOwner,] */ CMTAT_ARGUMENT calldata) public view returns (address);
+function computedNextProxyAddress(/* ... same trailing args ... */) public view returns (address);
+function nextDeploymentSalt() public view returns (bytes32);
+function CMTATProxyAddress(uint256 id) public view returns (address);
+function version() public view returns (string memory);
 
 event CMTATDeployed(address indexed proxy, address indexed deployer, uint256 indexed id, bytes32 salt);
 ```

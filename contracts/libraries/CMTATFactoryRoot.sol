@@ -129,8 +129,9 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     function _deployAndRegisterProxy(bytes memory bytecode, bytes32 deploymentSalt) internal returns (address cmtatAddress) {
         cmtatAddress = Create2.deploy(0, deploymentSalt, bytecode);
         // cmtatsList index == cmtatCounterId, so the array doubles as the id => address registry.
-        emit CMTATDeployed(cmtatAddress, msg.sender, cmtatCounterId, deploymentSalt);
-        ++cmtatCounterId;
+        uint256 id = cmtatCounterId;
+        emit CMTATDeployed(cmtatAddress, msg.sender, id, deploymentSalt);
+        cmtatCounterId = id + 1;
         cmtatsList.push(cmtatAddress);
     }
 

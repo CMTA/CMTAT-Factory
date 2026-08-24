@@ -66,6 +66,7 @@ Commit: _pending release commit_
   (constructor / external / public / internal / private, `view` and `pure` last; visibility before mutability
   before `virtual` / `override` before custom modifiers). Member moves only, no logic change.
 - `.gitignore`: ignore LibreOffice lock files (`.~lock.*#`).
+- `_deployAndRegisterProxy` caches `cmtatCounterId` in a local instead of loading the slot twice (once for the event, once for the increment): **114 gas** per deployment, measured. Finding B-1 of the v0.5.0 code-quality review.
 
 ### Dependencies
 
@@ -102,6 +103,15 @@ Commit: _pending release commit_
   beacon is created once in the factory constructor. Removed the superseded
   `doc/schema/drawio/factory-BeaconFactory.drawio.png` (the `factory.drawio` source is kept - it still backs the
   transparent-factory diagram).
+- Added a code-quality review for v0.5.0 ([`doc/audits/v0.5.0/CLAUDE_ANALYSIS.md`](doc/audits/v0.5.0/CLAUDE_ANALYSIS.md)),
+  produced with Claude Code and registered in [`AUDIT_OVERVIEW.md`](doc/audits/AUDIT_OVERVIEW.md). It reports no
+  vulnerabilities. Applied from it: a measured 114-gas saving in `_deployAndRegisterProxy` (the deployment
+  counter was loaded twice; the optimizer does not forward the load across the emit), and four documentation
+  corrections - the agent-guide file tree omitted three of the seven `libraries/` files, "all three factories"
+  and "three factory families" should read five and four, `VERSION` belongs to `ContractVersion` rather than
+  `CMTATFactoryRoot`, and the root README API sketch declared the entrypoints `external` returning `address`
+  when they are `public` and return the concrete proxy type. Two findings are left open for a maintainer
+  decision: `virtual` consistency on internal functions, and the lack of a public getter for `customSaltUsed`.
 
 ## 0.4.0 - 2026/07/03
 
