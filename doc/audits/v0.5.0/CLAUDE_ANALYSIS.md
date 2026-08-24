@@ -27,8 +27,9 @@
 | B-2 | `unchecked` on the counter increment | ⬜ declined (68 gas) | `CMTATFactoryRoot.sol:133` |
 | C-1 | `CMTATDeployed` has exactly one emit site | ⬜ keep — structurally enforced | `CMTATFactoryRoot.sol:132` |
 | C-2 | Constructor configuration emits no event | ⬜ keep — all immutable, no setter exists | `CMTATFactoryRoot.sol:41` |
-| D-1 | `_initializerData` byte-identical in two pairs of factories | ⬜ decide — trade-off stated | 4 factories |
-| D-2 | `Create2.computeAddress(...)` written identically 3× | ⬜ decide — trade-off stated | 3 files |
+| D-0 | Cost of a shared-parent member to a child that never calls it | ⚠️ measured — `internal` 0 bytes, `public` +79 and +1 ABI entry | probes |
+| D-1 | `_initializerData` byte-identical in two pairs of factories | ⚠️ **revised** — leave; must not hoist into `CMTATFactoryRoot` | 4 factories |
+| D-2 | `Create2.computeAddress(...)` written identically 3× | ⬜ decide — placement checked, clean | 3 files |
 | E-1 | 13/13 public functions `virtual`, only 2/18 internal ones | ⚠️ open — highest-value finding | all libraries |
 | F-1 | ERC-8303 / ERC-165 interface id and dispatch | ⬜ correct as written | `ContractVersion.sol` |
 | G-1 | Agent-guide file tree omits 3 of 7 `libraries/` files | ✅ fixed | `CLAUDE.md` / `AGENTS.md` |
@@ -43,7 +44,8 @@
 | J-1 | `libraries/` holds 5 abstract contracts, 1 interface, 1 library | ⬜ decide — naming | `contracts/libraries/` |
 | J-2 | Downstream probe: enumerable-roles factory | ⬜ inconvenience only, not a blocker | probe compiled |
 
-**Counts:** 21 rows — 5 fixed, 2 open, 14 deliberately left (of which 4 are "checked, nothing wrong").
+**Counts:** 22 rows — 5 fixed, 3 open/revised, 14 deliberately left (of which 4 are "checked, nothing wrong").
+D-1 and D-2 were **revised after review feedback**; see the note at the head of section D.
 
 ## Outstanding
 
@@ -51,7 +53,8 @@
 | --- | --- | --- |
 | E-1 | `virtual` on internal functions | Touches 16 signatures across 3 files. Behaviour-free, but it is an API-surface decision (what the project promises subclasses it can override) and should be the maintainer's call, not a reviewer's. |
 | H-1 | No way to ask whether a custom salt is still available | The fix is additive (one public view). Left unapplied because it adds to the public ABI, which belongs in a release decision. |
-| D-1, D-2, J-1 | Duplication and directory naming | Each has a real counter-argument recorded below. Genuine judgement calls, not defects. |
+| D-1 | `_initializerData` duplication | **Revised to leave.** The only shared ancestor of each pair is `CMTATFactoryRoot`, which the Light factories also inherit — hoisting there would couple the Light variants to `CMTATStandardUpgradeable` at compile time. A pair-level mixin would respect the constraint but costs two files to save 18 lines. |
+| D-2, J-1 | Address-computation duplication; directory naming | Genuine judgement calls, not defects. D-2's placement was re-checked and is clean. |
 
 ---
 
@@ -169,8 +172,46 @@ Role grants in the constructor (`_grantRole`) already emit OpenZeppelin's `RoleG
 
 ## D. Duplication
 
-Both findings below are real duplication, measured in **code lines excluding NatSpec**, and both come
-with a counter-argument. They are recorded as *decide*, not *implement*.
+Both duplication findings below are real, measured in **code lines excluding NatSpec**, and both come
+with a counter-argument. Neither is implemented: D-1 ends in *leave*, D-2 in *decide*.
+
+> **Revised after review feedback.** The first version of this section proposed hoisting shared
+> helpers without asking *which deployed contracts would then carry them*. A reviewer raised the
+> constraint directly: an extraction must not push code into a deployment that does not use the
+> function — UUPS being the obvious case, since it shares `CMTATFactoryBase` with Transparent but
+> needs a different initializer selector. That constraint is correct and it changes the D-1
+> recommendation. D-0 below measures exactly where it bites, because the answer is not the same for
+> `internal` and `public` members.
+
+### D-0. Where an extraction may land — measured
+
+Before recommending any hoist, I measured what a shared-parent member actually costs a child that
+never calls it. Two probes against `CMTATFactoryBase` (the parent of **UUPS** and Transparent), with
+Transparent calling the hoisted member and UUPS not, comparing exact `deployedBytecode` lengths from
+the artifacts rather than the size plugin's rounded KB:
+
+| Probe placed in `CMTATFactoryBase` | `CMTAT_UUPS_FACTORY` deployed | Δ | UUPS ABI functions |
+| --- | --- | --- | --- |
+| baseline (no probe) | 4583 bytes | — | 18 |
+| **`internal`** helper, called by TP, never by UUPS | **4583 bytes** | **0** | 18 |
+| **`public`** helper, never called by UUPS | **4662 bytes** | **+79** | **19** — `probePublicHelper` now callable on UUPS |
+
+**So the rule has two halves, and only one of them is about bytecode:**
+
+- **`internal` members are stripped.** solc removes an inherited internal function no reachable path
+  calls, so a child pays **exactly zero bytes** for a sibling's helper. Hoisting `internal` code into
+  a shared parent has no deployment cost for the contracts that ignore it.
+- **`public` members are not.** They land in every child's dispatch table *and its ABI* — UUPS gained
+  a function it has no business exposing, and 79 bytes. This is the case the project's own
+  "Refactoring safely" concern is about, and it is a real defect, not a size quibble: it widens the
+  callable surface of a deployed contract for a helper it does not use.
+
+The constraint therefore stands for anything `public`, and for `internal` it survives in a different
+currency: **compile-time coupling and legibility**, not bytes. That second form is what disqualifies
+the D-1 hoist below, so it is not a technicality.
+
+**Method note:** the size plugin reports KB to three decimals (~1 byte of resolution), which is why
+these numbers come from `deployedBytecode.length` in the build artifacts instead.
 
 ### D-1. `_initializerData` is byte-identical across two pairs of factories
 
@@ -186,15 +227,35 @@ fields; both Light factories encode `CMTATUpgradeableLight.initialize.selector` 
 The proxy pattern differs between the members of each pair, but the initializer payload does not —
 that is a function of the *implementation*, not the proxy.
 
-**The counter-argument, and it is a good one:** the encoding is the thing that must stay in lockstep
-with `computedProxyAddress`, because the initializer bytes feed the CREATE2 `init_code` hash. The
-project's own guide says so ("If you modify proxy creation bytecode, re-check both deployment and
-`computedProxyAddress(...)`"). Keeping the encoder physically next to the factory that uses it makes
-that review local. Hoisting it into a `CMTATStandardInitializer` / `CMTATLightInitializer` mixin
-removes ~18 code lines and adds two files plus one more inheritance edge.
+**Where it could go is the deciding question, and it rules out the obvious answer.** The two members
+of each pair are *not* siblings in the inheritance tree: `CMTATTransparentFactoryBase` and
+`CMTATBeaconFactoryBase` share no ancestor below **`CMTATFactoryRoot`**, which all five factories
+inherit. So "hoist it to the shared parent" means putting the **standard**-CMTAT encoder into the
+contract the two **Light** factories also derive from.
 
-**Verdict: decide.** Lean toward leaving it: 18 lines is a poor trade for making the
-address-prediction invariant non-local.
+Per D-0 that costs the Light factories **zero bytes** — the helper is `internal` and solc strips it.
+But the coupling it creates is the real objection, and it is worse here than in the generic case: the
+Light factories exist *specifically to avoid* `CMTATStandardUpgradeable`, and routing their common
+ancestor through an import of it would make the lightweight variants compile-time dependent on the
+heavyweight implementation they were built to escape. That is a genuine regression in the thing the
+Light factories are for, even at 0 bytes. It would also be invisible in a size report, which is
+exactly why it is worth writing down.
+
+Two further arguments against, both surviving the measurement:
+
+- The encoding must stay in lockstep with `computedProxyAddress`, because the initializer bytes feed
+  the CREATE2 `init_code` hash — the project's own guide says so ("If you modify proxy creation
+  bytecode, re-check both deployment and `computedProxyAddress(...)`"). Keeping the encoder next to
+  the factory that uses it keeps that review local.
+- The total prize is ~18 code lines.
+
+**Revised verdict: leave — and if it is ever extracted, not into `CMTATFactoryRoot`.** The only
+placement that respects the constraint is a pair-level mixin outside the Root chain —
+`CMTATStandardInitializer` inherited by `CMTAT_TP_FACTORY` + `CMTAT_BEACON_FACTORY` only, and
+`CMTATLightInitializer` by the two Light factories only — so each encoder reaches exactly the two
+deployments that call it and no others. That costs two new files and a second inheritance edge to
+save 18 lines, which is why the recommendation is still *leave*; the placement is recorded so that a
+future extraction does not take the tempting shortcut through Root.
 
 ### D-2. The CREATE2 address computation is written three times
 
@@ -218,8 +279,31 @@ but **UUPS has none** — `CMTAT_UUPS_FACTORY` inlines `_deployBytecode` and `_g
 siblings inherit. A reader looking for "where does UUPS do this" has to learn that the answer is
 "nowhere, it is in the concrete factory".
 
-**Verdict: decide.** The extraction is safe and small; the asymmetry is the stronger argument for
-doing it.
+**Checked against the D-0 constraint, and this one passes.** The natural home is
+`CMTATFactoryRoot`, which all five factories inherit — so the question is whether any of them would
+be carrying code it does not use. None would: every one of the five computes a proxy address.
+
+```
+CMTAT_TP_FACTORY.sol:62          -> _computedTransparentProxyAddress(...)
+CMTAT_LIGHT_TP_FACTORY.sol:52    -> _computedTransparentProxyAddress(...)
+CMTAT_BEACON_FACTORY.sol:69      -> _computedBeaconProxyAddress(...)
+CMTAT_LIGHT_BEACON_FACTORY.sol:57 -> _computedBeaconProxyAddress(...)
+CMTAT_UUPS_FACTORY.sol:67        -> Create2.computeAddress(...) inline
+```
+
+The helper would be `internal` (so zero bytes even for a hypothetical non-user) and, unlike D-1, it
+introduces **no new import** — `CMTATFactoryRoot` already imports `Create2` for `Create2.deploy`. The
+extraction adds nothing to any deployment that would not otherwise use it.
+
+The deploy-wrapper duplication in the same three files is a different case and must **not** be
+merged: `_deployBeaconProxyBytecode`, `_deployTransparentProxyBytecode` and `_deployBytecode` differ
+in return type (`BeaconProxy` / `TransparentUpgradeableProxy` / `ERC1967Proxy`). Their shared core is
+already `_deployAndRegisterProxy` in `CMTATFactoryRoot`; what remains per-file is the typed cast,
+which is exactly the part that cannot be shared.
+
+**Verdict: decide — and unlike D-1 this one is clean.** The extraction is safe, small, adds no
+dependency, and lands only where it is used; the UUPS-has-no-base asymmetry is the stronger argument
+for doing it.
 
 ## E. `virtual` / override convention
 
@@ -553,6 +637,11 @@ Two smaller check-J observations, neither currently breaking anything:
 | `contracts/libraries/CMTATFactoryRoot.sol` | B-1: cache `cmtatCounterId` in the deployment funnel (−114 gas, measured) |
 | `CLAUDE.md`, `AGENTS.md` | G-1, G-2, G-3: complete the `libraries/` file tree, correct "three factories"→five and "three test families"→four, attribute `VERSION` to `ContractVersion` |
 | `README.md` | G-4: correct the API sketch's visibility (`external`→`public`) and `deployCMTAT` return type |
+
+Section D was **revised after review feedback** (see the note at its head): an extraction must not
+push code into a deployment that does not use it. D-0 measures that cost, D-1's verdict changed from
+"decide" to "leave, and not into `CMTATFactoryRoot`", and D-2's placement was re-checked and found
+clean. No contract changed as a result — the revision is to the recommendations.
 
 No contract behaviour changed. All **42 tests pass**; the style checker (`check_order.py`) reports
 **0 violations** across all 8 checks; `npm run check:oz` exits 0.
