@@ -43,8 +43,9 @@
 | I-2 | Full CMTAT implementation imported for a 4-byte selector | ⬜ **keep** — measured, costs 0 bytes | 5 factories |
 | J-1 | `libraries/` holds 5 abstract contracts, 1 interface, 1 library | ⬜ decide — naming | `contracts/libraries/` |
 | J-2 | Downstream probe: enumerable-roles factory | ⬜ inconvenience only, not a blocker | probe compiled |
+| J-3 | No interface for the project's own API | ✅ **fixed** — `ICMTATFactory` added, +26 bytes, ABI unchanged | `contracts/interfaces/` |
 
-**Counts:** 22 rows — 7 fixed, 1 revised, 14 deliberately left (of which 4 are "checked, nothing wrong").
+**Counts:** 23 rows — 8 fixed, 1 revised, 14 deliberately left (of which 4 are "checked, nothing wrong").
 D-1 and D-2 were **revised after review feedback**; see the note at the head of section D.
 
 ## Outstanding
@@ -675,14 +676,70 @@ Two smaller check-J observations, neither currently breaking anything:
   inheriting `CMTATFactoryRoot` reports CMTA's `"0.5.0"` by default. Mitigated in practice —
   `version()` is `public virtual`, so it *can* be overridden — but the default is someone else's
   release number.
-- **No interface for the project's own API.** There is no `ICMTATFactory` declaring
-  `deployCMTAT` / `computedProxyAddress` / `CMTATProxyAddress` / `nextDeploymentSalt`, so an
-  integrator wanting to call a factory must import the concrete contract and its whole dependency
-  graph — including the CMTAT submodule (see I-2). For a project whose entire purpose is being called
-  by other systems, that is the modularity gap most likely to be felt. Worth considering for a future
-  release; not a defect today, since there is one implementation family and it is in this repo.
+- **No interface for the project's own API** — promoted to its own finding, **J-3**, and fixed.
 
 **Verdict: no blocker found. The probe files were deleted after measurement.**
+
+### J-3. No interface for the project's own API — ✅ fixed
+
+There was no `ICMTATFactory`, so an integrator wanting to read a factory had to import the concrete
+contract and with it the entire dependency graph — the CMTAT submodule (see I-2) and OpenZeppelin.
+For a project whose whole purpose is being called by other systems, that is the modularity gap most
+likely to be felt in practice.
+
+**What the five factories actually share** was established from the compiled ABIs rather than by
+reading, because it determines what the interface may contain:
+
+| | |
+| --- | --- |
+| **Identical across all five** | `CMTATProxyAddress(uint256)`, `cmtatsList(uint256)`, `cmtatCounterId()`, `useCustomSalt()`, `nextDeploymentSalt()`, `isCustomSaltUsed(bytes32)`, `CMTAT_DEPLOYER_ROLE()` — plus the `IAccessControl`, `IERC165` and `IERC8303` standard surfaces |
+| **Differ** | `deployCMTAT`, `computedProxyAddress`, `computedNextProxyAddress` (two shapes: with and without `proxyAdminOwner`, and `CMTAT_ARGUMENT` vs `CMTAT_LIGHT_ARGUMENT`), plus `logic()` / `beacon()` / `implementation()` |
+
+`contracts/interfaces/ICMTATFactory.sol` declares exactly the first group minus the standard
+interfaces — **7 functions and the `CMTATDeployed` event** — and is inherited by
+`CMTATFactoryInvariant`, so the compiler enforces the match rather than a comment promising it. The
+`CMTATDeployed` declaration moved into the interface (it was in `CMTATFactoryInvariant`) so there is
+still exactly one declaration and, per C-1, still exactly one emit site.
+
+**The interface has no imports at all**, which is the whole point. Proven, not asserted: the
+interface and a consumer of it were copied into an empty directory — no `node_modules`, no `CMTAT/` —
+and compiled with an import callback that errors on *any* external import. Both compile.
+
+**Applying check I's own rules to this change:**
+
+- **Minimum, not maximum.** `deployCMTAT` and the predictors are deliberately excluded. Their shapes
+  differ across the family, their arguments are CMTAT types (so declaring them would reintroduce the
+  dependency the interface exists to remove), and `deployCMTAT` returns the *concrete proxy type*
+  rather than `address` — which by Solidity's override rules cannot be reconciled with a single
+  interface declaration. The interface states all three reasons in its own NatSpec.
+- **No standard interface is fragmented.** Role administration stays `IAccessControl` and versioning
+  stays `IERC8303`; only `CMTAT_DEPLOYER_ROLE` is redeclared, because that identifier is
+  project-specific.
+- **Interface id is safe to compute.** `ICMTATFactory` inherits nothing, so
+  `type(ICMTATFactory).interfaceId` covers its entire selector set — the omitted-inherited-selector
+  trap cannot apply. All five factories now advertise it through `supportsInterface`, which is the
+  step most often missed.
+- **What changed and what did not.** Storage layout is untouched (interfaces hold no storage) and the
+  **ABI is byte-for-byte the same shape** — 19/20 functions before and after, because every declared
+  function already existed. What changed is the set of ids `supportsInterface` answers `true` for.
+
+**Cost, measured:** **+26 bytes** of deployed bytecode per factory, identical across all five — the
+single extra comparison in `supportsInterface`. No ABI entry added.
+
+**Tests — `test/FactoryInterface.test.js`, 5 cases:**
+
+- All five factories advertise the interface id, which the test **computes itself** by XOR-ing the 7
+  selectors rather than trusting `type(I).interfaceId` — so a silent change to the interface's shape
+  fails the test instead of moving both sides together.
+- The previously advertised ids (ERC-165, `AccessControl`, ERC-8303) still answer `true`, and
+  `0xffffffff` still answers `false` — the new branch displaced nothing.
+- `FactoryConsumerMock`, which imports **only** the interface, reads all five factory families
+  through it without knowing which is which.
+- The same consumer observes a real deployment (counter, registry and list agreeing) and the
+  custom-salt state flipping — so the interface is verified against live factory behaviour, not just
+  against selectors.
+
+**Verdict: implemented.** Suite 52 → **57**.
 
 ---
 
@@ -694,6 +751,9 @@ Two smaller check-J observations, neither currently breaking anything:
 | `test/CustomSalt.test.js` | H-1: 5 regression cases, verified to fail without the fix |
 | all 8 contract files | E-1: `virtual` on the 18 internal functions that lacked it (runtime bytecode byte-identical) |
 | `contracts/mocks/OverridableFactoryMock.sol`, `test/VirtualOverride.test.js` | E-1: 5 override guards, verified to break the build without `virtual` |
+| `contracts/interfaces/ICMTATFactory.sol` | J-3: dependency-free integration interface, inherited and ERC-165 advertised |
+| `CMTATFactoryInvariant.sol`, `CMTATFactoryRoot.sol` | J-3: implement the interface; `CMTATDeployed` moved into it; `supportsInterface` advertises its id (+26 bytes) |
+| `contracts/mocks/FactoryConsumerMock.sol`, `test/FactoryInterface.test.js` | J-3: 5 cases; the consumer compiles against the interface alone |
 | `CLAUDE.md`, `AGENTS.md` | G-1, G-2, G-3: complete the `libraries/` file tree, correct "three factories"→five and "three test families"→four, attribute `VERSION` to `ContractVersion` |
 | `README.md` | G-4: correct the API sketch's visibility (`external`→`public`) and `deployCMTAT` return type |
 
@@ -702,9 +762,10 @@ push code into a deployment that does not use it. D-0 measures that cost, D-1's 
 "decide" to "leave, and not into `CMTATFactoryRoot`", and D-2's placement was re-checked and found
 clean. No contract changed as a result — the revision is to the recommendations.
 
-No existing contract behaviour changed; H-1 adds one public view and E-1 changes no executable byte.
-All **52 tests pass** (42 at the start of the review, plus 5 for H-1 and 5 for E-1); the style checker
-(`check_order.py`) reports **0 violations** across all 8 checks; `npm run check:oz` exits 0.
+No existing contract behaviour changed: H-1 adds one public view, E-1 changes no executable byte, and
+J-3 leaves the ABI shape identical while adding one `supportsInterface` answer.
+All **57 tests pass** (42 at the start of the review, plus 5 each for H-1, E-1 and J-3); the style
+checker (`check_order.py`) reports **0 violations** across all 8 checks; `npm run check:oz` exits 0.
 
 Temporary artifacts created for measurement — the gas harness, the H-1 probe test and both modularity
 probes under `contracts/probe/` — were **deleted**; the test count is unchanged at 42, which is the

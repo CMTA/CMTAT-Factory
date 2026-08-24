@@ -7,6 +7,7 @@ import {Create2} from '@openzeppelin/contracts/utils/Create2.sol';
 import {ContractVersion} from "./ContractVersion.sol";
 import {CMTATFactoryInvariant} from "./CMTATFactoryInvariant.sol";
 import {FactoryErrors} from "./FactoryErrors.sol";
+import {ICMTATFactory} from "../interfaces/ICMTATFactory.sol";
 /**
 * @notice Code common to Beacon, TP and UUPS factory
 *
@@ -17,15 +18,15 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     /**
     * @notice List of every CMTAT proxy deployed by this factory, in deployment order
     */
-    address[] public cmtatsList;
+    address[] public override cmtatsList;
     /**
     * @notice If true, the deployer provides the CREATE2 salt, otherwise the salt is derived from cmtatCounterId
     */
-    bool immutable public useCustomSalt;
+    bool immutable public override useCustomSalt;
     /**
     * @notice Number of CMTAT proxies deployed, also the id assigned to the next deployment
     */
-    uint256 public cmtatCounterId;
+    uint256 public override cmtatCounterId;
     
     /* ==== Internal mapping ======== */
     /**
@@ -61,7 +62,7 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
      *
      * @return proxyAddress The address of the CMTAT proxy corresponding to the given counter ID.
      */
-    function CMTATProxyAddress(uint256 cmtatCounterId_) public view virtual returns (address) {
+    function CMTATProxyAddress(uint256 cmtatCounterId_) public view virtual override returns (address) {
         return cmtatCounterId_ < cmtatsList.length ? cmtatsList[cmtatCounterId_] : address(0);
     }
 
@@ -75,7 +76,9 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
         override(AccessControl, ContractVersion)
         returns (bool)
     {
-        return super.supportsInterface(interfaceId);
+        return
+            interfaceId == type(ICMTATFactory).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     /**
@@ -88,7 +91,7 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
      *
      * @return saltBytes The salt the next counter-derived deployment will use.
      */
-    function nextDeploymentSalt() public view virtual returns(bytes32 saltBytes) {
+    function nextDeploymentSalt() public view virtual override returns(bytes32 saltBytes) {
         return keccak256(abi.encodePacked(cmtatCounterId));
     }
 
@@ -106,7 +109,7 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
      *
      * @return used True if a deployment already consumed this salt.
      */
-    function isCustomSaltUsed(bytes32 salt) public view virtual returns (bool used) {
+    function isCustomSaltUsed(bytes32 salt) public view virtual override returns (bool used) {
         return customSaltUsed[salt];
     }
 

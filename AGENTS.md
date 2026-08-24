@@ -195,6 +195,7 @@ Important invariants:
 4. Every successful deployment increments `cmtatCounterId` by exactly one.
 5. `CMTATProxyAddress(id)` must match the emitted `CMTAT` event and the corresponding entry in `cmtatsList`.
 6. Address prediction must stay aligned with the actual deployment bytecode.
+7. The surface common to all five factories is declared in `contracts/interfaces/ICMTATFactory.sol` and inherited, so changing one of those signatures breaks the build on purpose. That file must stay import-free: integrators compile against it without CMTAT or OpenZeppelin.
 
 ## Project Structure
 
@@ -207,6 +208,8 @@ contracts/
 |- light/
 |  |- CMTAT_LIGHT_TP_FACTORY.sol
 |  `- CMTAT_LIGHT_BEACON_FACTORY.sol
+|- interfaces/
+|  `- ICMTATFactory.sol
 `- libraries/
    |- CMTATFactoryInvariant.sol
    |- ContractVersion.sol

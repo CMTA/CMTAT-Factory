@@ -86,6 +86,7 @@ npm run lint:js        # eslint  (add :fix to autofix)
 | [doc/TOOLCHAIN.md](./doc/TOOLCHAIN.md) | Toolchain details |
 | [doc/Solidity-API-Docgen.md](./doc/Solidity-API-Docgen.md) | Generated Solidity API reference |
 | [doc/audits/AUDIT_OVERVIEW.md](./doc/audits/AUDIT_OVERVIEW.md) | Static-analysis reports and triage |
+| [contracts/interfaces/ICMTATFactory.sol](./contracts/interfaces/ICMTATFactory.sol) | Import-free integration interface: the registry, salt and role surface every factory shares |
 | [doc/schema/](./doc/schema/) | PlantUML architecture diagrams (`plantuml/`, sources + renders), Surya inheritance / call graphs, drawio diagrams |
 
 ## Security

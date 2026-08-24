@@ -102,7 +102,8 @@ The factories are built from a small set of abstract base contracts in `contract
 
 | Contract | Inherits | Used by | Responsibility |
 | --- | --- | --- | --- |
-| `CMTATFactoryInvariant` | — | all factories | Declares the shared structs (`CMTAT_ARGUMENT`, `CMTAT_LIGHT_ARGUMENT`), the `CMTAT_DEPLOYER_ROLE` constant, and the `CMTAT` / `CMTATDeployed` events. |
+| `ICMTATFactory` | — (interface) | all factories | The import-free integration interface: deployment registry, salt surface, `CMTAT_DEPLOYER_ROLE`, and the `CMTATDeployed` event. Lives in `contracts/interfaces/`. |
+| `CMTATFactoryInvariant` | `ICMTATFactory` | all factories | Declares the shared structs (`CMTAT_ARGUMENT`, `CMTAT_LIGHT_ARGUMENT`) and the `CMTAT_DEPLOYER_ROLE` constant. |
 | `ContractVersion` | `ERC165`, `IERC8303` | `CMTATFactoryRoot` | ERC-8303 `version()` (`"0.5.0"`) and ERC-165 `supportsInterface`. |
 | `CMTATFactoryRoot` | `AccessControl`, `ContractVersion`, `CMTATFactoryInvariant` | all factories | Deployment index (`cmtatsList`, `cmtatCounterId`, `CMTATProxyAddress`), salt logic (`useCustomSalt`, `nextDeploymentSalt`, `_checkAndDetermineDeploymentSalt`, `_computeDeploymentSalt`), and CREATE2 deploy + registration (`_deployAndRegisterProxy`). |
 | `CMTATFactoryBase` | `CMTATFactoryRoot` | UUPS & Transparent factories | Stores the immutable `logic` implementation and reverts on a zero logic address. |
@@ -175,6 +176,18 @@ Every factory deploys its proxies with the **`CREATE2`** opcode instead of the d
 ## Common factory API
 
 All factories inherit `CMTATFactoryRoot` and share the following surface, in addition to the proxy-specific `deployCMTAT` / `computedProxyAddress` documented per factory below.
+
+### Integration interface (`ICMTATFactory`)
+
+Every factory implements [`ICMTATFactory`](../contracts/interfaces/ICMTATFactory.sol), which declares the surface all five share: `CMTATProxyAddress`, `cmtatsList`, `cmtatCounterId`, `useCustomSalt`, `nextDeploymentSalt`, `isCustomSaltUsed`, `CMTAT_DEPLOYER_ROLE`, and the `CMTATDeployed` event.
+
+**The file has no imports.** An indexer or integrating contract can compile against it without the CMTAT submodule or OpenZeppelin, instead of importing a concrete factory and its whole dependency graph. Factories advertise it through ERC-165:
+
+```solidity
+factory.supportsInterface(type(ICMTATFactory).interfaceId); // true
+```
+
+The deployment entrypoints (`deployCMTAT`, `computedProxyAddress`, `computedNextProxyAddress`) are **not** part of it: their shapes differ across the family (the Transparent variants take an extra `proxyAdminOwner`, the Light variants a smaller argument struct), their arguments are CMTAT types, and `deployCMTAT` returns the concrete proxy type rather than `address`. Use the concrete factory for those.
 
 ### Versioning (ERC-8303)
 
