@@ -68,7 +68,7 @@ npm run lint:js        # eslint  (add :fix to autofix)
 
 > **AI assistance:** Parts of this project were written with the help of AI coding assistants, principally Claude Code (Anthropic) and Codex (OpenAI).
 
-**Toolchain:** Hardhat `^2.26.1`, Node `20.5.0`, Solidity [`0.8.34`](https://docs.soliditylang.org/en/v0.8.34/) (EVM `prague`), CMTAT [`v3.3.0-rc1`](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc1), OpenZeppelin Contracts (+ Upgradeable) [`v5.6.1`](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.1).
+**Toolchain:** Hardhat `^2.26.1`, Node `20.5.0`, Solidity [`0.8.34`](https://docs.soliditylang.org/en/v0.8.34/) (EVM `prague`), CMTAT [`v3.3.0-rc3`](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc3), OpenZeppelin Contracts (+ Upgradeable) [`v5.7.0`](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.7.0).
 
 ## Documentation
 

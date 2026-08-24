@@ -75,7 +75,7 @@ In addition to the three standard factories, two **CMTAT Light** factories (`CMT
 
 ### CMTAT versions: Standard vs Light
 
-This project deploys two variants of the [CMTAT](https://github.com/CMTA/CMTAT) implementation (pinned at **v3.3.0-rc1**), each initialized with its own argument struct.
+This project deploys two variants of the [CMTAT](https://github.com/CMTA/CMTAT) implementation (pinned at **v3.3.0-rc3**), each initialized with its own argument struct.
 
 - **CMTAT Standard** — the full-featured security token.
   - Used by the UUPS, Transparent, and Beacon factories: `CMTATUpgradeableUUPS` (UUPS) and `CMTATStandardUpgradeable` (Transparent / Beacon).
@@ -579,9 +579,9 @@ are the latest ones that we tested:
 - Smart contract
   - Solidity [0.8.34](https://docs.soliditylang.org/en/v0.8.34/) (via solc-js)
   - EVM: Prague
-  - CMTAT [v3.3.0-rc1](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc1)
-  - OpenZeppelin Contracts (Node.js module) [v5.6.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.6.1) 
-  - OpenZeppelin Contracts Upgradeable (Node.js module) [v5.6.1](https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/releases/tag/v5.6.1)
+  - CMTAT [v3.3.0-rc3](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc3)
+  - OpenZeppelin Contracts (Node.js module) [v5.7.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.7.0) 
+  - OpenZeppelin Contracts Upgradeable (Node.js module) [v5.7.0](https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/releases/tag/v5.7.0)
 
 
 

@@ -44,7 +44,7 @@ This repo vendors the upstream CMTAT project in the `CMTAT/` directory. Some tes
 - Framework: Hardhat
 - Test stack: Mocha + Chai + `@nomicfoundation/hardhat-network-helpers`
 - Upgrade tooling: `@openzeppelin/hardhat-upgrades`
-- Solidity libs: OpenZeppelin Contracts `5.6.1` and `@openzeppelin/contracts-upgradeable` `5.6.1` (must match the OZ version required by the pinned CMTAT submodule)
+- Solidity libs: OpenZeppelin Contracts `5.7.0` and `@openzeppelin/contracts-upgradeable` `5.7.0` (must be at least the OZ version required by the pinned CMTAT submodule, and on the same major - enforced by `npm run check:oz`)
 - Docs/analysis tooling: `solidity-docgen`, `surya`, `sol2uml`, `hardhat-contract-sizer`, `solidity-coverage`
 
 ## Architecture

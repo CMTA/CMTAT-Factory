@@ -54,8 +54,9 @@ Branch: `style`
 
 Commit: _pending release commit_
 
-> Documentation and code-comment release. No functional, API or storage change since `0.4.0`: the deployed
-> bytecode of every factory is unchanged apart from the `version()` string.
+> Documentation, code-comment and dependency release. No factory API or storage change since `0.4.0`; the only
+> source-level change to the factories is the `version()` string. The deployed CMTAT implementation bytecode does
+> change, because the vendored CMTAT submodule and OpenZeppelin move forward.
 
 ### Changed
 
@@ -65,6 +66,19 @@ Commit: _pending release commit_
   (constructor / external / public / internal / private, `view` and `pure` last; visibility before mutability
   before `virtual` / `override` before custom modifiers). Member moves only, no logic change.
 - `.gitignore`: ignore LibreOffice lock files (`.~lock.*#`).
+
+### Dependencies
+
+- Updated the pinned CMTAT submodule from `v3.3.0-rc1` to
+  [`v3.3.0-rc3`](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc3).
+- Updated OpenZeppelin Contracts and Contracts-Upgradeable from `5.6.1` to
+  [`5.7.0`](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.7.0).
+- Relaxed the `npm run check:oz` guard (`scripts/check-oz-version.js`) from an exact-range match to a
+  **same-major floor**: it still fails when the factory's OpenZeppelin is older than, or on a different major to,
+  the version the pinned CMTAT submodule declares - the duplicate `Initializable` breakage the guard was written
+  for - but a newer OZ within the same major is now reported as a warning instead of an error. This is what CMTAT
+  `v3.3.0-rc3` needs, since it still pins OZ `5.6.1` exactly while the factory runs `5.7.0` (compiles clean, all
+  42 tests pass).
 
 ### Documentation
 
