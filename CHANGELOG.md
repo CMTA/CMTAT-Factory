@@ -69,6 +69,8 @@ Commit: _pending release commit_
 
 ### Dependencies
 
+- Updated the Hardhat Solidity compiler from `0.8.34` to `0.8.36` (`hardhat.config.js`), matching the compiler
+  the pinned CMTAT submodule builds with. Source pragmas stay `^0.8.20`; the EVM target stays `prague`.
 - Updated the pinned CMTAT submodule from `v3.3.0-rc1` to
   [`v3.3.0-rc3`](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc3).
 - Updated OpenZeppelin Contracts and Contracts-Upgradeable from `5.6.1` to
