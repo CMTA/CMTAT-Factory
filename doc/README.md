@@ -1,4 +1,7 @@
-# CMTAT Factory
+# CMTAT Factory — Full Documentation
+
+> This is the complete specification of the CMTAT Factory project.
+> For a short overview and quick start, see the [root README](../README.md).
 
 ## Introduction
 
@@ -56,19 +59,19 @@ In addition to the three standard factories, two **CMTAT Light** factories (`CMT
 
 - **UUPS Proxy Factory**
   - Deploys CMTAT behind a UUPS proxy ([ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)) with minimal admin overhead.
-  - Contract: [CMTAT_UUPS_FACTORY.sol](./contracts/standard/CMTAT_UUPS_FACTORY.sol) 
+  - Contract: [CMTAT_UUPS_FACTORY.sol](../contracts/standard/CMTAT_UUPS_FACTORY.sol) 
 - **Transparent Proxy Factory**
   - Deploys CMTAT behind a TransparentUpgradeableProxy with a dedicated ProxyAdmin contract.
-  - Contract: [CMTAT_TP_FACTORY.sol](./contracts/standard/CMTAT_TP_FACTORY.sol)
+  - Contract: [CMTAT_TP_FACTORY.sol](../contracts/standard/CMTAT_TP_FACTORY.sol)
 - **Beacon Proxy Factory**
   - Deploys CMTAT behind a BeaconProxy using an UpgradeableBeacon for shared implementation upgrades.
-  - Contract: [CMTAT_BEACON_FACTORY.sol](./contracts/standard/CMTAT_BEACON_FACTORY.sol)
+  - Contract: [CMTAT_BEACON_FACTORY.sol](../contracts/standard/CMTAT_BEACON_FACTORY.sol)
 - **CMTAT Light Transparent Proxy Factory**
   - Deploys the lighter `CMTATUpgradeableLight` implementation behind a TransparentUpgradeableProxy.
-  - Contract: [CMTAT_LIGHT_TP_FACTORY.sol](./contracts/light/CMTAT_LIGHT_TP_FACTORY.sol)
+  - Contract: [CMTAT_LIGHT_TP_FACTORY.sol](../contracts/light/CMTAT_LIGHT_TP_FACTORY.sol)
 - **CMTAT Light Beacon Proxy Factory**
   - Deploys the lighter `CMTATUpgradeableLight` implementation behind a BeaconProxy.
-  - Contract: [CMTAT_LIGHT_BEACON_FACTORY.sol](./contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol)
+  - Contract: [CMTAT_LIGHT_BEACON_FACTORY.sol](../contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol)
 
 ### CMTAT versions: Standard vs Light
 
@@ -102,7 +105,7 @@ The factories are built from a small set of abstract base contracts in `contract
 
 ### CMTATFactoryBase
 
-![surya_inheritance_CMTATFactoryBase.sol](./doc/schema/surya_inheritance/surya_inheritance_CMTATFactoryBase.sol.png)
+![surya_inheritance_CMTATFactoryBase.sol](./schema/surya_inheritance/surya_inheritance_CMTATFactoryBase.sol.png)
 
 
 |       Contract       |       Type        |      Bases       |                |                  |
@@ -116,7 +119,7 @@ The factories are built from a small set of abstract base contracts in `contract
 
 ### CMTATFactoryRoot
 
-![surya_inheritance_CMTATFactoryRoot.sol](./doc/schema/surya_inheritance/surya_inheritance_CMTATFactoryRoot.sol.png)
+![surya_inheritance_CMTATFactoryRoot.sol](./schema/surya_inheritance/surya_inheritance_CMTATFactoryRoot.sol.png)
 
 
 
@@ -345,15 +348,15 @@ The factory will use the same beacon for each beacon proxy.
 - This beacon provides the address of the implementation contract, a CMTAT_PROXY contract. 
 - If you upgrade the beacon to point to a new implementation, it will change the implementation contract for all beacon proxy.
 
-![factory-Beacon Factory.drawio](./doc/schema/drawio/factory-BeaconFactory.drawio.png)
+![factory-Beacon Factory.drawio](./schema/drawio/factory-BeaconFactory.drawio.png)
 
 #### Inheritance
 
-![surya_inheritance_CMTAT_BEACON_FACTORY.sol](./doc/schema/surya_inheritance/surya_inheritance_CMTAT_BEACON_FACTORY.sol.png)
+![surya_inheritance_CMTAT_BEACON_FACTORY.sol](./schema/surya_inheritance/surya_inheritance_CMTAT_BEACON_FACTORY.sol.png)
 
 #### Graph
 
-![surya_graph_CMTAT_BEACON_FACTORY.sol](./doc/schema/surya_graph/surya_graph_CMTAT_BEACON_FACTORY.sol.png)
+![surya_graph_CMTAT_BEACON_FACTORY.sol](./schema/surya_graph/surya_graph_CMTAT_BEACON_FACTORY.sol.png)
 
 #### Ethereum API
 
@@ -422,15 +425,15 @@ The factory will use the same implementation for each transparent proxy deployed
 - Each transparent proxy has its own proxy admin, deployed inside the constructor of the transparent proxy. 
 - Each transparent proxy can upgrade their implementation to a new one independently and without impact on other proxies.
 
-![factory-Transparent Factory.drawio](./doc/schema/drawio/factory-TransparentFactory.drawio.png)
+![factory-Transparent Factory.drawio](./schema/drawio/factory-TransparentFactory.drawio.png)
 
 #### Inheritance
 
- ![surya_inheritance_CMTAT_TP_FACTORY.sol](./doc/schema/surya_inheritance/surya_inheritance_CMTAT_TP_FACTORY.sol.png)
+ ![surya_inheritance_CMTAT_TP_FACTORY.sol](./schema/surya_inheritance/surya_inheritance_CMTAT_TP_FACTORY.sol.png)
 
 #### Graph
 
-![surya_graph_CMTAT_TP_FACTORY.sol](./doc/schema/surya_graph/surya_graph_CMTAT_TP_FACTORY.sol.png)
+![surya_graph_CMTAT_TP_FACTORY.sol](./schema/surya_graph/surya_graph_CMTAT_TP_FACTORY.sol.png)
 
 #### Ethereum API
 
@@ -485,11 +488,11 @@ The factory will use the same implementation for each UUPS proxy deployed.
 
 #### Inheritance
 
-![surya_inheritance_CMTAT_UUPS_FACTORY.sol](./doc/schema/surya_inheritance/surya_inheritance_CMTAT_UUPS_FACTORY.sol.png)
+![surya_inheritance_CMTAT_UUPS_FACTORY.sol](./schema/surya_inheritance/surya_inheritance_CMTAT_UUPS_FACTORY.sol.png)
 
 #### Graph
 
-![surya_graph_CMTAT_UUPS_FACTORY.sol](./doc/schema/surya_graph/surya_graph_CMTAT_UUPS_FACTORY.sol.png)
+![surya_graph_CMTAT_UUPS_FACTORY.sol](./schema/surya_graph/surya_graph_CMTAT_UUPS_FACTORY.sol.png)
 
 #### Ethereum API
 
@@ -535,8 +538,8 @@ Get the predicted proxy address for a given deployment salt without deploying it
 
 Two additional factories deploy the lighter `CMTATUpgradeableLight` implementation:
 
-- **`CMTAT_LIGHT_TP_FACTORY`** ([contracts/light/CMTAT_LIGHT_TP_FACTORY.sol](./contracts/light/CMTAT_LIGHT_TP_FACTORY.sol)) — Transparent proxy variant. Same architecture as the [Transparent Proxy Factory](#transparent-proxy-factory).
-- **`CMTAT_LIGHT_BEACON_FACTORY`** ([contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol](./contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol)) — Beacon proxy variant. Same architecture as the [Beacon Proxy Factory](#beacon-proxy-factory). When `implementation_ == address(0)`, the constructor deploys a fresh `CMTATUpgradeableLight` implementation.
+- **`CMTAT_LIGHT_TP_FACTORY`** ([contracts/light/CMTAT_LIGHT_TP_FACTORY.sol](../contracts/light/CMTAT_LIGHT_TP_FACTORY.sol)) — Transparent proxy variant. Same architecture as the [Transparent Proxy Factory](#transparent-proxy-factory).
+- **`CMTAT_LIGHT_BEACON_FACTORY`** ([contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol](../contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol)) — Beacon proxy variant. Same architecture as the [Beacon Proxy Factory](#beacon-proxy-factory). When `implementation_ == address(0)`, the constructor deploys a fresh `CMTATUpgradeableLight` implementation.
 
 Both expose the same entrypoints as their standard counterparts but take `CMTAT_LIGHT_ARGUMENT` instead of `CMTAT_ARGUMENT`:
 
@@ -549,15 +552,15 @@ Both expose the same entrypoints as their standard counterparts but take `CMTAT_
 
 #### Inheritance
 
-![surya_inheritance_CMTAT_LIGHT_TP_FACTORY.sol](./doc/schema/surya_inheritance/surya_inheritance_CMTAT_LIGHT_TP_FACTORY.sol.png)
+![surya_inheritance_CMTAT_LIGHT_TP_FACTORY.sol](./schema/surya_inheritance/surya_inheritance_CMTAT_LIGHT_TP_FACTORY.sol.png)
 
-![surya_inheritance_CMTAT_LIGHT_BEACON_FACTORY.sol](./doc/schema/surya_inheritance/surya_inheritance_CMTAT_LIGHT_BEACON_FACTORY.sol.png)
+![surya_inheritance_CMTAT_LIGHT_BEACON_FACTORY.sol](./schema/surya_inheritance/surya_inheritance_CMTAT_LIGHT_BEACON_FACTORY.sol.png)
 
 #### Graph
 
-![surya_graph_CMTAT_LIGHT_TP_FACTORY.sol](./doc/schema/surya_graph/surya_graph_CMTAT_LIGHT_TP_FACTORY.sol.png)
+![surya_graph_CMTAT_LIGHT_TP_FACTORY.sol](./schema/surya_graph/surya_graph_CMTAT_LIGHT_TP_FACTORY.sol.png)
 
-![surya_graph_CMTAT_LIGHT_BEACON_FACTORY.sol](./doc/schema/surya_graph/surya_graph_CMTAT_LIGHT_BEACON_FACTORY.sol.png)
+![surya_graph_CMTAT_LIGHT_BEACON_FACTORY.sol](./schema/surya_graph/surya_graph_CMTAT_LIGHT_BEACON_FACTORY.sol.png)
 
 
 
@@ -592,7 +595,7 @@ Clone the git repository, with the option `--recurse-submodules` to fetch the su
 
 We recommend to install the [Node Version Manager `nvm`](https://github.com/nvm-sh/nvm) to manage multiple versions of Node.js on your machine. You can then, for example, install the version 20.5.0 of Node.js with the following command: `nvm install 20.5.0`
 
-The file [.nvmrc](./.nvmrc) at the root of the project set the Node.js version. `nvm use`will automatically use this version if no version is supplied on the command line.
+The file [.nvmrc](../.nvmrc) at the root of the project set the Node.js version. `nvm use`will automatically use this version if no version is supplied on the command line.
 
 - node modules
 
@@ -664,7 +667,7 @@ npm run-script lint:sol:fix
 
 #### [Surya](https://github.com/ConsenSys/surya)
 
-To generate documentation with surya, you can call the three bash scripts in [doc/script](./doc/script)
+To generate documentation with surya, you can call the three bash scripts in [doc/script](./script)
 
 | Task                 | Script                      | Command exemple                                              |
 | -------------------- | --------------------------- | ------------------------------------------------------------ |
@@ -698,7 +701,7 @@ Please see [SECURITY.md](https://github.com/CMTA/CMTAT/blob/master/SECURITY.md) 
 
 ### Tools
 
-Static-analysis reports are versioned under [`doc/audits/`](./doc/audits/); see the [audit overview](./doc/audits/AUDIT_OVERVIEW.md) for the consolidated results and triage. All runs exclude mocks and exclude dependencies / the CMTAT submodule from scope. **For v0.4.0, neither tool reports anything to fix.**
+Static-analysis reports are versioned under [`doc/audits/`](./audits/); see the [audit overview](./audits/AUDIT_OVERVIEW.md) for the consolidated results and triage. All runs exclude mocks and exclude dependencies / the CMTAT submodule from scope. **For v0.4.0, neither tool reports anything to fix.**
 
 #### [Slither](https://github.com/crytic/slither)
 
@@ -710,9 +713,9 @@ slither . --checklist --filter-paths "node_modules,CMTAT,test,forge-std,mocks" >
 
 | Version | Report | Feedback |
 | --- | --- | --- |
-| v0.4.0 | [slither-report.md](./doc/audits/v0.4.0/slither-report.md) | [feedback](./doc/audits/v0.4.0/slither-report-feedback.md) |
-| v0.3.0 | [slither-report.md](./doc/audits/v0.3.0/slither-report.md) | [feedback](./doc/audits/v0.3.0/slither-report-feedback.md) |
-| v0.2.0 | [slither-report.md](./doc/audits/v0.2.0/slither-report.md) | — |
+| v0.4.0 | [slither-report.md](./audits/v0.4.0/slither-report.md) | [feedback](./audits/v0.4.0/slither-report-feedback.md) |
+| v0.3.0 | [slither-report.md](./audits/v0.3.0/slither-report.md) | [feedback](./audits/v0.3.0/slither-report-feedback.md) |
+| v0.2.0 | [slither-report.md](./audits/v0.2.0/slither-report.md) | — |
 
 #### Aderyn
 
@@ -724,9 +727,9 @@ aderyn -x mocks --output aderyn-report.md
 
 | Version | Report | Feedback |
 | --- | --- | --- |
-| v0.4.0 | [aderyn-report.md](./doc/audits/v0.4.0/aderyn-report.md) | [feedback](./doc/audits/v0.4.0/aderyn-report-feedback.md) |
-| v0.3.0 | [aderyn-report.md](./doc/audits/v0.3.0/aderyn-report.md) | [feedback](./doc/audits/v0.3.0/aderyn-report-feedback.md) |
-| v0.2.0 | [aderyn-report.md](./doc/audits/v0.2.0/aderyn-report.md) | — |
+| v0.4.0 | [aderyn-report.md](./audits/v0.4.0/aderyn-report.md) | [feedback](./audits/v0.4.0/aderyn-report-feedback.md) |
+| v0.3.0 | [aderyn-report.md](./audits/v0.3.0/aderyn-report.md) | [feedback](./audits/v0.3.0/aderyn-report-feedback.md) |
+| v0.2.0 | [aderyn-report.md](./audits/v0.2.0/aderyn-report.md) | — |
 
 #### [Nethermind AuditAgent](https://auditagent.nethermind.io/)
 
@@ -736,7 +739,7 @@ aderyn -x mocks --output aderyn-report.md
 
 | Version | Result | Report | Feedback |
 | --- | --- | --- | --- |
-| v0.3.0 | 0 High · 0 Medium · 1 Low · 1 Info — **nothing to fix** (both accepted as design; hardened in v0.4.0) | [audit_agent_report_v0.3.0.pdf](./doc/audits/v0.3.0/audit_agent_report_v0.3.0.pdf) | [feedback](./doc/audits/v0.3.0/audit_agent_report-feedback.md) |
+| v0.3.0 | 0 High · 0 Medium · 1 Low · 1 Info — **nothing to fix** (both accepted as design; hardened in v0.4.0) | [audit_agent_report_v0.3.0.pdf](./audits/v0.3.0/audit_agent_report_v0.3.0.pdf) | [feedback](./audits/v0.3.0/audit_agent_report-feedback.md) |
 
 
 
@@ -748,4 +751,4 @@ This article uses the CMTAT version [2.5.1](https://github.com/CMTA/CMTAT/releas
 
 ## Intellectual property
 
-The code is copyright (c) Capital Market and Technology Association, 2025-2026, and is released under [Mozilla Public License 2.0](./LICENSE.md).
+The code is copyright (c) Capital Market and Technology Association, 2025-2026, and is released under [Mozilla Public License 2.0](../LICENSE.md).
