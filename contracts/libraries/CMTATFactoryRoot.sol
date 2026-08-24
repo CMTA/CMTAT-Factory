@@ -144,7 +144,7 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     * @param deploymentSalt Effective salt used by CREATE2.
     * @return cmtatAddress The address of the deployed CMTAT proxy.
     */
-    function _deployAndRegisterProxy(bytes memory bytecode, bytes32 deploymentSalt) internal returns (address cmtatAddress) {
+    function _deployAndRegisterProxy(bytes memory bytecode, bytes32 deploymentSalt) internal virtual returns (address cmtatAddress) {
         cmtatAddress = Create2.deploy(0, deploymentSalt, bytecode);
         // cmtatsList index == cmtatCounterId, so the array doubles as the id => address registry.
         uint256 id = cmtatCounterId;

@@ -76,6 +76,13 @@ Commit: _pending release commit_
   before `virtual` / `override` before custom modifiers). Member moves only, no logic change.
 - `.gitignore`: ignore LibreOffice lock files (`.~lock.*#`).
 - `_deployAndRegisterProxy` caches `cmtatCounterId` in a local instead of loading the slot twice (once for the event, once for the increment): **114 gas** per deployment, measured. Finding B-1 of the v0.5.0 code-quality review.
+- Marked every `internal` function `virtual` (18 additions across 8 files), so the internal surface is now 20/20
+  and matches the public one, which was already 13/13. Previously the rule was applied inconsistently - inside
+  `CMTATFactoryRoot`, `_deployAndRegisterProxy` sat between two `virtual` siblings without the keyword - which
+  left the deployment funnel and the `_checkProxyAdminOwner` validation hook impossible to override without
+  forking the base contract. The **runtime bytecode is byte-identical** for all five factories (verified with the
+  solc metadata trailer stripped), so this costs nothing to deploy or run. Finding E-1 of the v0.5.0 code-quality
+  review; the two highest-consequence hooks are covered by `test/VirtualOverride.test.js`.
 
 ### Dependencies
 

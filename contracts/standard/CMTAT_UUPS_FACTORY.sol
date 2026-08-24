@@ -96,7 +96,7 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase, ReentrancyGuard {
     * @param deploymentSalt Effective salt used by CREATE2.
     * @return cmtat The deployed ERC1967Proxy.
     */
-    function _deployBytecode(bytes memory bytecode, bytes32  deploymentSalt) internal returns (ERC1967Proxy cmtat) {
+    function _deployBytecode(bytes memory bytecode, bytes32  deploymentSalt) internal virtual returns (ERC1967Proxy cmtat) {
                     address cmtatAddress = _deployAndRegisterProxy(bytecode, deploymentSalt);
                     cmtat = ERC1967Proxy(payable(cmtatAddress));
                     return cmtat;
@@ -110,7 +110,7 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase, ReentrancyGuard {
     */
      function _getBytecode( 
         // CMTAT function initialize
-        CMTAT_ARGUMENT calldata cmtatArgument) internal view returns(bytes memory bytecode) {
+        CMTAT_ARGUMENT calldata cmtatArgument) internal view virtual returns(bytes memory bytecode) {
         bytes memory implementation = abi.encodeWithSelector(
             CMTATUpgradeableUUPS(address(0)).initialize.selector,
                   cmtatArgument.CMTATAdmin,

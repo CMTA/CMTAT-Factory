@@ -249,6 +249,7 @@ When changing shared factory logic in `CMTATFactoryRoot` or `CMTATFactoryInvaria
 - Follow the existing section-header pattern in contracts:
   `/* ============ SECTION ============ */`
 - Prefer minimal, targeted changes. The current codebase is small and has duplicated deployment logic by design.
+- Every function is `virtual`: all 13 public/external and all 20 internal. Keep it that way when adding one - subclasses rely on these as extension points, and `virtual` on an internal function costs zero bytecode (verified). `contracts/mocks/OverridableFactoryMock.sol` guards the two most important hooks.
 - Be careful with proxy initializer selectors:
   `CMTATUpgradeableUUPS.initialize.selector` is intentionally different from `CMTATStandardUpgradeable.initialize.selector`.
 - CMTAT Light uses `CMTATUpgradeableLight.initialize.selector` and only passes `admin` plus `ERC20Attributes`.

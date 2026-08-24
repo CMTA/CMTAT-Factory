@@ -80,7 +80,7 @@ contract CMTAT_LIGHT_TP_FACTORY is CMTATTransparentFactoryBase, ReentrancyGuard 
     * @return initializerData Encoded call to the CMTAT Light initializer.
     */
     function _initializerData(
-        CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) internal pure returns(bytes memory initializerData) {
+        CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) internal pure virtual returns(bytes memory initializerData) {
         initializerData = abi.encodeWithSelector(
             CMTATUpgradeableLight(address(0)).initialize.selector,
             cmtatArgument.CMTATAdmin,

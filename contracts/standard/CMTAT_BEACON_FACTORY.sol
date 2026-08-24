@@ -96,7 +96,7 @@ contract CMTAT_BEACON_FACTORY is CMTATBeaconFactoryBase, ReentrancyGuard {
     */
      function _initializerData(
         // CMTAT function initialize
-        CMTAT_ARGUMENT calldata cmtatArgument) internal pure returns(bytes memory initializerData) {
+        CMTAT_ARGUMENT calldata cmtatArgument) internal pure virtual returns(bytes memory initializerData) {
         initializerData = abi.encodeWithSelector(
             CMTATStandardUpgradeable(address(0)).initialize.selector,
             cmtatArgument.CMTATAdmin,

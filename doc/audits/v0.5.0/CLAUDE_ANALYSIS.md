@@ -30,7 +30,7 @@
 | D-0 | Cost of a shared-parent member to a child that never calls it | ⚠️ measured — `internal` 0 bytes, `public` +79 and +1 ABI entry | probes |
 | D-1 | `_initializerData` byte-identical in two pairs of factories | ⚠️ **revised** — leave; must not hoist into `CMTATFactoryRoot` | 4 factories |
 | D-2 | `Create2.computeAddress(...)` written identically 3× | ⬜ decide — placement checked, clean | 3 files |
-| E-1 | 13/13 public functions `virtual`, only 2/18 internal ones | ⚠️ open — highest-value finding | all libraries |
+| E-1 | Public surface effectively 100% `virtual`, internal only 2/20 | ✅ **fixed** — all 20 now `virtual`, 0 bytes | all libraries |
 | F-1 | ERC-8303 / ERC-165 interface id and dispatch | ⬜ correct as written | `ContractVersion.sol` |
 | G-1 | Agent-guide file tree omits 3 of 7 `libraries/` files | ✅ fixed | `CLAUDE.md` / `AGENTS.md` |
 | G-2 | "all three factories" / "three factory families" — there are 5 and 4 | ✅ fixed | `CLAUDE.md` / `AGENTS.md` |
@@ -44,14 +44,13 @@
 | J-1 | `libraries/` holds 5 abstract contracts, 1 interface, 1 library | ⬜ decide — naming | `contracts/libraries/` |
 | J-2 | Downstream probe: enumerable-roles factory | ⬜ inconvenience only, not a blocker | probe compiled |
 
-**Counts:** 22 rows — 6 fixed, 2 open/revised, 14 deliberately left (of which 4 are "checked, nothing wrong").
+**Counts:** 22 rows — 7 fixed, 1 revised, 14 deliberately left (of which 4 are "checked, nothing wrong").
 D-1 and D-2 were **revised after review feedback**; see the note at the head of section D.
 
 ## Outstanding
 
 | ID | Item | Why it is still open |
 | --- | --- | --- |
-| E-1 | `virtual` on internal functions | Touches 16 signatures across 3 files. Behaviour-free, but it is an API-surface decision (what the project promises subclasses it can override) and should be the maintainer's call, not a reviewer's. |
 | D-1 | `_initializerData` duplication | **Revised to leave.** The only shared ancestor of each pair is `CMTATFactoryRoot`, which the Light factories also inherit — hoisting there would couple the Light variants to `CMTATStandardUpgradeable` at compile time. A pair-level mixin would respect the constraint but costs two files to save 18 lines. |
 | D-2, J-1 | Address-computation duplication; directory naming | Genuine judgement calls, not defects. D-2's placement was re-checked and is clean. |
 
@@ -306,14 +305,24 @@ for doing it.
 
 ## E. `virtual` / override convention
 
-### E-1. Public surface is 100% `virtual`; the internal surface is 11% — ⚠️ open
+### E-1. Public surface is `virtual` throughout; the internal surface was 10% — ✅ fixed
 
 Full scan of `contracts/` (mocks excluded):
 
-| Visibility | `virtual` | total | |
-| --- | --- | --- | --- |
-| `public` / `external` | **13** | 13 | 100% |
-| `internal` | **2** | 18 | **11%** |
+| Visibility | before | after |
+| --- | --- | --- |
+| `public` / `external` | 21 of 22 | 22 of 23 |
+| `internal` | **2 of 20 (10%)** | **20 of 20 (100%)** |
+
+The single `public`/`external` member without the keyword is the `version()` declaration **inside
+`interface IERC8303`**, where `virtual` is implicit and conventionally omitted — so the public surface
+was, and remains, effectively 100%.
+
+> **Two corrections to the first version of this report.** It gave the counts as "13/13 public" and
+> "2/18 internal (11%)". Both denominators were wrong: a re-census puts the public surface at 22
+> functions (21 carrying the keyword) and the internal surface at **20** (2 carrying it, so **18**
+> needed changing — that is the number actually changed). The conclusion — public consistent, internal
+> not — is unaffected, and the 18 sites listed in the finding were always correct.
 
 The convention is not something this review is imposing — it is the project's own, and the evidence
 is that the codebase contradicts itself **inside a single file**. In `CMTATFactoryRoot.sol`:
@@ -340,14 +349,47 @@ in `CMTAT/contracts/modules/`, **118 of 129** internal functions (~91%) are `vir
 `virtual` on an internal function is resolved statically and is free at runtime. I did **not** run a
 gas benchmark for this, because the change was not applied — stated here rather than implied.
 
-**Verdict: open.** Recommended: add `virtual` to all 16, restoring one rule. Left to the maintainer
-because it widens what the project promises subclasses can override, and that promise is a release
-decision. If the answer is instead "internal functions are deliberately final", then the two `virtual`
-keywords in `CMTATFactoryRoot` should come off — either way, the file should stop contradicting itself.
+**Fix applied.** `virtual` added to all **18** internal functions that lacked it, across 8 files, so
+the internal surface is now 20/20 — one rule, no exceptions. Keyword placement follows the project's
+style order (`internal view virtual`, `internal pure virtual`), and the style checker reports 0
+modifier-order violations.
 
-**Test guard if implemented:** a subclass in `contracts/mocks/` that overrides
-`_deployAndRegisterProxy` and asserts the override is *reached* (not merely that it compiles — a
-compile-only harness will not catch a silently shadowed override).
+**Cost: provably zero.** The report previously said `virtual` on an internal function "is resolved
+statically and is free", flagged as reasoning rather than measurement. It is now measured, and the
+result is stronger than a gas benchmark — the **runtime bytecode is byte-identical**:
+
+| Factory | runtime code (metadata stripped) | vs baseline |
+| --- | --- | --- |
+| `CMTAT_UUPS_FACTORY` | 4575 bytes | **identical** |
+| `CMTAT_TP_FACTORY` | 7237 bytes | **identical** |
+| `CMTAT_BEACON_FACTORY` | 5209 bytes | **identical** |
+| `CMTAT_LIGHT_TP_FACTORY` | 6984 bytes | **identical** |
+| `CMTAT_LIGHT_BEACON_FACTORY` | 4959 bytes | **identical** |
+
+Same executable bytes means gas is identical by construction, so no gas run was needed. **Method note
+worth recording:** comparing the *full* `deployedBytecode` reports a difference for all five, because
+solc appends a CBOR metadata trailer that hashes the source — any source edit changes it. Stripping
+that trailer (its length is the last two bytes) is what shows the code itself is unchanged. A naive
+hash comparison here would have produced a false "this changed the bytecode" alarm.
+
+**Test guard — `test/VirtualOverride.test.js` + `contracts/mocks/OverridableFactoryMock.sol`, 5 cases.**
+Two subclasses exercise the two highest-consequence hooks from the table above:
+
+- `DeployHookFactoryMock` overrides `_deployAndRegisterProxy` (the deployment funnel), calls `super`,
+  and records a counter and the registered address. The test asserts the counter reaches 1 and the
+  recorded address equals `CMTATProxyAddress(0)` — i.e. the override **ran**, rather than merely
+  compiling. A second case asserts the id/`cmtatsList` invariants survive the override.
+- `StrictProxyAdminFactoryMock` overrides `_checkProxyAdminOwner` to reject an extra address on top of
+  the inherited zero check. Tests assert the subclass rule fires from the real `deployCMTAT` path, the
+  inherited zero-address rule still fires (so `super` is genuinely called), and an allowed owner still
+  deploys.
+
+Per the "a guard that has never failed is a guess" rule, `virtual` was **removed again** from both
+functions and the build re-run: it fails with `TypeError: Trying to override non-virtual function.
+Did you forget to add "virtual"?` — twice, once per hook. Restored, everything passes. Suite 47 → **52**.
+
+**Verdict: implemented.** This widens what the project promises subclasses can override; the two
+guarded hooks are now covered by tests, the other 16 by the compiler.
 
 ## F. ERC / specification conformance
 
@@ -410,7 +452,7 @@ G.
 
 ## H. Weird behaviour — correct, but at odds with the purpose
 
-### H-1. The address predictor keeps answering for a salt that can never be used again — ⚠️ open
+### H-1. The address predictor keeps answering for a salt that can never be used again — ✅ fixed
 
 A custom salt is one-time-use: `_checkAndDetermineDeploymentSalt` records it in `customSaltUsed` and
 a second `deployCMTAT` with it reverts `CMTAT_Factory_SaltAlreadyUsed`. But `computedProxyAddress`
@@ -650,6 +692,8 @@ Two smaller check-J observations, neither currently breaking anything:
 | --- | --- |
 | `contracts/libraries/CMTATFactoryRoot.sol` | B-1: cache `cmtatCounterId` in the deployment funnel (−114 gas, measured)<br>H-1: add `isCustomSaltUsed(bytes32)` public view |
 | `test/CustomSalt.test.js` | H-1: 5 regression cases, verified to fail without the fix |
+| all 8 contract files | E-1: `virtual` on the 18 internal functions that lacked it (runtime bytecode byte-identical) |
+| `contracts/mocks/OverridableFactoryMock.sol`, `test/VirtualOverride.test.js` | E-1: 5 override guards, verified to break the build without `virtual` |
 | `CLAUDE.md`, `AGENTS.md` | G-1, G-2, G-3: complete the `libraries/` file tree, correct "three factories"→five and "three test families"→four, attribute `VERSION` to `ContractVersion` |
 | `README.md` | G-4: correct the API sketch's visibility (`external`→`public`) and `deployCMTAT` return type |
 
@@ -658,9 +702,9 @@ push code into a deployment that does not use it. D-0 measures that cost, D-1's 
 "decide" to "leave, and not into `CMTATFactoryRoot`", and D-2's placement was re-checked and found
 clean. No contract changed as a result — the revision is to the recommendations.
 
-No existing contract behaviour changed; H-1 adds one public view. All **47 tests pass** (42 before,
-plus 5 new); the style checker (`check_order.py`) reports **0 violations** across all 8 checks;
-`npm run check:oz` exits 0.
+No existing contract behaviour changed; H-1 adds one public view and E-1 changes no executable byte.
+All **52 tests pass** (42 at the start of the review, plus 5 for H-1 and 5 for E-1); the style checker
+(`check_order.py`) reports **0 violations** across all 8 checks; `npm run check:oz` exits 0.
 
 Temporary artifacts created for measurement — the gas harness, the H-1 probe test and both modularity
 probes under `contracts/probe/` — were **deleted**; the test count is unchanged at 42, which is the

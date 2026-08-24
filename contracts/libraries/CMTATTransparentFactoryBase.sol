@@ -28,7 +28,7 @@ abstract contract CMTATTransparentFactoryBase is CMTATFactoryBase {
         bytes32 deploymentSaltInput,
         address proxyAdminOwner,
         bytes memory initializerData
-    ) internal returns (TransparentUpgradeableProxy cmtat) {
+    ) internal virtual returns (TransparentUpgradeableProxy cmtat) {
         _checkProxyAdminOwner(proxyAdminOwner);
         bytes32 deploymentSalt = _checkAndDetermineDeploymentSalt(deploymentSaltInput);
         bytes memory bytecode = _getTransparentProxyBytecode(proxyAdminOwner, initializerData);
@@ -42,7 +42,7 @@ abstract contract CMTATTransparentFactoryBase is CMTATFactoryBase {
     * @param deploymentSalt Effective salt used by CREATE2.
     * @return cmtat The deployed TransparentUpgradeableProxy.
     */
-    function _deployTransparentProxyBytecode(bytes memory bytecode, bytes32 deploymentSalt) internal returns (TransparentUpgradeableProxy cmtat) {
+    function _deployTransparentProxyBytecode(bytes memory bytecode, bytes32 deploymentSalt) internal virtual returns (TransparentUpgradeableProxy cmtat) {
         address cmtatAddress = _deployAndRegisterProxy(bytecode, deploymentSalt);
         cmtat = TransparentUpgradeableProxy(payable(cmtatAddress));
         return cmtat;
@@ -59,7 +59,7 @@ abstract contract CMTATTransparentFactoryBase is CMTATFactoryBase {
         bytes32 effectiveDeploymentSalt,
         address proxyAdminOwner,
         bytes memory initializerData
-    ) internal view returns (address cmtatProxy) {
+    ) internal view virtual returns (address cmtatProxy) {
         _checkProxyAdminOwner(proxyAdminOwner);
         bytes memory bytecode = _getTransparentProxyBytecode(proxyAdminOwner, initializerData);
         return Create2.computeAddress(effectiveDeploymentSalt,  keccak256(bytecode), address(this) );
@@ -76,7 +76,7 @@ abstract contract CMTATTransparentFactoryBase is CMTATFactoryBase {
         bytes32 deploymentSaltInput,
         address proxyAdminOwner,
         bytes memory initializerData
-    ) internal view returns (address cmtatProxy) {
+    ) internal view virtual returns (address cmtatProxy) {
         return _computedTransparentProxyAddress(
             _computeDeploymentSalt(deploymentSaltInput),
             proxyAdminOwner,
@@ -88,7 +88,7 @@ abstract contract CMTATTransparentFactoryBase is CMTATFactoryBase {
     * @dev Reverts if the transparent proxy admin owner is zero.
     * @param proxyAdminOwner Address that will own the ProxyAdmin created by the proxy.
     */
-    function _checkProxyAdminOwner(address proxyAdminOwner) internal pure {
+    function _checkProxyAdminOwner(address proxyAdminOwner) internal pure virtual {
         if(proxyAdminOwner == address(0)){
             revert FactoryErrors.CMTAT_Factory_AddressZeroNotAllowedForProxyAdminOwner();
         }
@@ -103,7 +103,7 @@ abstract contract CMTATTransparentFactoryBase is CMTATFactoryBase {
     function _getTransparentProxyBytecode(
         address proxyAdminOwner,
         bytes memory initializerData
-    ) internal view returns(bytes memory bytecode) {
+    ) internal view virtual returns(bytes memory bytecode) {
         bytecode = abi.encodePacked(type(TransparentUpgradeableProxy).creationCode, abi.encode(logic, proxyAdminOwner, initializerData));
     }
 }

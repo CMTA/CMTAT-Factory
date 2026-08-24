@@ -51,7 +51,7 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
     function _deployBeaconProxy(
         bytes32 deploymentSaltInput,
         bytes memory initializerData
-    ) internal returns (BeaconProxy cmtat) {
+    ) internal virtual returns (BeaconProxy cmtat) {
         bytes32 deploymentSalt = _checkAndDetermineDeploymentSalt(deploymentSaltInput);
         bytes memory bytecode = _getBeaconProxyBytecode(initializerData);
         cmtat = _deployBeaconProxyBytecode(bytecode, deploymentSalt);
@@ -64,7 +64,7 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
     * @param deploymentSalt Effective salt used by CREATE2.
     * @return cmtat The deployed BeaconProxy.
     */
-    function _deployBeaconProxyBytecode(bytes memory bytecode, bytes32 deploymentSalt) internal returns (BeaconProxy cmtat) {
+    function _deployBeaconProxyBytecode(bytes memory bytecode, bytes32 deploymentSalt) internal virtual returns (BeaconProxy cmtat) {
         address cmtatAddress = _deployAndRegisterProxy(bytecode, deploymentSalt);
         cmtat = BeaconProxy(payable(cmtatAddress));
         return cmtat;
@@ -79,7 +79,7 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
     function _computedBeaconProxyAddress(
         bytes32 effectiveDeploymentSalt,
         bytes memory initializerData
-    ) internal view returns (address cmtatProxy) {
+    ) internal view virtual returns (address cmtatProxy) {
         bytes memory bytecode = _getBeaconProxyBytecode(initializerData);
         return Create2.computeAddress(effectiveDeploymentSalt,  keccak256(bytecode), address(this) );
     }
@@ -93,7 +93,7 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
     function _computedNextBeaconProxyAddress(
         bytes32 deploymentSaltInput,
         bytes memory initializerData
-    ) internal view returns (address cmtatProxy) {
+    ) internal view virtual returns (address cmtatProxy) {
         return _computedBeaconProxyAddress(
             _computeDeploymentSalt(deploymentSaltInput),
             initializerData
@@ -105,7 +105,7 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
     * @param initializerData Encoded CMTAT initializer call forwarded to the proxy.
     * @return bytecode Beacon proxy creation bytecode, constructor arguments included.
     */
-    function _getBeaconProxyBytecode(bytes memory initializerData) internal view returns(bytes memory bytecode) {
+    function _getBeaconProxyBytecode(bytes memory initializerData) internal view virtual returns(bytes memory bytecode) {
         bytecode = abi.encodePacked(type(BeaconProxy).creationCode, abi.encode(address(beacon), initializerData));
     }
 }
