@@ -124,8 +124,9 @@ Salt behavior is central to this repo.
 
 - If `useCustomSalt == false`, the deployment salt is `keccak256(abi.encodePacked(cmtatCounterId))`.
 - If `useCustomSalt == true`, the caller-supplied salt is used directly.
-- Custom salts are one-time-use only and tracked in `customSaltUsed`.
+- Custom salts are one-time-use only and tracked in `customSaltUsed`, exposed through `isCustomSaltUsed(bytes32)`.
 - Reusing a custom salt reverts with `FactoryErrors.CMTAT_Factory_SaltAlreadyUsed()`.
+- The address predictors ignore `customSaltUsed`: they still answer for a consumed salt. `isCustomSaltUsed(...)` is the only way to ask whether a deployment is still available.
 - `nextDeploymentSalt()` returns the next effective non-custom salt.
 - `computedNextProxyAddress(...)` mirrors `deployCMTAT(...)`: it uses the caller-provided salt in custom-salt mode and `nextDeploymentSalt()` otherwise.
 

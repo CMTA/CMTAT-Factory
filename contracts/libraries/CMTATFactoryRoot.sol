@@ -92,6 +92,24 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
         return keccak256(abi.encodePacked(cmtatCounterId));
     }
 
+    /**
+     * @notice Tells whether a custom salt has already been consumed by a deployment.
+     * @dev A custom salt is one-time-use: once a deployment has used it,
+     * `deployCMTAT(...)` with the same salt reverts with `CMTAT_Factory_SaltAlreadyUsed`.
+     * `computedProxyAddress(...)` keeps returning the CREATE2 address for a consumed salt, because
+     * that address is still what CREATE2 would derive - it just can no longer be reached. Call this
+     * before relying on a predicted address to know whether the deployment is still available.
+     * @dev Always returns false when `useCustomSalt == false`, since counter mode never records a
+     * salt: in that mode the effective salt comes from `nextDeploymentSalt()` and is never reused.
+     *
+     * @param salt The custom salt to check.
+     *
+     * @return used True if a deployment already consumed this salt.
+     */
+    function isCustomSaltUsed(bytes32 salt) public view virtual returns (bool used) {
+        return customSaltUsed[salt];
+    }
+
     /*//////////////////////////////////////////////////////////////
                             INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/

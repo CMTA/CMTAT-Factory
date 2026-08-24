@@ -45,6 +45,7 @@ function deployCMTAT(bytes32 deploymentSaltInput, /* [address proxyAdminOwner,] 
 function computedProxyAddress(bytes32 deploymentSalt, /* [address proxyAdminOwner,] */ CMTAT_ARGUMENT calldata) public view returns (address);
 function computedNextProxyAddress(/* ... same trailing args ... */) public view returns (address);
 function nextDeploymentSalt() public view returns (bytes32);
+function isCustomSaltUsed(bytes32 salt) public view returns (bool);   // custom-salt mode: already consumed?
 function CMTATProxyAddress(uint256 id) public view returns (address);
 function version() public view returns (string memory);
 

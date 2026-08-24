@@ -37,14 +37,14 @@
 | G-3 | `VERSION` attributed to `CMTATFactoryRoot`, lives in `ContractVersion` | ✅ fixed | `CLAUDE.md` / `AGENTS.md` |
 | G-4 | Root README API sketch: wrong visibility and return type | ✅ fixed | `README.md` |
 | G-5 | NatSpec block-length distribution | ⬜ healthy — no action | — |
-| H-1 | `computedProxyAddress` answers for a consumed one-shot salt | ⚠️ open — fix proposed, not applied | `CMTATFactoryRoot.sol:34` |
+| H-1 | `computedProxyAddress` answers for a consumed one-shot salt | ✅ **fixed** — `isCustomSaltUsed(bytes32)` added | `CMTATFactoryRoot.sol:95` |
 | H-2 | Beacon factory fails open on a zero implementation | ⬜ keep — documented and deliberate | `CMTAT_BEACON_FACTORY.sol:28` |
 | I-1 | `beacon` typed as `UpgradeableBeacon`, factory calls one member | ⬜ keep — reasoned below | `CMTATBeaconFactoryBase.sol:17` |
 | I-2 | Full CMTAT implementation imported for a 4-byte selector | ⬜ **keep** — measured, costs 0 bytes | 5 factories |
 | J-1 | `libraries/` holds 5 abstract contracts, 1 interface, 1 library | ⬜ decide — naming | `contracts/libraries/` |
 | J-2 | Downstream probe: enumerable-roles factory | ⬜ inconvenience only, not a blocker | probe compiled |
 
-**Counts:** 22 rows — 5 fixed, 3 open/revised, 14 deliberately left (of which 4 are "checked, nothing wrong").
+**Counts:** 22 rows — 6 fixed, 2 open/revised, 14 deliberately left (of which 4 are "checked, nothing wrong").
 D-1 and D-2 were **revised after review feedback**; see the note at the head of section D.
 
 ## Outstanding
@@ -52,7 +52,6 @@ D-1 and D-2 were **revised after review feedback**; see the note at the head of 
 | ID | Item | Why it is still open |
 | --- | --- | --- |
 | E-1 | `virtual` on internal functions | Touches 16 signatures across 3 files. Behaviour-free, but it is an API-surface decision (what the project promises subclasses it can override) and should be the maintainer's call, not a reviewer's. |
-| H-1 | No way to ask whether a custom salt is still available | The fix is additive (one public view). Left unapplied because it adds to the public ABI, which belongs in a release decision. |
 | D-1 | `_initializerData` duplication | **Revised to leave.** The only shared ancestor of each pair is `CMTATFactoryRoot`, which the Light factories also inherit — hoisting there would couple the Light variants to `CMTATStandardUpgradeable` at compile time. A pair-level mixin would respect the constraint but costs two files to save 18 lines. |
 | D-2, J-1 | Address-computation duplication; directory naming | Genuine judgement calls, not defects. D-2's placement was re-checked and is clean. |
 
@@ -436,14 +435,9 @@ raw storage slot or sending a transaction and watching it revert.
 **Not a vulnerability:** the deployment itself still reverts correctly, so nothing is deployed twice
 and no address is stolen. The cost is a wasted transaction and a misleading pre-flight check.
 
-**Proposed fix — additive, zero behaviour change:**
+**Fix applied** — additive, zero behaviour change, in `CMTATFactoryRoot`:
 
 ```solidity
-/**
-* @notice Whether a custom salt has already been consumed by a deployment.
-* @param salt The custom salt to check.
-* @return used True if a deployment already used this salt, so deployCMTAT would revert.
-*/
 function isCustomSaltUsed(bytes32 salt) public view virtual returns (bool used) {
     return customSaltUsed[salt];
 }
@@ -451,8 +445,28 @@ function isCustomSaltUsed(bytes32 salt) public view virtual returns (bool used) 
 
 Deliberately *not* making `computedProxyAddress` revert on a consumed salt: a pure predictor that
 sometimes reverts is harder to compose, and `computedNextProxyAddress` would inherit the behaviour.
+The predictors keep their current semantics — "this is where CREATE2 puts it" — and the new getter
+answers the separate question "can that still happen".
 
-**Verdict: open** — the fix adds to the public ABI, which belongs in a release decision.
+`virtual` on the getter matches the other public members of `CMTATFactoryRoot` (all 13 public
+functions in the project are `virtual`); it does not pre-empt E-1, which is about the *internal*
+surface.
+
+**Regression test:** `test/CustomSalt.test.js`, 5 cases — an unused salt reads `false`; a consumed
+salt reads `true` *and* the second `deployCMTAT` reverts `CMTAT_Factory_SaltAlreadyUsed`; the
+predicted address is unchanged across consumption while the flag flips (the finding itself, pinned);
+an unrelated salt is not flagged; and counter mode never flags anything, including its own effective
+salt.
+
+Per the "a regression test that has never failed is a guess" rule, the getter was **removed and the
+suite re-run**: all **5 fail** (`TypeError: factory.isCustomSaltUsed is not a function`), then pass
+again with it restored. Suite total 42 → **47**.
+
+**Verdict: implemented.** This adds one function to the public ABI of all five factories.
+
+> **Correction to the first version of this report**, which recorded H-1 as *open* on the grounds that
+> an ABI addition belongs in a release decision. It was applied on the maintainer's instruction; the
+> reasoning about *what* to change was unaffected.
 
 ### H-2. The beacon factory fails open where its siblings fail closed — ⬜ keep
 
@@ -634,7 +648,8 @@ Two smaller check-J observations, neither currently breaking anything:
 
 | File | Change |
 | --- | --- |
-| `contracts/libraries/CMTATFactoryRoot.sol` | B-1: cache `cmtatCounterId` in the deployment funnel (−114 gas, measured) |
+| `contracts/libraries/CMTATFactoryRoot.sol` | B-1: cache `cmtatCounterId` in the deployment funnel (−114 gas, measured)<br>H-1: add `isCustomSaltUsed(bytes32)` public view |
+| `test/CustomSalt.test.js` | H-1: 5 regression cases, verified to fail without the fix |
 | `CLAUDE.md`, `AGENTS.md` | G-1, G-2, G-3: complete the `libraries/` file tree, correct "three factories"→five and "three test families"→four, attribute `VERSION` to `ContractVersion` |
 | `README.md` | G-4: correct the API sketch's visibility (`external`→`public`) and `deployCMTAT` return type |
 
@@ -643,8 +658,9 @@ push code into a deployment that does not use it. D-0 measures that cost, D-1's 
 "decide" to "leave, and not into `CMTATFactoryRoot`", and D-2's placement was re-checked and found
 clean. No contract changed as a result — the revision is to the recommendations.
 
-No contract behaviour changed. All **42 tests pass**; the style checker (`check_order.py`) reports
-**0 violations** across all 8 checks; `npm run check:oz` exits 0.
+No existing contract behaviour changed; H-1 adds one public view. All **47 tests pass** (42 before,
+plus 5 new); the style checker (`check_order.py`) reports **0 violations** across all 8 checks;
+`npm run check:oz` exits 0.
 
 Temporary artifacts created for measurement — the gas harness, the H-1 probe test and both modularity
 probes under `contracts/probe/` — were **deleted**; the test count is unchanged at 42, which is the

@@ -58,6 +58,15 @@ Commit: _pending release commit_
 > source-level change to the factories is the `version()` string. The deployed CMTAT implementation bytecode does
 > change, because the vendored CMTAT submodule and OpenZeppelin move forward.
 
+### Added
+
+- `isCustomSaltUsed(bytes32 salt)` on every factory: whether a custom salt has already been consumed, so
+  `deployCMTAT(...)` with it would revert `CMTAT_Factory_SaltAlreadyUsed`. Previously `customSaltUsed` was
+  `internal`, and the address predictors keep answering for a consumed salt (the CREATE2 address is still
+  correct, it just can no longer be reached) - so an integrator had no on-chain way to tell a live prediction
+  from a dead one short of sending a transaction and watching it revert. Returns `false` in counter mode, which
+  never records a salt. Finding H-1 of the v0.5.0 code-quality review; covered by `test/CustomSalt.test.js`.
+
 ### Changed
 
 - Bumped the factory version constant to `0.5.0` (`ContractVersion.sol`) and synced every mirror (`package.json`,

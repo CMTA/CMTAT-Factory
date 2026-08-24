@@ -211,10 +211,12 @@ It records the deployed `proxy`, the `deployer` (`msg.sender`), the incremental 
 | `useCustomSalt` | `bool` (immutable) | If `false`, the factory derives the salt itself; if `true`, the caller-supplied salt is used. |
 | `nextDeploymentSalt()` | `bytes32` | The salt the next non-custom deployment will use: `keccak256(abi.encodePacked(cmtatCounterId))`. |
 | `computedNextProxyAddress(...)` | `address` | Predicts the next proxy address using the same salt selection as `deployCMTAT` (custom salt when `useCustomSalt == true`, otherwise `nextDeploymentSalt()`). Same trailing arguments as the factory's `deployCMTAT`. |
+| `isCustomSaltUsed(bytes32 salt)` | `bool` | Whether a custom salt has already been consumed, so `deployCMTAT(...)` with it would revert. Always `false` in counter mode, which never records a salt. |
 
 - When `useCustomSalt == false`, the salt is always `keccak256(abi.encodePacked(cmtatCounterId))`; the `deploymentSaltInput` argument is ignored.
 - When `useCustomSalt == true`, the caller-supplied salt is used directly and is **one-time-use**: reusing a salt reverts with `FactoryErrors.CMTAT_Factory_SaltAlreadyUsed()`.
 - `computedProxyAddress(...)` takes an *effective* salt and mirrors the exact bytecode used by `deployCMTAT(...)`, while `computedNextProxyAddress(...)` applies the same salt-selection logic as a real deployment.
+- The address predictors do **not** consider whether a custom salt is still available: they keep returning the CREATE2 address for a consumed salt, because that address is still what CREATE2 derives — it simply can no longer be reached. Call `isCustomSaltUsed(salt)` before acting on a predicted address.
 
 > **⚠️ Warning — counter mode has no per-caller address reservation.**
 > When `useCustomSalt == false`, the salt is the shared `keccak256(abi.encodePacked(cmtatCounterId))`, so
