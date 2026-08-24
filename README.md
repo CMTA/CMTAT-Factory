@@ -72,7 +72,7 @@ In addition to the three standard factories, two **CMTAT Light** factories (`CMT
 
 ### CMTAT versions: Standard vs Light
 
-This project deploys two flavors of the [CMTAT](https://github.com/CMTA/CMTAT) implementation (pinned at **v3.3.0-rc1**), each initialized with its own argument struct.
+This project deploys two variants of the [CMTAT](https://github.com/CMTA/CMTAT) implementation (pinned at **v3.3.0-rc1**), each initialized with its own argument struct.
 
 - **CMTAT Standard** — the full-featured security token.
   - Used by the UUPS, Transparent, and Beacon factories: `CMTATUpgradeableUUPS` (UUPS) and `CMTATStandardUpgradeable` (Transparent / Beacon).
@@ -419,7 +419,7 @@ Moreover, the upgrade function is coded within the proxy itself, making the prox
 
 The factory will use the same implementation for each transparent proxy deployed. 
 
-- Each transparent proxy has its owned proxy admin, deployed inside the constructor of the transparent proxy. 
+- Each transparent proxy has its own proxy admin, deployed inside the constructor of the transparent proxy. 
 - Each transparent proxy can upgrade their implementation to a new one independently and without impact on other proxies.
 
 ![factory-Transparent Factory.drawio](./doc/schema/drawio/factory-TransparentFactory.drawio.png)
