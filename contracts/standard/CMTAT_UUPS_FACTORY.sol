@@ -3,7 +3,6 @@ pragma solidity ^0.8.20;
 
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {CMTATUpgradeableUUPS} from "../../CMTAT/contracts/deployment/CMTATUpgradeableUUPS.sol";
-import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {CMTATFactoryBase} from "../libraries/CMTATFactoryBase.sol";
 
@@ -61,10 +60,7 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase, ReentrancyGuard {
         bytes32 effectiveDeploymentSalt,
         // CMTAT function initialize
         CMTAT_ARGUMENT calldata cmtatArgument) public view virtual returns (address cmtatProxy) {
-        bytes memory bytecode =  _getBytecode(
-        // CMTAT function initialize
-        cmtatArgument);
-        return Create2.computeAddress(effectiveDeploymentSalt,  keccak256(bytecode), address(this) );
+        return _computeCreate2Address(_getBytecode(cmtatArgument), effectiveDeploymentSalt);
     }
 
     /**

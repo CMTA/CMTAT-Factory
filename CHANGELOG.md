@@ -95,6 +95,14 @@ Commit: _pending release commit_
   (constructor / external / public / internal / private, `view` and `pure` last; visibility before mutability
   before `virtual` / `override` before custom modifiers). Member moves only, no logic change.
 - `.gitignore`: ignore LibreOffice lock files (`.~lock.*#`).
+- Extracted the CREATE2 address prediction into `_computeCreate2Address(bytecode, salt)` on
+  `CMTATFactoryRoot`, replacing three byte-identical copies of `Create2.computeAddress(...)` in the beacon base,
+  the transparent base and the UUPS factory, and removing the three now-unused `Create2` imports. It sits beside
+  `_deployAndRegisterProxy` - the function it must mirror - and takes the same arguments in the same order, so the
+  deploy/predict invariant has one documented home. Behaviour is unchanged (predicted addresses depend only on
+  deployer, salt and init code, none of which moved); `computedProxyAddress` gas is identical at 35,280, and
+  deployed bytecode grows by 7 bytes per factory (12 for the beacon one). Finding D-2 of the v0.5.0 code-quality
+  review.
 - `_deployAndRegisterProxy` caches `cmtatCounterId` in a local instead of loading the slot twice (once for the event, once for the increment): **114 gas** per deployment, measured. Finding B-1 of the v0.5.0 code-quality review.
 - Marked every `internal` function `virtual` (18 additions across 8 files), so the internal surface is now 20/20
   and matches the public one, which was already 13/13. Previously the rule was applied inconsistently - inside

@@ -164,4 +164,21 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     function _computeDeploymentSalt(bytes32 deploymentSaltInput) internal view virtual returns(bytes32 saltBytes){
         return useCustomSalt ? deploymentSaltInput : nextDeploymentSalt();
     }
+
+    /**
+    * @dev Predict the CREATE2 address of a proxy without deploying it.
+    * @dev Counterpart of `_deployAndRegisterProxy`, and takes the same two arguments in the same
+    * order. Feeding the two a different bytecode or a different effective salt is what makes a
+    * prediction stop matching the deployment it claims to describe, so keep the callers of both in
+    * sync when changing the proxy type, its constructor arguments, or the initializer payload.
+    * @param bytecode Proxy creation bytecode, constructor arguments included.
+    * @param deploymentSalt Effective salt used by CREATE2.
+    * @return cmtatProxy The address the proxy would occupy.
+    */
+    function _computeCreate2Address(
+        bytes memory bytecode,
+        bytes32 deploymentSalt
+    ) internal view virtual returns (address cmtatProxy) {
+        return Create2.computeAddress(deploymentSalt, keccak256(bytecode), address(this));
+    }
 }

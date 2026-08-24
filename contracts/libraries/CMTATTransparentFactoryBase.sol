@@ -2,7 +2,6 @@
 pragma solidity ^0.8.20;
 
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 import {CMTATFactoryBase} from "./CMTATFactoryBase.sol";
 import {FactoryErrors} from "./FactoryErrors.sol";
 
@@ -61,8 +60,10 @@ abstract contract CMTATTransparentFactoryBase is CMTATFactoryBase {
         bytes memory initializerData
     ) internal view virtual returns (address cmtatProxy) {
         _checkProxyAdminOwner(proxyAdminOwner);
-        bytes memory bytecode = _getTransparentProxyBytecode(proxyAdminOwner, initializerData);
-        return Create2.computeAddress(effectiveDeploymentSalt,  keccak256(bytecode), address(this) );
+        return _computeCreate2Address(
+            _getTransparentProxyBytecode(proxyAdminOwner, initializerData),
+            effectiveDeploymentSalt
+        );
     }
 
     /**

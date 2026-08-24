@@ -2,7 +2,6 @@
 pragma solidity ^0.8.20;
 
 import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
-import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 import {CMTATFactoryRoot} from "./CMTATFactoryRoot.sol";
 import {FactoryErrors} from "./FactoryErrors.sol";
@@ -80,8 +79,10 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
         bytes32 effectiveDeploymentSalt,
         bytes memory initializerData
     ) internal view virtual returns (address cmtatProxy) {
-        bytes memory bytecode = _getBeaconProxyBytecode(initializerData);
-        return Create2.computeAddress(effectiveDeploymentSalt,  keccak256(bytecode), address(this) );
+        return _computeCreate2Address(
+            _getBeaconProxyBytecode(initializerData),
+            effectiveDeploymentSalt
+        );
     }
 
     /**

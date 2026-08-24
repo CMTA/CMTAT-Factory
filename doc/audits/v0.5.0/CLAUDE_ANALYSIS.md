@@ -29,7 +29,7 @@
 | C-2 | Constructor configuration emits no event | ⬜ keep — all immutable, no setter exists | `CMTATFactoryRoot.sol:41` |
 | D-0 | Cost of a shared-parent member to a child that never calls it | ⚠️ measured — `internal` 0 bytes, `public` +79 and +1 ABI entry | probes |
 | D-1 | `_initializerData` byte-identical in two pairs of factories | ⚠️ **revised** — leave; must not hoist into `CMTATFactoryRoot` | 4 factories |
-| D-2 | `Create2.computeAddress(...)` written identically 3× | ⬜ decide — placement checked, clean | 3 files |
+| D-2 | `Create2.computeAddress(...)` written identically 3× | ✅ **fixed** — `_computeCreate2Address` in `CMTATFactoryRoot` | 4 files |
 | E-1 | Public surface effectively 100% `virtual`, internal only 2/20 | ✅ **fixed** — all 20 now `virtual`, 0 bytes | all libraries |
 | F-1 | ERC-8303 / ERC-165 interface id and dispatch | ⬜ correct as written | `ContractVersion.sol` |
 | G-1 | Agent-guide file tree omits 3 of 7 `libraries/` files | ✅ fixed | `CLAUDE.md` / `AGENTS.md` |
@@ -45,7 +45,7 @@
 | J-2 | Downstream probe: enumerable-roles factory | ⬜ inconvenience only, not a blocker | probe compiled |
 | J-3 | No interface for the project's own API | ✅ **fixed** — `ICMTATFactory` added, +26 bytes, ABI unchanged | `contracts/interfaces/` |
 
-**Counts:** 23 rows — 8 fixed, 1 revised, 14 deliberately left (of which 4 are "checked, nothing wrong").
+**Counts:** 23 rows — 9 fixed, 1 revised, 13 deliberately left (of which 4 are "checked, nothing wrong").
 D-1 and D-2 were **revised after review feedback**; see the note at the head of section D.
 
 ## Outstanding
@@ -53,7 +53,7 @@ D-1 and D-2 were **revised after review feedback**; see the note at the head of 
 | ID | Item | Why it is still open |
 | --- | --- | --- |
 | D-1 | `_initializerData` duplication | **Revised to leave.** The only shared ancestor of each pair is `CMTATFactoryRoot`, which the Light factories also inherit — hoisting there would couple the Light variants to `CMTATStandardUpgradeable` at compile time. A pair-level mixin would respect the constraint but costs two files to save 18 lines. |
-| D-2, J-1 | Address-computation duplication; directory naming | Genuine judgement calls, not defects. D-2's placement was re-checked and is clean. |
+| J-1 | Directory naming (`libraries/` holds one library) | A genuine judgement call, not a defect. Note `contracts/interfaces/` now exists because of J-3, which is a step toward the ecosystem layout this finding describes. |
 
 ---
 
@@ -300,9 +300,70 @@ in return type (`BeaconProxy` / `TransparentUpgradeableProxy` / `ERC1967Proxy`).
 already `_deployAndRegisterProxy` in `CMTATFactoryRoot`; what remains per-file is the typed cast,
 which is exactly the part that cannot be shared.
 
-**Verdict: decide — and unlike D-1 this one is clean.** The extraction is safe, small, adds no
-dependency, and lands only where it is used; the UUPS-has-no-base asymmetry is the stronger argument
-for doing it.
+**Fix applied.** `_computeCreate2Address(bytes memory bytecode, bytes32 deploymentSalt)` added to
+`CMTATFactoryRoot`, and the three copies replaced by calls to it:
+
+```solidity
+function _computeCreate2Address(
+    bytes memory bytecode,
+    bytes32 deploymentSalt
+) internal view virtual returns (address cmtatProxy) {
+    return Create2.computeAddress(deploymentSalt, keccak256(bytecode), address(this));
+}
+```
+
+Details that were decided rather than defaulted:
+
+- **Name.** `_computeCreate2Address`, not `_computeProxyAddress`. The latter is one character away from
+  the *public* `computedProxyAddress` and the internal `_computedBeaconProxyAddress` /
+  `_computedTransparentProxyAddress`, which would make call sites hard to scan. The chosen name also
+  pairs with its neighbour `_computeDeploymentSalt`, leaving a consistent split: `_compute*` are the
+  generic CREATE2 primitives in `CMTATFactoryRoot`, `computed*` are the CMTAT-specific predictors.
+- **Argument order** matches `_deployAndRegisterProxy(bytes memory bytecode, bytes32 deploymentSalt)`
+  — the function it must mirror, three lines above it in the same contract.
+- **Placement** in the internal section after `_computeDeploymentSalt`, keeping the style guide's
+  view-last ordering within the group (checker: 0 function-order violations).
+- **`virtual`** per E-1. This does create a new hazard worth naming: `_computeCreate2Address` and
+  `_deployAndRegisterProxy` are now *both* overridable, so a subclass could override one and silently
+  desynchronize prediction from deployment. The helper's NatSpec states the pairing obligation
+  explicitly, which is the main reason the doc comment is longer than the function.
+
+Three incidental cleanups fell out: the now-unused `Create2` import was removed from all three files
+(an unused-import audit across `contracts/` confirms none remain), three redundant `bytes memory
+bytecode` locals disappeared, and the inconsistent spacing the three copies had drifted into
+(`effectiveDeploymentSalt,  keccak256(bytecode), address(this) )`) is gone with them.
+
+**Not merged, deliberately:** the deploy wrappers in the same three files
+(`_deployBeaconProxyBytecode`, `_deployTransparentProxyBytecode`, `_deployBytecode`) differ in return
+type — `BeaconProxy` / `TransparentUpgradeableProxy` / `ERC1967Proxy` — which Solidity cannot
+reconcile. Their shared core is already `_deployAndRegisterProxy` in `CMTATFactoryRoot`; what remains
+per-file is exactly the typed cast that cannot be shared.
+
+**Cost, measured both ways:**
+
+| | |
+| --- | --- |
+| Deployed bytecode | **+7 bytes** for four factories, **+12** for `CMTAT_BEACON_FACTORY` |
+| `computedProxyAddress` gas | **35,280 → 35,280 — identical** |
+
+The gas figure is the informative one: solc inlines the helper, so there is no extra internal call at
+runtime and the byte delta is layout only. (For most integrators the point is moot anyway — these are
+`view` functions reached by `eth_call`.) Note this cuts against the naive expectation that
+deduplication shrinks bytecode: each factory reaches the helper from **one** call site, so there is
+nothing to fold together, and abstraction costs a handful of bytes rather than saving any. Worth
+taking for the single documented home of the deploy/predict invariant, not for size.
+
+**Regression guard: the existing suite already covers this.** `test/beacon/`, `test/Transparent/` and
+`test/Light/` assert that `computedProxyAddress` / `computedNextProxyAddress` equal the address
+actually deployed — 14 tests across those three files, all passing. Since a predicted address is a
+pure function of `(deployer, salt, init_code)` and none of the three changed, any slip in this
+refactor would surface there. No new test was written, because one would duplicate what those already
+assert.
+
+**Verdict: implemented.** The remaining asymmetry — `CMTAT_UUPS_FACTORY` calling the helper straight
+from a public function while Beacon and Transparent go through an internal wrapper in a base contract
+— is the "UUPS has no `…FactoryBase`" gap noted above. Closing it means adding a fourth base contract,
+which is a larger change than this finding, and is left open.
 
 ## E. `virtual` / override convention
 
@@ -752,6 +813,7 @@ single extra comparison in `supportsInterface`. No ABI entry added.
 | all 8 contract files | E-1: `virtual` on the 18 internal functions that lacked it (runtime bytecode byte-identical) |
 | `contracts/mocks/OverridableFactoryMock.sol`, `test/VirtualOverride.test.js` | E-1: 5 override guards, verified to break the build without `virtual` |
 | `contracts/interfaces/ICMTATFactory.sol` | J-3: dependency-free integration interface, inherited and ERC-165 advertised |
+| `CMTATFactoryRoot.sol` + the 3 predict call sites | D-2: extract `_computeCreate2Address`; 3 duplicated lines and 3 unused `Create2` imports removed |
 | `CMTATFactoryInvariant.sol`, `CMTATFactoryRoot.sol` | J-3: implement the interface; `CMTATDeployed` moved into it; `supportsInterface` advertises its id (+26 bytes) |
 | `contracts/mocks/FactoryConsumerMock.sol`, `test/FactoryInterface.test.js` | J-3: 5 cases; the consumer compiles against the interface alone |
 | `CLAUDE.md`, `AGENTS.md` | G-1, G-2, G-3: complete the `libraries/` file tree, correct "three factories"→five and "three test families"→four, attribute `VERSION` to `ContractVersion` |
