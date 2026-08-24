@@ -230,7 +230,7 @@ All factories inherit OpenZeppelin `AccessControl`. The constructor grants both 
 
 Each concrete factory inherits OpenZeppelin `ReentrancyGuard` and marks its `deployCMTAT(...)` entrypoint `nonReentrant` (declared first, before `onlyRole`).
 
-This matters because in counter mode the effective salt is derived from `cmtatCounterId`, which is only incremented **after** `Create2.deploy`. Since `Create2.deploy` runs the proxy constructor — and its CMTAT initializer — before that increment, a reentrant `deployCMTAT(...)` call could otherwise observe the same `cmtatCounterId` and reuse the same auto-derived salt (Nethermind AuditAgent NM-2). The guard rejects any attempt to re-enter the deploy path mid-deployment, so every automatic deployment sees a distinct counter value and salt, keeping the deployment index and emitted events consistent.
+In counter mode the effective salt is derived from `cmtatCounterId`, which is only incremented **after** `Create2.deploy`. Since `Create2.deploy` runs the proxy constructor — and its CMTAT initializer — before that increment, a reentrant `deployCMTAT(...)` call could otherwise observe the same `cmtatCounterId` and reuse the same auto-derived salt (Nethermind AuditAgent NM-2). The guard rejects any attempt to re-enter the deploy path mid-deployment, so every automatic deployment sees a distinct counter value and salt, keeping the deployment index and emitted events consistent.
 
 ## Factory contracts
 
@@ -331,7 +331,7 @@ struct CMTAT_LIGHT_ARGUMENT {
 
 ### Beacon Proxy Factory
 
-A beacon proxy is very useful if you want to manage all your proxies in one place.
+A beacon proxy lets you manage all your proxies in one place.
 
 Unlike the transparent proxy, the beacon proxy does not point directly to the implementation contract. Instead, it stores the address of another contract called the *Beacon contract*. This contract is responsible for storing the address of the implementation. 
 
@@ -565,6 +565,8 @@ Both expose the same entrypoints as their standard counterparts but take `CMTAT_
 
 
 ## Usage instructions
+
+> **AI assistance:** Parts of this project were written with the help of AI coding assistants, principally Claude Code (Anthropic) and Codex (OpenAI).
 
 ### Dependencies
 
