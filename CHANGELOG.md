@@ -92,6 +92,14 @@ Commit: _pending release commit_
 - Added the versioned specification PDF (`doc/specification/CMTATFactorySpecificationV0.4.0.pdf`) and its
   cover page sources (`coverpage.odg`, `coverpage.pdf`).
 - Disclosed the use of AI coding assistants (Claude Code, Codex) in both READMEs.
+- Added a PlantUML diagram directory (`doc/schema/plantuml/`) holding both the `.puml` sources and their renders.
+  Added an `Overview` diagram (deployer -> factory -> CREATE2 proxy -> CMTAT implementation, with the
+  factory/proxy/implementation matrix) to the top of both READMEs, and replaced the drawio export of the beacon
+  factory with `beacon-factory.png`. The redrawn beacon diagram corrects a stale label: the implementation behind
+  `CMTAT_BEACON_FACTORY` is `CMTATStandardUpgradeable`, not `CMTATUpgradeable`, and it now also shows that the
+  beacon is created once in the factory constructor. Removed the superseded
+  `doc/schema/drawio/factory-BeaconFactory.drawio.png` (the `factory.drawio` source is kept - it still backs the
+  transparent-factory diagram).
 
 ## 0.4.0 - 2026/07/03
 

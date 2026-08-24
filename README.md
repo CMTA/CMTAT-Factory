@@ -6,6 +6,12 @@ Factory contracts to deploy [**CMTAT**](https://github.com/CMTA/CMTAT) security 
 
 📖 **Full documentation / specification: [doc/README.md](./doc/README.md)**
 
+## Overview
+
+![CMTAT Factory overview](./doc/schema/plantuml/overview.png)
+
+_Diagram source: [`doc/schema/plantuml/overview.puml`](./doc/schema/plantuml/overview.puml)._
+
 ## Factories
 
 | Factory | Proxy | Implementation | Contract |
@@ -78,7 +84,7 @@ npm run lint:js        # eslint  (add :fix to autofix)
 | [doc/TOOLCHAIN.md](./doc/TOOLCHAIN.md) | Toolchain details |
 | [doc/Solidity-API-Docgen.md](./doc/Solidity-API-Docgen.md) | Generated Solidity API reference |
 | [doc/audits/AUDIT_OVERVIEW.md](./doc/audits/AUDIT_OVERVIEW.md) | Static-analysis reports and triage |
-| [doc/schema/](./doc/schema/) | Surya inheritance / call graphs and drawio diagrams |
+| [doc/schema/](./doc/schema/) | PlantUML architecture diagrams (`plantuml/`, sources + renders), Surya inheritance / call graphs, drawio diagrams |
 
 ## Security
 

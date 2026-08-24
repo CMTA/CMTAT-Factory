@@ -12,9 +12,16 @@ In addition to the three standard factories, two **CMTAT Light** factories (`CMT
 
 > **Note:** This project has not undergone an audit and is provided as-is without any warranties.
 
+### Overview
+
+![CMTAT Factory overview](./schema/plantuml/overview.png)
+
+_Diagram source: [`doc/schema/plantuml/overview.puml`](./schema/plantuml/overview.puml)._
+
 ## Table of Contents
 
 - [Introduction](#introduction)
+  - [Overview](#overview)
   - [Key features](#key-features)
   - [Factory Overview](#factory-overview)
   - [CMTAT versions: Standard vs Light](#cmtat-versions-standard-vs-light)
@@ -348,7 +355,9 @@ The factory will use the same beacon for each beacon proxy.
 - This beacon provides the address of the implementation contract, a CMTAT_PROXY contract. 
 - If you upgrade the beacon to point to a new implementation, it will change the implementation contract for all beacon proxy.
 
-![factory-Beacon Factory.drawio](./schema/drawio/factory-BeaconFactory.drawio.png)
+![CMTAT Beacon Factory architecture](./schema/plantuml/beacon-factory.png)
+
+_Diagram source: [`doc/schema/plantuml/beacon-factory.puml`](./schema/plantuml/beacon-factory.puml)._
 
 #### Inheritance
 
