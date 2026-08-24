@@ -27,7 +27,7 @@ See [Proxy patterns: Transparent vs UUPS vs Beacon](./doc/README.md#proxy-patter
 - **Deterministic addresses** — proxies are deployed with `CREATE2`; `computedProxyAddress(...)` / `computedNextProxyAddress(...)` return the address before deployment.
 - **Role-based security** — only holders of `CMTAT_DEPLOYER_ROLE` can deploy.
 - **Deployment registry** — every proxy is indexed by an incremental id and emitted in a `CMTATDeployed` event.
-- **Versioned on-chain** — factories expose [ERC-8303](https://github.com/ethereum/ERCs/pull/1819) `version()`; current version is **`0.4.0`**.
+- **Versioned on-chain** — factories expose [ERC-8303](https://github.com/ethereum/ERCs/pull/1819) `version()`; current version is **`0.5.0`**.
 
 ## Common API
 

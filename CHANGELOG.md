@@ -48,6 +48,37 @@ Custom changelog tag: `Dependencies`, `Documentation`, `Testing`
 
 
 
+## 0.5.0 - 2026/08/24
+
+Branch: `style`
+
+Commit: _pending release commit_
+
+> Documentation and code-comment release. No functional, API or storage change since `0.4.0`: the deployed
+> bytecode of every factory is unchanged apart from the `version()` string.
+
+### Changed
+
+- Bumped the factory version constant to `0.5.0` (`ContractVersion.sol`) and synced every mirror (`package.json`,
+  `package-lock.json`, the `version()` test, `README.md`, `doc/README.md`, `AGENTS.md` / `CLAUDE.md`).
+- Reordered functions and modifier keywords across the contracts to follow the Solidity style guide
+  (constructor / external / public / internal / private, `view` and `pure` last; visibility before mutability
+  before `virtual` / `override` before custom modifiers). Member moves only, no logic change.
+- `.gitignore`: ignore LibreOffice lock files (`.~lock.*#`).
+
+### Documentation
+
+- Split the README in two: the root [`README.md`](README.md) is now a short overview (factory table, key features,
+  common API, quick start, documentation index, security), and the full specification moved to
+  [`doc/README.md`](doc/README.md) with all relative links rewritten for its new location.
+- Completed NatSpec coverage across `contracts/`: every contract, interface, library, struct, event, state
+  variable, constant and function now carries a `/** */` block, with one `@param` per argument and one `@return`
+  per return value. Comment-only change, verified by the style checker and by a full compile.
+- Fixed the stale `ContractVersion` version shown in the library-contracts table (was `"0.3.0"`).
+- Added the versioned specification PDF (`doc/specification/CMTATFactorySpecificationV0.4.0.pdf`) and its
+  cover page sources (`coverpage.odg`, `coverpage.pdf`).
+- Disclosed the use of AI coding assistants (Claude Code, Codex) in both READMEs.
+
 ## 0.4.0 - 2026/07/03
 
 Commit: _pending release commit_

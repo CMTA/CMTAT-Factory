@@ -16,7 +16,7 @@ This file helps AI agents understand and work with this codebase.
 
 The factories deploy token proxies with `CREATE2`, track deployed instances by incremental id, and gate deployment behind `AccessControl`.
 
-- **Factory version:** `0.4.0` in `contracts/libraries/ContractVersion.sol`
+- **Factory version:** `0.5.0` in `contracts/libraries/ContractVersion.sol`
 - **Solidity:** source files use `^0.8.20`, Hardhat compiles with `0.8.34`
 - **EVM target:** `prague`
 - **License:** `MPL-2.0`
@@ -70,7 +70,7 @@ CMTATFactoryInvariant
 
 CMTATFactoryRoot
 |- AccessControl
-|- VERSION = "0.4.0"
+|- VERSION = "0.5.0"
 |- cmtatsList / cmtatCounterId / CMTATProxyAddress(id)
 |- useCustomSalt
 |- _checkAndDetermineDeploymentSalt(...)
