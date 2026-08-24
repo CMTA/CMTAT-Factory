@@ -16,10 +16,25 @@ pragma solidity ^0.8.20;
 * `deployCMTAT` passes `onlyRole` and is rejected by the reentrancy guard, not by access control.
 */
 contract ReentrancyDeployAttacker {
+    /**
+    * @notice Factory the attacker re-enters.
+    */
     address public factory;
+    /**
+    * @notice Encoded `deployCMTAT(...)` calldata replayed against the factory.
+    */
     bytes public reentrantCall;
+    /**
+    * @notice If false, `attack()` returns without re-entering.
+    */
     bool public armed;
 
+    /**
+    * @notice Set the factory, the re-entrant calldata and whether the attack is armed.
+    * @param factory_ Factory the attacker re-enters.
+    * @param reentrantCall_ Encoded `deployCMTAT(...)` calldata replayed against the factory.
+    * @param armed_ If false, `attack()` returns without re-entering.
+    */
     function configure(address factory_, bytes calldata reentrantCall_, bool armed_) external {
         factory = factory_;
         reentrantCall = reentrantCall_;
@@ -49,14 +64,27 @@ contract ReentrancyDeployAttacker {
 * bytecode and remains readable under the proxy's delegatecall.
 */
 contract ReentrantInitLogicMock {
+    /**
+    * @notice Attacker contract called from `fallback` during proxy construction.
+    */
     address private immutable ATTACKER;
 
+    /**
+    * @notice Bake the attacker address into the runtime bytecode.
+    * @param attacker_ Attacker contract called from `fallback` during proxy construction.
+    */
     constructor(address attacker_) {
         ATTACKER = attacker_;
     }
 
+    /**
+    * @notice Accepts plain ether transfers so the mock can stand in for a payable implementation.
+    */
     receive() external payable {}
 
+    /**
+    * @notice Catches the delegatecalled CMTAT initializer and re-enters the factory through the attacker.
+    */
     fallback() external payable {
         ReentrancyDeployAttacker(ATTACKER).attack();
     }

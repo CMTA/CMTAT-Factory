@@ -73,6 +73,9 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase, ReentrancyGuard {
     * deployment by ANY authorized deployer, because the salt is the shared `nextDeploymentSalt()`. Do not pre-fund
     * or pre-authorize the returned address in a multi-deployer setup. For a stable, reservable address use
     * custom-salt mode (`useCustomSalt == true`) with a unique caller-chosen salt (one-time-use).
+    * @param deploymentSaltInput Salt supplied by the caller, ignored when useCustomSalt is false.
+    * @param cmtatArgument Struct containing initializer arguments for the CMTAT contract.
+    * @return cmtatProxy predicted address of the CMTAT proxy for the next deployment
     */
     function computedNextProxyAddress(
         bytes32 deploymentSaltInput,
@@ -89,6 +92,9 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase, ReentrancyGuard {
 
     /**
     * @dev Deploy CMTAT and push the created CMTAT in the list
+    * @param bytecode Proxy creation bytecode, constructor arguments included.
+    * @param deploymentSalt Effective salt used by CREATE2.
+    * @return cmtat The deployed ERC1967Proxy.
     */
     function _deployBytecode(bytes memory bytecode, bytes32  deploymentSalt) internal returns (ERC1967Proxy cmtat) {
                     address cmtatAddress = _deployAndRegisterProxy(bytecode, deploymentSalt);
@@ -99,6 +105,8 @@ contract CMTAT_UUPS_FACTORY is CMTATFactoryBase, ReentrancyGuard {
     
     /**
     * @dev return the smart contract bytecode
+    * @param cmtatArgument Struct containing initializer arguments for the CMTAT contract.
+    * @return bytecode ERC1967Proxy creation bytecode, constructor arguments included.
     */
      function _getBytecode( 
         // CMTAT function initialize

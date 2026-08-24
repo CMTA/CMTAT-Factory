@@ -14,16 +14,29 @@ import {FactoryErrors} from "./FactoryErrors.sol";
 abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFactoryInvariant {
     /* ============ State Variables ============ */
     /* ==== Public Variables ======== */
+    /**
+    * @notice List of every CMTAT proxy deployed by this factory, in deployment order
+    */
     address[] public cmtatsList;
+    /**
+    * @notice If true, the deployer provides the CREATE2 salt, otherwise the salt is derived from cmtatCounterId
+    */
     bool immutable public useCustomSalt;
+    /**
+    * @notice Number of CMTAT proxies deployed, also the id assigned to the next deployment
+    */
     uint256 public cmtatCounterId;
     
     /* ==== Internal mapping ======== */
+    /**
+    * @dev Tracks custom salts already consumed, since a custom salt is one-time-use
+    */
     mapping(bytes32 => bool) internal customSaltUsed;
     
     /* ============ Constructor ============ */
     /**
     * @param factoryAdmin admin
+    * @param useCustomSalt_ if true, the salt provided by the deployer is used, otherwise the salt is derived from the deployment counter
     */
     constructor(address factoryAdmin, bool useCustomSalt_) {
         if(factoryAdmin == address(0)){
@@ -72,6 +85,8 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
      * deployer deploys. An address predicted from it is not reserved for a specific caller and can be front-run by
      * another `CMTAT_DEPLOYER_ROLE` holder. For a stable, reservable address prefer custom-salt mode
      * (`useCustomSalt == true`) with a unique caller-chosen salt, which is enforced one-time-use.
+     *
+     * @return saltBytes The salt the next counter-derived deployment will use.
      */
     function nextDeploymentSalt() public view virtual returns(bytes32 saltBytes) {
         return keccak256(abi.encodePacked(cmtatCounterId));
@@ -85,6 +100,7 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     * @param deploymentSalt salt for deployment
     * @dev 
     * if useCustomSalt is at false, the salt used is the current value of cmtatCounterId
+    * @return saltBytes The effective salt to use for this deployment.
     */
     function _checkAndDetermineDeploymentSalt(bytes32 deploymentSalt) internal virtual returns(bytes32 saltBytes){
        if(useCustomSalt){
@@ -106,6 +122,9 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     * same counter-derived salt (Nethermind AuditAgent NM-2). Each concrete factory inherits OpenZeppelin
     * ReentrancyGuard and marks its public deployCMTAT entrypoint `nonReentrant`, which blocks that re-entry.
     * All five factories funnel through this function.
+    * @param bytecode Proxy creation bytecode, constructor arguments included.
+    * @param deploymentSalt Effective salt used by CREATE2.
+    * @return cmtatAddress The address of the deployed CMTAT proxy.
     */
     function _deployAndRegisterProxy(bytes memory bytecode, bytes32 deploymentSalt) internal returns (address cmtatAddress) {
         cmtatAddress = Create2.deploy(0, deploymentSalt, bytecode);
@@ -117,6 +136,8 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
 
     /**
     * @dev Mirrors deployment salt selection without mutating customSaltUsed.
+    * @param deploymentSaltInput Salt supplied by the caller, ignored when useCustomSalt is false.
+    * @return saltBytes The effective salt a deployment would use.
     */
     function _computeDeploymentSalt(bytes32 deploymentSaltInput) internal view virtual returns(bytes32 saltBytes){
         return useCustomSalt ? deploymentSaltInput : nextDeploymentSalt();

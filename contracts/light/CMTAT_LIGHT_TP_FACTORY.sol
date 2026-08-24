@@ -43,6 +43,7 @@ contract CMTAT_LIGHT_TP_FACTORY is CMTATTransparentFactoryBase, ReentrancyGuard 
     * @param proxyAdminOwner admin of the proxy
     * @param cmtatArgument argument for the function initialize
     * @notice get the proxy address depending on a particular effective salt
+    * @return cmtatProxy predicted address of the CMTAT proxy for the given salt
     */
     function computedProxyAddress(
         bytes32 effectiveDeploymentSalt,
@@ -57,6 +58,10 @@ contract CMTAT_LIGHT_TP_FACTORY is CMTATTransparentFactoryBase, ReentrancyGuard 
     * deployment by ANY authorized deployer, because the salt is the shared `nextDeploymentSalt()`. Do not pre-fund
     * or pre-authorize the returned address in a multi-deployer setup. For a stable, reservable address use
     * custom-salt mode (`useCustomSalt == true`) with a unique caller-chosen salt (one-time-use).
+    * @param deploymentSaltInput Salt supplied by the caller, ignored when useCustomSalt is false.
+    * @param proxyAdminOwner Address that will own the ProxyAdmin contract.
+    * @param cmtatArgument Struct containing initializer arguments for the CMTAT contract.
+    * @return cmtatProxy predicted address of the CMTAT proxy for the next deployment
     */
     function computedNextProxyAddress(
         bytes32 deploymentSaltInput,
@@ -71,6 +76,8 @@ contract CMTAT_LIGHT_TP_FACTORY is CMTATTransparentFactoryBase, ReentrancyGuard 
 
     /**
     * @dev return the CMTAT Light initializer data
+    * @param cmtatArgument Struct containing initializer arguments for the CMTAT contract.
+    * @return initializerData Encoded call to the CMTAT Light initializer.
     */
     function _initializerData(
         CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) internal pure returns(bytes memory initializerData) {

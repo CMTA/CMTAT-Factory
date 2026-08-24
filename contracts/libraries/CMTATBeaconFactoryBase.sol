@@ -11,6 +11,9 @@ import {FactoryErrors} from "./FactoryErrors.sol";
 * @notice Shared logic for CMTAT beacon proxy factories.
 */
 abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
+    /**
+    * @notice Beacon shared by every BeaconProxy deployed by this factory
+    */
     UpgradeableBeacon public immutable beacon;
 
     /**
@@ -41,6 +44,9 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
 
     /**
     * @dev Deploy beacon proxy and push the created CMTAT in the list.
+    * @param deploymentSaltInput Salt supplied by the caller, ignored when useCustomSalt is false.
+    * @param initializerData Encoded CMTAT initializer call forwarded to the proxy.
+    * @return cmtat The deployed BeaconProxy.
     */
     function _deployBeaconProxy(
         bytes32 deploymentSaltInput,
@@ -54,6 +60,9 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
 
     /**
     * @dev Deploy CMTAT and push the created CMTAT in the list.
+    * @param bytecode Beacon proxy creation bytecode, constructor arguments included.
+    * @param deploymentSalt Effective salt used by CREATE2.
+    * @return cmtat The deployed BeaconProxy.
     */
     function _deployBeaconProxyBytecode(bytes memory bytecode, bytes32 deploymentSalt) internal returns (BeaconProxy cmtat) {
         address cmtatAddress = _deployAndRegisterProxy(bytecode, deploymentSalt);
@@ -63,6 +72,9 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
 
     /**
     * @dev Compute a beacon proxy address for an already-derived effective salt.
+    * @param effectiveDeploymentSalt Salt already resolved by the caller.
+    * @param initializerData Encoded CMTAT initializer call forwarded to the proxy.
+    * @return cmtatProxy The predicted BeaconProxy address.
     */
     function _computedBeaconProxyAddress(
         bytes32 effectiveDeploymentSalt,
@@ -74,6 +86,9 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
 
     /**
     * @dev Compute a beacon proxy address using the same salt selection as deployCMTAT.
+    * @param deploymentSaltInput Salt supplied by the caller, ignored when useCustomSalt is false.
+    * @param initializerData Encoded CMTAT initializer call forwarded to the proxy.
+    * @return cmtatProxy The predicted BeaconProxy address.
     */
     function _computedNextBeaconProxyAddress(
         bytes32 deploymentSaltInput,
@@ -87,6 +102,8 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
 
     /**
     * @dev return the beacon proxy bytecode
+    * @param initializerData Encoded CMTAT initializer call forwarded to the proxy.
+    * @return bytecode Beacon proxy creation bytecode, constructor arguments included.
     */
     function _getBeaconProxyBytecode(bytes memory initializerData) internal view returns(bytes memory bytecode) {
         bytecode = abi.encodePacked(type(BeaconProxy).creationCode, abi.encode(address(beacon), initializerData));
