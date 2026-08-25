@@ -1,7 +1,7 @@
 # CMTAT Factory — Full Documentation
 
 > This is the complete specification of the CMTAT Factory project.
-> For a short overview and quick start, see the [root README](../README.md).
+> For a short overview and quick start, see the [root README](https://github.com/CMTA/CMTAT-factory/blob/main/README.md).
 
 ## Introduction
 
@@ -67,19 +67,19 @@ _Diagram source: [`doc/schema/plantuml/overview.puml`](./schema/plantuml/overvie
 
 - **UUPS Proxy Factory**
   - Deploys CMTAT behind a UUPS proxy ([ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)) with minimal admin overhead.
-  - Contract: [CMTAT_UUPS_FACTORY.sol](../contracts/standard/CMTAT_UUPS_FACTORY.sol) 
+  - Contract: [CMTAT_UUPS_FACTORY.sol](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/standard/CMTAT_UUPS_FACTORY.sol) 
 - **Transparent Proxy Factory**
   - Deploys CMTAT behind a TransparentUpgradeableProxy with a dedicated ProxyAdmin contract.
-  - Contract: [CMTAT_TP_FACTORY.sol](../contracts/standard/CMTAT_TP_FACTORY.sol)
+  - Contract: [CMTAT_TP_FACTORY.sol](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/standard/CMTAT_TP_FACTORY.sol)
 - **Beacon Proxy Factory**
   - Deploys CMTAT behind a BeaconProxy using an UpgradeableBeacon for shared implementation upgrades.
-  - Contract: [CMTAT_BEACON_FACTORY.sol](../contracts/standard/CMTAT_BEACON_FACTORY.sol)
+  - Contract: [CMTAT_BEACON_FACTORY.sol](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/standard/CMTAT_BEACON_FACTORY.sol)
 - **CMTAT Light Transparent Proxy Factory**
   - Deploys the lighter `CMTATUpgradeableLight` implementation behind a TransparentUpgradeableProxy.
-  - Contract: [CMTAT_LIGHT_TP_FACTORY.sol](../contracts/light/CMTAT_LIGHT_TP_FACTORY.sol)
+  - Contract: [CMTAT_LIGHT_TP_FACTORY.sol](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/light/CMTAT_LIGHT_TP_FACTORY.sol)
 - **CMTAT Light Beacon Proxy Factory**
   - Deploys the lighter `CMTATUpgradeableLight` implementation behind a BeaconProxy.
-  - Contract: [CMTAT_LIGHT_BEACON_FACTORY.sol](../contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol)
+  - Contract: [CMTAT_LIGHT_BEACON_FACTORY.sol](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol)
 
 ### CMTAT versions: Standard vs Light
 
@@ -201,7 +201,7 @@ All factories inherit `CMTATFactoryRoot` and share the following surface, in add
 
 ### Integration interface (`ICMTATFactory`)
 
-All ten deployable factories implement [`ICMTATFactory`](../contracts/interfaces/ICMTATFactory.sol), which declares the surface they share: `CMTATProxyAddress`, `cmtatsList`, `cmtatCounterId`, `useCustomSalt`, `nextDeploymentSalt`, `isCustomSaltUsed`, and the `CMTATDeployed` event. It declares no access-control member, because that is chosen per deployment — see [Access control](#access-control).
+All ten deployable factories implement [`ICMTATFactory`](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/interfaces/ICMTATFactory.sol), which declares the surface they share: `CMTATProxyAddress`, `cmtatsList`, `cmtatCounterId`, `useCustomSalt`, `nextDeploymentSalt`, `isCustomSaltUsed`, and the `CMTATDeployed` event. It declares no access-control member, because that is chosen per deployment — see [Access control](#access-control).
 
 **The file has no imports.** An indexer or integrating contract can compile against it without the CMTAT submodule or OpenZeppelin, instead of importing a concrete factory and its whole dependency graph. Factories advertise it through ERC-165:
 
@@ -287,7 +287,7 @@ function _authorizeDeployCMTAT() internal view virtual;   // no body: every depl
 > **The variants are chosen at deployment and are not interchangeable at a deployed address.**
 > Pick the role-based one when duties must be separable — several deployers, independently revocable, an admin distinct from the deployer. Pick `Ownable2Step` for a single-operator deployment that wants a handover which cannot be lost to a mistyped address. **`Ownable2Step` has exactly one privilege level and cannot express separated duties.**
 
-`CMTAT_DEPLOYER_ROLE` is declared by `CMTATFactoryAccessControl`, the layer that enforces it — not by a shared base — so an `Ownable2Step` factory never publishes a role identifier it does not check. For the same reason [`ICMTATFactory`](../contracts/interfaces/ICMTATFactory.sol) declares no access-control member.
+`CMTAT_DEPLOYER_ROLE` is declared by `CMTATFactoryAccessControl`, the layer that enforces it — not by a shared base — so an `Ownable2Step` factory never publishes a role identifier it does not check. For the same reason [`ICMTATFactory`](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/interfaces/ICMTATFactory.sol) declares no access-control member.
 
 #### Policy modules
 
@@ -615,8 +615,8 @@ Get the predicted proxy address for a given deployment salt without deploying it
 
 Two additional factories deploy the lighter `CMTATUpgradeableLight` implementation:
 
-- **`CMTAT_LIGHT_TP_FACTORY`** ([contracts/light/CMTAT_LIGHT_TP_FACTORY.sol](../contracts/light/CMTAT_LIGHT_TP_FACTORY.sol)) — Transparent proxy variant. Same architecture as the [Transparent Proxy Factory](#transparent-proxy-factory).
-- **`CMTAT_LIGHT_BEACON_FACTORY`** ([contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol](../contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol)) — Beacon proxy variant. Same architecture as the [Beacon Proxy Factory](#beacon-proxy-factory). When `implementation_ == address(0)`, the constructor deploys a fresh `CMTATUpgradeableLight` implementation.
+- **`CMTAT_LIGHT_TP_FACTORY`** ([contracts/light/CMTAT_LIGHT_TP_FACTORY.sol](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/light/CMTAT_LIGHT_TP_FACTORY.sol)) — Transparent proxy variant. Same architecture as the [Transparent Proxy Factory](#transparent-proxy-factory).
+- **`CMTAT_LIGHT_BEACON_FACTORY`** ([contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol)) — Beacon proxy variant. Same architecture as the [Beacon Proxy Factory](#beacon-proxy-factory). When `implementation_ == address(0)`, the constructor deploys a fresh `CMTATUpgradeableLight` implementation.
 
 Both expose the same entrypoints as their standard counterparts but take `CMTAT_LIGHT_ARGUMENT` instead of `CMTAT_ARGUMENT`:
 
@@ -647,11 +647,11 @@ The five single-owner variants share their deployment logic with the role-based 
 
 | Contract | Source |
 | --- | --- |
-| `CMTAT_UUPS_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_UUPS_FACTORY_Ownable2Step.sol](../contracts/ownable/CMTAT_UUPS_FACTORY_Ownable2Step.sol) |
-| `CMTAT_TP_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_TP_FACTORY_Ownable2Step.sol](../contracts/ownable/CMTAT_TP_FACTORY_Ownable2Step.sol) |
-| `CMTAT_BEACON_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_BEACON_FACTORY_Ownable2Step.sol](../contracts/ownable/CMTAT_BEACON_FACTORY_Ownable2Step.sol) |
-| `CMTAT_LIGHT_TP_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_LIGHT_TP_FACTORY_Ownable2Step.sol](../contracts/ownable/CMTAT_LIGHT_TP_FACTORY_Ownable2Step.sol) |
-| `CMTAT_LIGHT_BEACON_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_LIGHT_BEACON_FACTORY_Ownable2Step.sol](../contracts/ownable/CMTAT_LIGHT_BEACON_FACTORY_Ownable2Step.sol) |
+| `CMTAT_UUPS_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_UUPS_FACTORY_Ownable2Step.sol](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/ownable/CMTAT_UUPS_FACTORY_Ownable2Step.sol) |
+| `CMTAT_TP_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_TP_FACTORY_Ownable2Step.sol](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/ownable/CMTAT_TP_FACTORY_Ownable2Step.sol) |
+| `CMTAT_BEACON_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_BEACON_FACTORY_Ownable2Step.sol](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/ownable/CMTAT_BEACON_FACTORY_Ownable2Step.sol) |
+| `CMTAT_LIGHT_TP_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_LIGHT_TP_FACTORY_Ownable2Step.sol](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/ownable/CMTAT_LIGHT_TP_FACTORY_Ownable2Step.sol) |
+| `CMTAT_LIGHT_BEACON_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_LIGHT_BEACON_FACTORY_Ownable2Step.sol](https://github.com/CMTA/CMTAT-factory/blob/main/contracts/ownable/CMTAT_LIGHT_BEACON_FACTORY_Ownable2Step.sol) |
 
 #### Inheritance
 
@@ -698,7 +698,7 @@ Clone the git repository, with the option `--recurse-submodules` to fetch the su
 
 We recommend to install the [Node Version Manager `nvm`](https://github.com/nvm-sh/nvm) to manage multiple versions of Node.js on your machine. You can then, for example, install the version 20.5.0 of Node.js with the following command: `nvm install 20.5.0`
 
-The file [.nvmrc](../.nvmrc) at the root of the project set the Node.js version. `nvm use`will automatically use this version if no version is supplied on the command line.
+The file [.nvmrc](https://github.com/CMTA/CMTAT-factory/blob/main/.nvmrc) at the root of the project set the Node.js version. `nvm use`will automatically use this version if no version is supplied on the command line.
 
 - node modules
 
@@ -870,4 +870,4 @@ This article uses the CMTAT version [2.5.1](https://github.com/CMTA/CMTAT/releas
 
 ## Intellectual property
 
-The code is copyright (c) Capital Market and Technology Association, 2025-2026, and is released under [Mozilla Public License 2.0](../LICENSE.md).
+The code is copyright (c) Capital Market and Technology Association, 2025-2026, and is released under [Mozilla Public License 2.0](https://github.com/CMTA/CMTAT-factory/blob/main/LICENSE.md).
