@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import {CMTATStandardBeaconFactoryBase} from "../libraries/CMTATStandardBeaconFactoryBase.sol";
-import {CMTATFactoryAccessControl} from "../libraries/CMTATFactoryAccessControl.sol";
-import {CMTATFactoryRoot} from "../libraries/CMTATFactoryRoot.sol";
+import {CMTATStandardBeaconFactoryBase} from "../modules/deployment/CMTATStandardBeaconFactoryBase.sol";
+import {CMTATFactoryAccessControl} from "../modules/access/CMTATFactoryAccessControl.sol";
+import {CMTATFactoryRoot} from "../modules/core/CMTATFactoryRoot.sol";
 
 /**
 * @notice Factory to deploy CMTAT behind a beacon proxy, gated by `CMTAT_DEPLOYER_ROLE`.

@@ -3,8 +3,8 @@ pragma solidity ^0.8.20;
 
 import {CMTAT_UUPS_FACTORY} from "../standard/CMTAT_UUPS_FACTORY.sol";
 import {CMTAT_TP_FACTORY} from "../standard/CMTAT_TP_FACTORY.sol";
-import {CMTATFactoryRoot} from "../libraries/CMTATFactoryRoot.sol";
-import {CMTATTransparentFactoryBase} from "../libraries/CMTATTransparentFactoryBase.sol";
+import {CMTATFactoryRoot} from "../modules/core/CMTATFactoryRoot.sol";
+import {CMTATTransparentFactoryBase} from "../modules/proxy/CMTATTransparentFactoryBase.sol";
 
 /**
 * @title Override guards for the factories' internal extension points

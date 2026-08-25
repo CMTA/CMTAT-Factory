@@ -1,60 +1,62 @@
 //SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import {CMTATUpgradeableLight} from "../../CMTAT/contracts/deployment/light/CMTATUpgradeableLight.sol";
+import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
+import {CMTATUpgradeableLight} from "../../../CMTAT/contracts/deployment/light/CMTATUpgradeableLight.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {CMTATTransparentFactoryBase} from "./CMTATTransparentFactoryBase.sol";
+import {CMTATBeaconFactoryBase} from "../proxy/CMTATBeaconFactoryBase.sol";
 
 /**
-* @notice Transparent proxy (cmtat light) factory logic, without an access-control policy.
+* @notice Beacon proxy (cmtat light) factory logic, without an access-control policy.
 * @dev Holds the deployment entrypoint and address prediction shared by every variant of this
 * factory. It does not decide WHO may deploy: `deployCMTAT` is gated by `onlyCMTATDeployer`, whose
 * hook a concrete contract implements by combining this base with a policy
 * (`CMTATFactoryAccessControl` or `CMTATFactoryOwnable2Step`).
 */
-abstract contract CMTATLightTPFactoryBase is CMTATTransparentFactoryBase, ReentrancyGuard {
+abstract contract CMTATLightBeaconFactoryBase is CMTATBeaconFactoryBase, ReentrancyGuard {
     /**
-    * @param logic_ contract implementation, cannot be zero
+    * @param implementation_ Address of the initial CMTAT implementation contract; if zero, a fresh one is deployed
+    * @param beaconOwner Address that will own and control the beacon upgrades
     * @param useCustomSalt_ custom salt with create2 or not
     */
     constructor(
-        address logic_,
+        address implementation_,
+        address beaconOwner,
         bool useCustomSalt_
-    ) CMTATTransparentFactoryBase(logic_, useCustomSalt_) {}
+    ) CMTATBeaconFactoryBase(
+            implementation_ == address(0) ? address(new CMTATUpgradeableLight()) : implementation_,
+            beaconOwner,
+            useCustomSalt_
+        ) {}
 
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
     /**
-     * @notice Deploys a CMTAT Light token behind a transparent proxy.
+     * @notice Deploys a CMTAT Light token behind a Beacon proxy.
      *
      * @param deploymentSaltInput Salt used for deterministic deployment (via CREATE2).
-     * @param proxyAdminOwner Address that will own the ProxyAdmin contract.
      * @param cmtatArgument Struct containing initializer arguments for the CMTAT Light contract.
      *
-     * @return cmtat proxy Address of the deployed TransparentUpgradeableProxy.
+     * @return cmtat The deployed BeaconProxy instance pointing to the CMTAT Light implementation.
      */
     function deployCMTAT(
         bytes32 deploymentSaltInput,
-        address proxyAdminOwner,
         CMTAT_LIGHT_ARGUMENT calldata cmtatArgument
-    ) public virtual nonReentrant onlyCMTATDeployer returns(TransparentUpgradeableProxy cmtat)   {
-        return _deployTransparentProxy(deploymentSaltInput, proxyAdminOwner, _initializerData(cmtatArgument));
+    ) public virtual nonReentrant onlyCMTATDeployer returns(BeaconProxy cmtat)   {
+        return _deployBeaconProxy(deploymentSaltInput, _initializerData(cmtatArgument));
     }
 
     /**
     * @param effectiveDeploymentSalt effective salt for the deployment
-    * @param proxyAdminOwner admin of the proxy
     * @param cmtatArgument argument for the function initialize
     * @notice get the proxy address depending on a particular effective salt
-    * @return cmtatProxy predicted address of the CMTAT proxy for the given salt
+    * @return cmtatProxy proxy address
     */
     function computedProxyAddress(
         bytes32 effectiveDeploymentSalt,
-        address proxyAdminOwner,
         CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) public view virtual returns (address cmtatProxy) {
-        return _computedTransparentProxyAddress(effectiveDeploymentSalt, proxyAdminOwner, _initializerData(cmtatArgument));
+        return _computedBeaconProxyAddress(effectiveDeploymentSalt, _initializerData(cmtatArgument));
     }
 
     /**
@@ -64,15 +66,13 @@ abstract contract CMTATLightTPFactoryBase is CMTATTransparentFactoryBase, Reentr
     * or pre-authorize the returned address in a multi-deployer setup. For a stable, reservable address use
     * custom-salt mode (`useCustomSalt == true`) with a unique caller-chosen salt (one-time-use).
     * @param deploymentSaltInput Salt supplied by the caller, ignored when useCustomSalt is false.
-    * @param proxyAdminOwner Address that will own the ProxyAdmin contract.
     * @param cmtatArgument Struct containing initializer arguments for the CMTAT contract.
     * @return cmtatProxy predicted address of the CMTAT proxy for the next deployment
     */
     function computedNextProxyAddress(
         bytes32 deploymentSaltInput,
-        address proxyAdminOwner,
         CMTAT_LIGHT_ARGUMENT calldata cmtatArgument) public view virtual returns (address cmtatProxy) {
-        return _computedNextTransparentProxyAddress(deploymentSaltInput, proxyAdminOwner, _initializerData(cmtatArgument));
+        return _computedNextBeaconProxyAddress(deploymentSaltInput, _initializerData(cmtatArgument));
     }
 
 

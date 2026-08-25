@@ -3,8 +3,8 @@ pragma solidity ^0.8.20;
 
 import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
-import {CMTATFactoryRoot} from "./CMTATFactoryRoot.sol";
-import {FactoryErrors} from "./FactoryErrors.sol";
+import {CMTATFactoryRoot} from "../core/CMTATFactoryRoot.sol";
+import {FactoryErrors} from "../../libraries/FactoryErrors.sol";
 
 /**
 * @notice Shared logic for CMTAT beacon proxy factories.

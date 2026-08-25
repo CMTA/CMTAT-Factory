@@ -41,11 +41,11 @@
 | H-2 | Beacon factory fails open on a zero implementation | ⬜ keep — documented and deliberate | `CMTAT_BEACON_FACTORY.sol:28` |
 | I-1 | `beacon` typed as `UpgradeableBeacon`, factory calls one member | ⬜ keep — reasoned below | `CMTATBeaconFactoryBase.sol:17` |
 | I-2 | Full CMTAT implementation imported for a 4-byte selector | ⬜ **keep** — measured, costs 0 bytes | 5 factories |
-| J-1 | `libraries/` holds 5 abstract contracts, 1 interface, 1 library | ⬜ decide — naming | `contracts/libraries/` |
+| J-1 | `libraries/` held 13 abstract contracts and 1 library | ✅ **fixed** — split into `interfaces/`, `modules/<capability>/`, `libraries/` | `contracts/` |
 | J-2 | Downstream probe: enumerable-roles factory | ⬜ inconvenience only, not a blocker | probe compiled |
 | J-3 | No interface for the project's own API | ✅ **fixed** — `ICMTATFactory` added, +26 bytes, ABI unchanged | `contracts/interfaces/` |
 
-**Counts:** 23 rows — 9 fixed, 1 revised, 13 deliberately left (of which 4 are "checked, nothing wrong").
+**Counts:** 23 rows — 10 fixed, 1 revised, 12 deliberately left (of which 4 are "checked, nothing wrong").
 D-1 and D-2 were **revised after review feedback**; see the note at the head of section D.
 
 ## Outstanding
@@ -53,7 +53,7 @@ D-1 and D-2 were **revised after review feedback**; see the note at the head of 
 | ID | Item | Why it is still open |
 | --- | --- | --- |
 | D-1 | `_initializerData` duplication | **Revised to leave.** The only shared ancestor of each pair is `CMTATFactoryRoot`, which the Light factories also inherit — hoisting there would couple the Light variants to `CMTATStandardUpgradeable` at compile time. A pair-level mixin would respect the constraint but costs two files to save 18 lines. |
-| J-1 | Directory naming (`libraries/` holds one library) | A genuine judgement call, not a defect. Note `contracts/interfaces/` now exists because of J-3, which is a step toward the ecosystem layout this finding describes. |
+
 
 ---
 
@@ -670,7 +670,7 @@ are the argument.
 
 ## J. Modularity
 
-### J-1. `contracts/libraries/` contains one library — ⬜ decide
+### J-1. `contracts/libraries/` contained one library — ✅ fixed
 
 Checking directory names against contents:
 
@@ -694,11 +694,37 @@ The ecosystem convention is available and costs nothing to follow: upstream CMTA
 `contracts/libraries/` for actual libraries. Adopting it would mean `base/` (or `modules/`) for the
 five abstract contracts, `interfaces/` for `IERC8303`, and `libraries/` for `FactoryErrors` alone.
 
-**Counter-argument:** it is a pure rename touching every import path in the project, for a
-seven-file directory, on a codebase this small.
+**Fix applied — and the case grew while the review was open.** By the time J-1 was implemented,
+`libraries/` held **13 abstract contracts and 1 library** (the access-control split and the per-family
+bases landed after this finding was written), which made the misnomer harder to defend than the
+original 7-file version.
 
-**Verdict: decide.** Following the sibling project's convention is the stronger argument, but the
-churn is real and this is not a defect.
+The layout now follows upstream CMTAT's own (`deployment/ interfaces/ library/ mocks/ modules/`),
+grouping by **capability** rather than by nothing:
+
+| Directory | Holds |
+| --- | --- |
+| `contracts/interfaces/` | `ICMTATFactory`, `IERC8303`, `IERC173` — interfaces only |
+| `contracts/modules/core/` | `CMTATFactoryInvariant`, `ContractVersion`, `CMTATFactoryRoot`, `CMTATFactoryBase` |
+| `contracts/modules/proxy/` | `CMTATTransparentFactoryBase`, `CMTATBeaconFactoryBase` |
+| `contracts/modules/deployment/` | the five per-family `CMTAT*FactoryBase` |
+| `contracts/modules/access/` | `CMTATFactoryAccessControl`, `CMTATFactoryOwnable2Step` |
+| `contracts/libraries/` | `FactoryErrors` — now the only occupant, and an actual `library` |
+
+Two interfaces that were **buried inside module files** were extracted while doing it: `IERC8303` out
+of `ContractVersion.sol` and `IERC173` out of `CMTATFactoryOwnable2Step.sol`. Declaring an interface
+inside the module that implements it is the same defect at file scale, and it meant an integrator
+importing `IERC8303` pulled in `ERC165` and the whole module with it.
+
+**Behaviour-preserving, and verified as such:** `git diff -M` shows the moved files differ only in
+their `import` lines (plus `ContractVersion.sol` losing the interface declaration). A script recomputed
+every relative import from each file's new location, including the depth-sensitive `../../CMTAT/`
+paths; an automated pass then confirmed **every** relative import in `contracts/` resolves to an
+existing file. 117/117 tests pass and the style checker reports 0 violations across all 8 checks.
+
+The convention is now recorded in `CLAUDE.md` / `AGENTS.md` so the next file lands in the right place.
+
+**Verdict: implemented.**
 
 ### J-2. Downstream probe: a factory that wants enumerable roles — ⬜ inconvenience, not a blocker
 

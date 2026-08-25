@@ -16,7 +16,7 @@ This file helps AI agents understand and work with this codebase.
 
 The factories deploy token proxies with `CREATE2`, track deployed instances by incremental id, and gate deployment behind `AccessControl`.
 
-- **Factory version:** `0.5.0` in `contracts/libraries/ContractVersion.sol`
+- **Factory version:** `0.5.0` in `contracts/modules/core/ContractVersion.sol`
 - **Solidity:** source files use `^0.8.20`, Hardhat compiles with `0.8.36`
 - **EVM target:** `prague`
 - **License:** `MPL-2.0`
@@ -206,7 +206,7 @@ wants a safer handover; it has exactly one privilege level and cannot express se
 
 ## Key Errors and Invariants
 
-Custom errors are defined in `contracts/libraries/FactoryErrors.sol`:
+Custom errors are defined in `contracts/libraries/FactoryErrors.sol` (the only real `library` in the project):
 
 - `CMTAT_Factory_AddressZeroNotAllowedForFactoryAdmin`
 - `CMTAT_Factory_AddressZeroNotAllowedForBeaconOwner`
@@ -235,21 +235,35 @@ contracts/
 |- light/
 |  |- CMTAT_LIGHT_TP_FACTORY.sol
 |  `- CMTAT_LIGHT_BEACON_FACTORY.sol
-|- ownable/
+|- ownable/                            deployables: single-owner policy
 |  |- CMTAT_UUPS_FACTORY_Ownable2Step.sol
 |  |- CMTAT_TP_FACTORY_Ownable2Step.sol
 |  |- CMTAT_BEACON_FACTORY_Ownable2Step.sol
 |  |- CMTAT_LIGHT_TP_FACTORY_Ownable2Step.sol
 |  `- CMTAT_LIGHT_BEACON_FACTORY_Ownable2Step.sol
-|- interfaces/
-|  `- ICMTATFactory.sol
-`- libraries/
-   |- CMTATFactoryInvariant.sol
-   |- ContractVersion.sol
-   |- CMTATFactoryRoot.sol
-   |- CMTATFactoryBase.sol
-   |- CMTATTransparentFactoryBase.sol
-   |- CMTATBeaconFactoryBase.sol
+|- interfaces/                         interfaces only
+|  |- ICMTATFactory.sol
+|  |- IERC8303.sol
+|  `- IERC173.sol
+|- modules/                            abstract contracts, grouped by capability
+|  |- core/                            policy-free shared machinery
+|  |  |- CMTATFactoryInvariant.sol     argument structs
+|  |  |- ContractVersion.sol           ERC-8303 version()
+|  |  |- CMTATFactoryRoot.sol          registry, salt logic, CREATE2, authorization hook
+|  |  `- CMTATFactoryBase.sol          immutable `logic` implementation
+|  |- proxy/                           proxy-mechanism bases, shared by standard and light
+|  |  |- CMTATTransparentFactoryBase.sol
+|  |  `- CMTATBeaconFactoryBase.sol
+|  |- deployment/                      per-family deployCMTAT + address prediction
+|  |  |- CMTATUUPSFactoryBase.sol
+|  |  |- CMTATStandardTPFactoryBase.sol
+|  |  |- CMTATStandardBeaconFactoryBase.sol
+|  |  |- CMTATLightTPFactoryBase.sol
+|  |  `- CMTATLightBeaconFactoryBase.sol
+|  `- access/                          who may deploy
+|     |- CMTATFactoryAccessControl.sol
+|     `- CMTATFactoryOwnable2Step.sol
+`- libraries/                          actual libraries
    `- FactoryErrors.sol
 
 test/
@@ -285,6 +299,7 @@ When changing shared factory logic in `CMTATFactoryRoot` or `CMTATFactoryInvaria
 - Follow the existing section-header pattern in contracts:
   `/* ============ SECTION ============ */`
 - Prefer minimal, targeted changes. The current codebase is small and has duplicated deployment logic by design.
+- Put a new file where its **kind** says: `interfaces/` for interfaces, `modules/<capability>/` for abstract contracts, `libraries/` for actual `library` declarations, and `standard/` / `light/` / `ownable/` for deployable contracts. Never declare an interface inside a module file.
 - Every function is `virtual`: all 13 public/external and all 20 internal. Keep it that way when adding one - subclasses rely on these as extension points, and `virtual` on an internal function costs zero bytecode (verified). `contracts/mocks/OverridableFactoryMock.sol` guards the two most important hooks.
 - Be careful with proxy initializer selectors:
   `CMTATUpgradeableUUPS.initialize.selector` is intentionally different from `CMTATStandardUpgradeable.initialize.selector`.

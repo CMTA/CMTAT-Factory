@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import {CMTATLightTPFactoryBase} from "../libraries/CMTATLightTPFactoryBase.sol";
-import {CMTATFactoryAccessControl} from "../libraries/CMTATFactoryAccessControl.sol";
-import {CMTATFactoryRoot} from "../libraries/CMTATFactoryRoot.sol";
+import {CMTATLightTPFactoryBase} from "../modules/deployment/CMTATLightTPFactoryBase.sol";
+import {CMTATFactoryAccessControl} from "../modules/access/CMTATFactoryAccessControl.sol";
+import {CMTATFactoryRoot} from "../modules/core/CMTATFactoryRoot.sol";
 
 /**
 * @notice Factory to deploy CMTAT behind a transparent proxy (CMTAT Light), gated by `CMTAT_DEPLOYER_ROLE`.

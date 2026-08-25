@@ -2,9 +2,9 @@
 pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {CMTATStandardBeaconFactoryBase} from "../libraries/CMTATStandardBeaconFactoryBase.sol";
-import {CMTATFactoryOwnable2Step} from "../libraries/CMTATFactoryOwnable2Step.sol";
-import {CMTATFactoryRoot} from "../libraries/CMTATFactoryRoot.sol";
+import {CMTATStandardBeaconFactoryBase} from "../modules/deployment/CMTATStandardBeaconFactoryBase.sol";
+import {CMTATFactoryOwnable2Step} from "../modules/access/CMTATFactoryOwnable2Step.sol";
+import {CMTATFactoryRoot} from "../modules/core/CMTATFactoryRoot.sol";
 
 /**
 * @notice Factory to deploy CMTAT behind a beacon proxy, gated by a single owner.

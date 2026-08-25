@@ -5,8 +5,8 @@ pragma solidity ^0.8.20;
 import {Create2} from '@openzeppelin/contracts/utils/Create2.sol';
 import {ContractVersion} from "./ContractVersion.sol";
 import {CMTATFactoryInvariant} from "./CMTATFactoryInvariant.sol";
-import {FactoryErrors} from "./FactoryErrors.sol";
-import {ICMTATFactory} from "../interfaces/ICMTATFactory.sol";
+import {FactoryErrors} from "../../libraries/FactoryErrors.sol";
+import {ICMTATFactory} from "../../interfaces/ICMTATFactory.sol";
 /**
 * @notice Code common to Beacon, TP and UUPS factory
 * @dev Policy-free: this contract decides WHAT is protected (the deployment entrypoint, through

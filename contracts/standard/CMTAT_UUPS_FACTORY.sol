@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MPL-2.0
 pragma solidity ^0.8.20;
 
-import {CMTATUUPSFactoryBase} from "../libraries/CMTATUUPSFactoryBase.sol";
-import {CMTATFactoryAccessControl} from "../libraries/CMTATFactoryAccessControl.sol";
-import {CMTATFactoryRoot} from "../libraries/CMTATFactoryRoot.sol";
+import {CMTATUUPSFactoryBase} from "../modules/deployment/CMTATUUPSFactoryBase.sol";
+import {CMTATFactoryAccessControl} from "../modules/access/CMTATFactoryAccessControl.sol";
+import {CMTATFactoryRoot} from "../modules/core/CMTATFactoryRoot.sol";
 
 /**
 * @notice Factory to deploy CMTAT with a UUPS proxy, gated by `CMTAT_DEPLOYER_ROLE`.

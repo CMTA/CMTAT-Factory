@@ -85,6 +85,15 @@ Commit: _pending release commit_
   (constructor / external / public / internal / private, `view` and `pure` last; visibility before mutability
   before `virtual` / `override` before custom modifiers). Member moves only, no logic change.
 - `.gitignore`: ignore LibreOffice lock files (`.~lock.*#`).
+- **Reorganised `contracts/` so a file's path says what it is.** `contracts/libraries/` had grown to hold 13
+  abstract contracts and a single actual `library`; the abstract contracts moved to `contracts/modules/`, grouped
+  by capability - `core/` (registry, salt logic, CREATE2, version), `proxy/` (proxy-mechanism bases),
+  `deployment/` (per-family entrypoints) and `access/` (who may deploy) - leaving `libraries/` holding only
+  `FactoryErrors`. Two interfaces that were declared inside the module implementing them were extracted:
+  `IERC8303` from `ContractVersion.sol` and `IERC173` from `CMTATFactoryOwnable2Step.sol`, both now under
+  `contracts/interfaces/`. The layout follows the upstream CMTAT convention. Behaviour-preserving: the moved
+  files differ only in their import lines, every relative import was recomputed and verified to resolve, and all
+  117 tests pass. Finding J-1 of the v0.5.0 code-quality review.
 - Extracted the CREATE2 address prediction into `_computeCreate2Address(bytecode, salt)` on
   `CMTATFactoryRoot`, replacing three byte-identical copies of `Create2.computeAddress(...)` in the beacon base,
   the transparent base and the UUPS factory, and removing the three now-unused `Create2` imports. It sits beside

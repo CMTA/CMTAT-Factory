@@ -98,7 +98,20 @@ Choose **Light** when you only need a self-contained transfer-restricted token, 
 
 ## Library contracts
 
-The factories are built from a small set of abstract base contracts in `contracts/libraries/`:
+The factories are built from abstract contracts under `contracts/modules/`, grouped by capability so that a
+file's path says what it is and what it does:
+
+| Directory | Holds | Answers |
+| --- | --- | --- |
+| `contracts/interfaces/` | `ICMTATFactory`, `IERC8303`, `IERC173` | interfaces only, never mixed into a module file |
+| `contracts/modules/core/` | `CMTATFactoryInvariant`, `ContractVersion`, `CMTATFactoryRoot`, `CMTATFactoryBase` | the policy-free shared machinery: registry, salt logic, CREATE2, version |
+| `contracts/modules/proxy/` | `CMTATTransparentFactoryBase`, `CMTATBeaconFactoryBase` | proxy-mechanism bytecode and address prediction, shared by standard and light |
+| `contracts/modules/deployment/` | the five `CMTAT*FactoryBase` contracts | the per-family `deployCMTAT` and predictors, without a policy |
+| `contracts/modules/access/` | `CMTATFactoryAccessControl`, `CMTATFactoryOwnable2Step` | who may deploy |
+| `contracts/libraries/` | `FactoryErrors` | actual `library` declarations |
+| `contracts/standard/`, `light/`, `ownable/` | the ten deployable factories | what you deploy |
+
+The individual contracts:
 
 | Contract | Inherits | Used by | Responsibility |
 | --- | --- | --- | --- |

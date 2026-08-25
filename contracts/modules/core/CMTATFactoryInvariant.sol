@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 
-import {ICMTATConstructor} from "../../CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
+import {ICMTATConstructor} from "../../../CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
 
 /**
 * @notice Initializer argument structs shared by every CMTAT factory.

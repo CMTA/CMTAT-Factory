@@ -2,8 +2,8 @@
 pragma solidity ^0.8.20;
 
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import {CMTATFactoryBase} from "./CMTATFactoryBase.sol";
-import {FactoryErrors} from "./FactoryErrors.sol";
+import {CMTATFactoryBase} from "../core/CMTATFactoryBase.sol";
+import {FactoryErrors} from "../../libraries/FactoryErrors.sol";
 
 /**
 * @notice Shared logic for CMTAT transparent proxy factories.

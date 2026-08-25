@@ -2,8 +2,8 @@
 pragma solidity ^0.8.20;
 
 import {AccessControl} from '@openzeppelin/contracts/access/AccessControl.sol';
-import {CMTATFactoryRoot} from "./CMTATFactoryRoot.sol";
-import {FactoryErrors} from "./FactoryErrors.sol";
+import {CMTATFactoryRoot} from "../core/CMTATFactoryRoot.sol";
+import {FactoryErrors} from "../../libraries/FactoryErrors.sol";
 
 /**
 * @title Role-based access-control policy for a CMTAT factory

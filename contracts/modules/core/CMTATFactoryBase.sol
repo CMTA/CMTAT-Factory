@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {CMTATFactoryRoot} from "./CMTATFactoryRoot.sol";
-import {FactoryErrors} from "./FactoryErrors.sol";
+import {FactoryErrors} from "../../libraries/FactoryErrors.sol";
 
 /**
 * @notice Code common to TP and UUPS Factory
