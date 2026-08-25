@@ -31,7 +31,6 @@ contract FactoryConsumerMock {
     * @return listHeadMatchesRegistry Whether `cmtatsList(0)` agrees with `CMTATProxyAddress(0)`.
     * @return nextSalt The salt the next counter-derived deployment would use.
     * @return custom Whether the factory is in custom-salt mode.
-    * @return deployerRole The role identifier required to deploy.
     */
     function readAll()
         external
@@ -41,8 +40,7 @@ contract FactoryConsumerMock {
             address firstProxy,
             bool listHeadMatchesRegistry,
             bytes32 nextSalt,
-            bool custom,
-            bytes32 deployerRole
+            bool custom
         )
     {
         counter = FACTORY.cmtatCounterId();
@@ -52,7 +50,6 @@ contract FactoryConsumerMock {
             : FACTORY.cmtatsList(0) == firstProxy;
         nextSalt = FACTORY.nextDeploymentSalt();
         custom = FACTORY.useCustomSalt();
-        deployerRole = FACTORY.CMTAT_DEPLOYER_ROLE();
     }
 
     /**

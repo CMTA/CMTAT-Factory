@@ -169,13 +169,40 @@ struct CMTAT_LIGHT_ARGUMENT {
 
 ## Access Control
 
-All factories inherit `AccessControl` through `CMTATFactoryRoot`.
+Access control uses the **authorization-hook (template method)** pattern. The logic decides WHAT is
+protected; the deployment decides WHO may do it.
 
-- `DEFAULT_ADMIN_ROLE` is granted to `factoryAdmin` in the constructor.
-- `CMTAT_DEPLOYER_ROLE` is also granted to `factoryAdmin` in the constructor.
-- `deployCMTAT(...)` is protected by `onlyRole(CMTAT_DEPLOYER_ROLE)`.
+- `CMTATFactoryRoot` declares `modifier onlyCMTATDeployer` and the bodyless hook
+  `function _authorizeDeployCMTAT() internal view virtual;`. It does **not** inherit any access-control
+  module, so no policy is welded into the shared core.
+- `deployCMTAT(...)` carries `nonReentrant onlyCMTATDeployer` on all ten deployable factories.
+- Each deployable contract answers the hook with one bare override:
 
-There is no separate deployer management wrapper; role administration uses the normal OpenZeppelin `AccessControl` surface.
+| Policy | Contract | Hook override | Constructor authority |
+| --- | --- | --- | --- |
+| Role-based | `CMTATFactoryAccessControl` | `_authorizeDeployCMTAT() ... onlyRole(CMTAT_DEPLOYER_ROLE) {}` | `factoryAdmin` gets `DEFAULT_ADMIN_ROLE` + `CMTAT_DEPLOYER_ROLE` |
+| Single-owner | `CMTATFactoryOwnable2Step` | `_authorizeDeployCMTAT() ... onlyOwner {}` | `initialOwner` via `Ownable(initialOwner)` |
+
+### Conventions to keep
+
+- Hooks are `internal view virtual` on the declaration **and** on every override. `view` is a
+  compiler-enforced guarantee that authorization never mutates state, and it is free on an internal
+  function.
+- Overrides carry the **modifier** and an **empty body** (`onlyRole(...) {}`), never a bare
+  `_checkRole` / `_checkOwner` call.
+- **Role constants live with the layer that enforces them.** `CMTAT_DEPLOYER_ROLE` is declared in
+  `CMTATFactoryAccessControl`, not in a shared base, so the `Ownable2Step` variants never publish a
+  role identifier they do not check. `ICMTATFactory` declares no access-control member for the same
+  reason.
+- The factories have no ERC-2771 module, so `msg.sender` and `_msgSender()` coincide; `AccessControl`
+  resolves through `Context` already.
+
+### Choosing a variant
+
+The two policies are **chosen at deployment and are not interchangeable at a deployed address**. Use
+the `AccessControl` variant when duties must be separable (several deployers, independently
+revocable, admin distinct from deployer). Use `Ownable2Step` for a single-operator deployment that
+wants a safer handover; it has exactly one privilege level and cannot express separated duties.
 
 ## Key Errors and Invariants
 
@@ -208,6 +235,12 @@ contracts/
 |- light/
 |  |- CMTAT_LIGHT_TP_FACTORY.sol
 |  `- CMTAT_LIGHT_BEACON_FACTORY.sol
+|- ownable/
+|  |- CMTAT_UUPS_FACTORY_Ownable2Step.sol
+|  |- CMTAT_TP_FACTORY_Ownable2Step.sol
+|  |- CMTAT_BEACON_FACTORY_Ownable2Step.sol
+|  |- CMTAT_LIGHT_TP_FACTORY_Ownable2Step.sol
+|  `- CMTAT_LIGHT_BEACON_FACTORY_Ownable2Step.sol
 |- interfaces/
 |  `- ICMTATFactory.sol
 `- libraries/

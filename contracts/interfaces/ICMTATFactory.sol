@@ -16,9 +16,10 @@ pragma solidity ^0.8.20;
 *   CMTAT types, so declaring them would reintroduce the dependency this interface exists to avoid.
 *   `deployCMTAT` also returns the concrete proxy type (`ERC1967Proxy` / `TransparentUpgradeableProxy`
 *   / `BeaconProxy`) rather than `address`, which a single interface cannot express.
-* - Role administration is plain `IAccessControl` and versioning is `IERC8303`; use those standard
-*   interfaces rather than having this one redeclare them. Only `CMTAT_DEPLOYER_ROLE` appears here,
-*   because the role identifier itself is specific to this project.
+* - Access control is NOT here, deliberately. A factory's policy is chosen at deployment: the
+*   `AccessControl` variants expose `IAccessControl` and `CMTAT_DEPLOYER_ROLE()`, the `Ownable2Step`
+*   variants expose `owner()` instead. Declaring either here would oblige every variant to publish a
+*   surface it does not enforce. Versioning is `IERC8303`; use that standard interface.
 */
 interface ICMTATFactory {
     /* ============ Events ============ */
@@ -38,12 +39,6 @@ interface ICMTATFactory {
     );
 
     /* ============ Functions ============ */
-
-    /**
-    * @notice Role required to call the factory's deployment entrypoint.
-    * @return role The `CMTAT_DEPLOYER_ROLE` identifier.
-    */
-    function CMTAT_DEPLOYER_ROLE() external view returns (bytes32 role);
 
     /**
     * @notice Address of the deployed proxy for a given deployment id.

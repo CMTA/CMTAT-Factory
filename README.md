@@ -22,6 +22,15 @@ _Diagram source: [`doc/schema/plantuml/overview.puml`](./doc/schema/plantuml/ove
 | `CMTAT_LIGHT_TP_FACTORY` | `TransparentUpgradeableProxy` | `CMTATUpgradeableLight` | [contracts/light/CMTAT_LIGHT_TP_FACTORY.sol](./contracts/light/CMTAT_LIGHT_TP_FACTORY.sol) |
 | `CMTAT_LIGHT_BEACON_FACTORY` | `BeaconProxy` (shared `UpgradeableBeacon`) | `CMTATUpgradeableLight` | [contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol](./contracts/light/CMTAT_LIGHT_BEACON_FACTORY.sol) |
 
+Each family ships in **two access-control variants**, sharing identical deployment logic and differing only in who may deploy:
+
+| Policy | Contract | Who may deploy | When to choose it |
+| --- | --- | --- | --- |
+| Role-based | `CMTAT_*_FACTORY` | holders of `CMTAT_DEPLOYER_ROLE` | duties must be separable — several deployers, independently revocable, admin distinct from deployer |
+| Single-owner | `CMTAT_*_FACTORY_Ownable2Step` | the `owner()` | one operator, and a handover that cannot be lost to a mistyped address (`transferOwnership` then `acceptOwnership`) |
+
+> The variants are **chosen at deployment and are not interchangeable at a deployed address**. `Ownable2Step` has exactly one privilege level and cannot express separated duties.
+
 - **Standard** factories deploy the full-featured CMTAT (RuleEngine, documents, snapshots, debt, cross-chain, meta-transactions) and take the `CMTAT_ARGUMENT` initializer struct.
 - **Light** factories deploy the minimal `CMTATUpgradeableLight` (ERC-20 with mint/burn, pause, enforcement, validation, access control) and take the smaller `CMTAT_LIGHT_ARGUMENT` struct.
 
@@ -31,7 +40,7 @@ See [Proxy patterns: Transparent vs UUPS vs Beacon](./doc/README.md#proxy-patter
 
 - **Multiple proxy types** — UUPS, Transparent, or Beacon, depending on your upgrade strategy.
 - **Deterministic addresses** — proxies are deployed with `CREATE2`; `computedProxyAddress(...)` / `computedNextProxyAddress(...)` return the address before deployment.
-- **Role-based security** — only holders of `CMTAT_DEPLOYER_ROLE` can deploy.
+- **Pluggable access control** — one deployment entrypoint, two policies: `CMTAT_DEPLOYER_ROLE` or a single `Ownable2Step` owner, selected by which contract you deploy.
 - **Deployment registry** — every proxy is indexed by an incremental id and emitted in a `CMTATDeployed` event.
 - **Versioned on-chain** — factories expose [ERC-8303](https://github.com/ethereum/ERCs/pull/1819) `version()`; current version is **`0.5.0`**.
 

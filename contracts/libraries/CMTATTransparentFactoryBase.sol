@@ -11,10 +11,9 @@ import {FactoryErrors} from "./FactoryErrors.sol";
 abstract contract CMTATTransparentFactoryBase is CMTATFactoryBase {
     /**
     * @param logic_ contract implementation, cannot be zero
-    * @param factoryAdmin admin
     * @param useCustomSalt_ custom salt with create2 or not
     */
-    constructor(address logic_, address factoryAdmin, bool useCustomSalt_) CMTATFactoryBase(logic_, factoryAdmin, useCustomSalt_) {}
+    constructor(address logic_, bool useCustomSalt_) CMTATFactoryBase(logic_, useCustomSalt_) {}
 
     /**
     * @dev Deploy transparent proxy and push the created CMTAT in the list.

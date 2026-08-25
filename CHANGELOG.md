@@ -62,18 +62,8 @@ Commit: _pending release commit_
 
 - `ICMTATFactory` ([`contracts/interfaces/ICMTATFactory.sol`](contracts/interfaces/ICMTATFactory.sol)): the
   deployment-registry and salt surface every factory exposes identically - `CMTATProxyAddress`, `cmtatsList`,
-  `cmtatCounterId`, `useCustomSalt`, `nextDeploymentSalt`, `isCustomSaltUsed`, `CMTAT_DEPLOYER_ROLE` and the
-  `CMTATDeployed` event. **It has no imports**, so an indexer or integrating contract can compile against it
-  without the CMTAT submodule or OpenZeppelin; previously the only way to call a factory was to import the
-  concrete contract and its whole dependency graph. It is inherited (so the compiler enforces the match, not a
-  comment) and advertised through ERC-165 `supportsInterface`. The deployment entrypoints are deliberately not
-  declared: their shapes differ across the family, their arguments are CMTAT types, and `deployCMTAT` returns the
-  concrete proxy type rather than `address`. Costs **+26 bytes** per factory and leaves the ABI shape unchanged.
-  Finding J-3 of the v0.5.0 code-quality review; covered by `test/FactoryInterface.test.js`.
-- `ICMTATFactory` ([`contracts/interfaces/ICMTATFactory.sol`](contracts/interfaces/ICMTATFactory.sol)): the
-  deployment-registry and salt surface every factory exposes identically - `CMTATProxyAddress`, `cmtatsList`,
-  `cmtatCounterId`, `useCustomSalt`, `nextDeploymentSalt`, `isCustomSaltUsed`, `CMTAT_DEPLOYER_ROLE` and the
-  `CMTATDeployed` event. **It has no imports**, so an indexer or integrating contract can compile against it
+  `cmtatCounterId`, `useCustomSalt`, `nextDeploymentSalt`, `isCustomSaltUsed` and the `CMTATDeployed` event
+  (no access-control member: that is policy, and policy is chosen per deployment). **It has no imports**, so an indexer or integrating contract can compile against it
   without the CMTAT submodule or OpenZeppelin; previously the only way to call a factory was to import the
   concrete contract and its whole dependency graph. It is inherited (so the compiler enforces the match, not a
   comment) and advertised through ERC-165 `supportsInterface`. The deployment entrypoints are deliberately not

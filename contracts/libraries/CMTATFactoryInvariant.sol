@@ -3,13 +3,13 @@ pragma solidity ^0.8.20;
 
 
 import {ICMTATConstructor} from "../../CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
-import {ICMTATFactory} from "../interfaces/ICMTATFactory.sol";
 
 /**
-* @notice List of Invariant (struct, constant, events)
-* 
+* @notice Initializer argument structs shared by every CMTAT factory.
+* @dev Policy-free on purpose: role constants live with the layer that enforces them
+* (`CMTATFactoryAccessControl`), so an `Ownable2Step` variant never inherits a role it does not check.
 */
-abstract contract CMTATFactoryInvariant is ICMTATFactory {
+abstract contract CMTATFactoryInvariant {
     /* ============ Structs ============ */
     /**
     * @notice Initializer arguments forwarded to a standard CMTAT implementation
@@ -27,7 +27,4 @@ abstract contract CMTATFactoryInvariant is ICMTATFactory {
         address CMTATAdmin;
         ICMTATConstructor.ERC20Attributes ERC20Attributes;
     }
-    /* ============ State Variables ============ */
-    /// @dev Role to deploy CMTAT
-    bytes32 public constant override CMTAT_DEPLOYER_ROLE = keccak256("CMTAT_DEPLOYER_ROLE");
 }

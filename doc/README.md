@@ -246,7 +246,28 @@ It records the deployed `proxy`, the `deployer` (`msg.sender`), the incremental 
 
 ### Access control
 
-All factories inherit OpenZeppelin `AccessControl`. The constructor grants both `DEFAULT_ADMIN_ROLE` and `CMTAT_DEPLOYER_ROLE` to `factoryAdmin`, and `deployCMTAT(...)` is gated by `onlyRole(CMTAT_DEPLOYER_ROLE)`.
+Access control uses the **authorization-hook (template method)** pattern: the shared logic decides *what* is protected, each deployable contract decides *who* may do it.
+
+`CMTATFactoryRoot` declares the modifier and a hook with no body, so a factory cannot be deployed without stating a policy:
+
+```solidity
+modifier onlyCMTATDeployer() { _authorizeDeployCMTAT(); _; }
+function _authorizeDeployCMTAT() internal view virtual;   // no body: every deployment must answer
+```
+
+`deployCMTAT(...)` carries `nonReentrant onlyCMTATDeployer` on all ten deployable factories. Two policies answer the hook:
+
+| Policy | Deployable contracts | Hook override | Authority |
+| --- | --- | --- | --- |
+| **Role-based** (`CMTATFactoryAccessControl`) | `CMTAT_UUPS_FACTORY`, `CMTAT_TP_FACTORY`, `CMTAT_BEACON_FACTORY`, `CMTAT_LIGHT_TP_FACTORY`, `CMTAT_LIGHT_BEACON_FACTORY` | `_authorizeDeployCMTAT() ... onlyRole(CMTAT_DEPLOYER_ROLE) {}` | `factoryAdmin` receives `DEFAULT_ADMIN_ROLE` and `CMTAT_DEPLOYER_ROLE`; roles are granted and revoked through the standard `AccessControl` surface |
+| **Single-owner** (`CMTATFactoryOwnable2Step`) | the same five with a `_Ownable2Step` suffix | `_authorizeDeployCMTAT() ... onlyOwner {}` | `initialOwner`; ownership moves in two steps (`transferOwnership`, then `acceptOwnership` by the recipient) |
+
+> **The variants are chosen at deployment and are not interchangeable at a deployed address.**
+> Pick the role-based one when duties must be separable — several deployers, independently revocable, an admin distinct from the deployer. Pick `Ownable2Step` for a single-operator deployment that wants a handover which cannot be lost to a mistyped address. **`Ownable2Step` has exactly one privilege level and cannot express separated duties.**
+
+`CMTAT_DEPLOYER_ROLE` is declared by `CMTATFactoryAccessControl`, the layer that enforces it — not by a shared base — so an `Ownable2Step` factory never publishes a role identifier it does not check. For the same reason [`ICMTATFactory`](../contracts/interfaces/ICMTATFactory.sol) declares no access-control member.
+
+**What this does not do.** The pattern makes the policy pluggable, not automatically correct: a hook overridden with the wrong role is exactly as broken as an inline check with the wrong role. It also does not reduce centralisation — a single admin or owner key still controls who may deploy.
 
 ### Reentrancy protection
 

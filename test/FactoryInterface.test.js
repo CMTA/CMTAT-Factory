@@ -14,7 +14,6 @@ const DEPLOYMENT_DECIMAL = 0
 // so this is the whole set - the ERC-165 trap of missing inherited selectors
 // cannot apply here.
 const ICMTAT_FACTORY_SIGNATURES = [
-  'CMTAT_DEPLOYER_ROLE()',
   'CMTATProxyAddress(uint256)',
   'cmtatCounterId()',
   'cmtatsList(uint256)',
@@ -72,6 +71,33 @@ describe('ICMTATFactory', function () {
         this.admin,
         this.admin,
         false
+      ]),
+      await ethers.deployContract('CMTAT_UUPS_FACTORY_Ownable2Step', [
+        this.UUPS_IMPL.target,
+        this.admin,
+        false
+      ]),
+      await ethers.deployContract('CMTAT_TP_FACTORY_Ownable2Step', [
+        this.STANDARD_IMPL.target,
+        this.admin,
+        false
+      ]),
+      await ethers.deployContract('CMTAT_BEACON_FACTORY_Ownable2Step', [
+        this.STANDARD_IMPL.target,
+        this.admin,
+        this.admin,
+        false
+      ]),
+      await ethers.deployContract('CMTAT_LIGHT_TP_FACTORY_Ownable2Step', [
+        this.LIGHT_IMPL.target,
+        this.admin,
+        false
+      ]),
+      await ethers.deployContract('CMTAT_LIGHT_BEACON_FACTORY_Ownable2Step', [
+        this.LIGHT_IMPL.target,
+        this.admin,
+        this.admin,
+        false
       ])
     ]
   })
@@ -88,10 +114,10 @@ describe('ICMTATFactory', function () {
     })
 
     it('testCanKeepAdvertisingTheInheritedInterfaces', async function () {
-      // Assert: adding the new id did not displace the existing answers
+      // Assert: adding the new id did not displace the existing answers, in
+      // either access-control policy
       for (const factory of this.factories) {
         expect(await factory.supportsInterface('0x01ffc9a7')).to.equal(true) // ERC-165
-        expect(await factory.supportsInterface('0x7965db0b')).to.equal(true) // AccessControl
         expect(await factory.supportsInterface('0x54fd4d50')).to.equal(true) // ERC-8303
         expect(await factory.supportsInterface('0xffffffff')).to.equal(false)
       }
@@ -101,26 +127,20 @@ describe('ICMTATFactory', function () {
   context('Interface-only consumer', function () {
     it('testCanReadEveryFactoryThroughTheSharedInterface', async function () {
       // Act + Assert: one consumer, compiled against the interface alone,
-      // reads all five factory families without knowing which is which
+      // reads all ten deployable factories - both policies of all five families
+      // - without knowing which is which
       for (const factory of this.factories) {
         const consumer = await ethers.deployContract('FactoryConsumerMock', [
           factory.target
         ])
-        const [
-          counter,
-          firstProxy,
-          listHeadMatchesRegistry,
-          nextSalt,
-          custom,
-          deployerRole
-        ] = await consumer.readAll()
+        const [counter, firstProxy, listHeadMatchesRegistry, nextSalt, custom] =
+          await consumer.readAll()
 
         expect(counter).to.equal(0)
         expect(firstProxy).to.equal(ZERO_ADDRESS)
         expect(listHeadMatchesRegistry).to.equal(true)
         expect(nextSalt).to.equal(await factory.nextDeploymentSalt())
         expect(custom).to.equal(false)
-        expect(deployerRole).to.equal(await factory.CMTAT_DEPLOYER_ROLE())
       }
     })
 

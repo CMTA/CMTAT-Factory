@@ -17,10 +17,9 @@ abstract contract CMTATFactoryBase is CMTATFactoryRoot {
     /* ============ Constructor ============ */
     /**
     * @param logic_ contract implementation
-    * @param factoryAdmin admin
     * @param useCustomSalt_ if true, the salt provided by the deployer is used, otherwise the salt is derived from the deployment counter
     */
-    constructor(address logic_, address factoryAdmin, bool useCustomSalt_)CMTATFactoryRoot( factoryAdmin, useCustomSalt_) {
+    constructor(address logic_, bool useCustomSalt_) CMTATFactoryRoot(useCustomSalt_) {
         if(logic_ == address(0)){
             revert FactoryErrors.CMTAT_Factory_AddressZeroNotAllowedForLogicContract();
         }

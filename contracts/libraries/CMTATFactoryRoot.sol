@@ -2,7 +2,6 @@
 pragma solidity ^0.8.20;
 
 
-import {AccessControl} from '@openzeppelin/contracts/access/AccessControl.sol';
 import {Create2} from '@openzeppelin/contracts/utils/Create2.sol';
 import {ContractVersion} from "./ContractVersion.sol";
 import {CMTATFactoryInvariant} from "./CMTATFactoryInvariant.sol";
@@ -10,9 +9,12 @@ import {FactoryErrors} from "./FactoryErrors.sol";
 import {ICMTATFactory} from "../interfaces/ICMTATFactory.sol";
 /**
 * @notice Code common to Beacon, TP and UUPS factory
-*
+* @dev Policy-free: this contract decides WHAT is protected (the deployment entrypoint, through
+* `onlyCMTATDeployer`) and leaves WHO may do it to the concrete factory, which must implement
+* `_authorizeDeployCMTAT`. It deliberately does not inherit an access-control module, so a deployment
+* can be role-based (`CMTATFactoryAccessControl`) or single-owner (`Ownable2Step`) without forking it.
 */
-abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFactoryInvariant {
+abstract contract CMTATFactoryRoot is ContractVersion, CMTATFactoryInvariant, ICMTATFactory {
     /* ============ State Variables ============ */
     /* ==== Public Variables ======== */
     /**
@@ -34,18 +36,22 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     */
     mapping(bytes32 => bool) internal customSaltUsed;
     
+    /* ============ Modifiers ============ */
+    /**
+    * @notice Restricts a function to callers the concrete factory authorizes to deploy.
+    * @dev Delegates the decision to `_authorizeDeployCMTAT`, which each deployment implements.
+    */
+    modifier onlyCMTATDeployer() {
+        _authorizeDeployCMTAT();
+        _;
+    }
+
     /* ============ Constructor ============ */
     /**
-    * @param factoryAdmin admin
     * @param useCustomSalt_ if true, the salt provided by the deployer is used, otherwise the salt is derived from the deployment counter
     */
-    constructor(address factoryAdmin, bool useCustomSalt_) {
-        if(factoryAdmin == address(0)){
-            revert  FactoryErrors.CMTAT_Factory_AddressZeroNotAllowedForFactoryAdmin();
-        }
+    constructor(bool useCustomSalt_) {
         useCustomSalt = useCustomSalt_;
-        _grantRole(DEFAULT_ADMIN_ROLE, factoryAdmin);
-        _grantRole(CMTAT_DEPLOYER_ROLE, factoryAdmin);
     }
 
 
@@ -67,13 +73,13 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     }
 
     /**
-    * @inheritdoc AccessControl
+    * @inheritdoc ContractVersion
     */
     function supportsInterface(bytes4 interfaceId)
         public
         view
         virtual
-        override(AccessControl, ContractVersion)
+        override(ContractVersion)
         returns (bool)
     {
         return
@@ -164,6 +170,15 @@ abstract contract CMTATFactoryRoot is AccessControl, ContractVersion, CMTATFacto
     function _computeDeploymentSalt(bytes32 deploymentSaltInput) internal view virtual returns(bytes32 saltBytes){
         return useCustomSalt ? deploymentSaltInput : nextDeploymentSalt();
     }
+
+    /**
+    * @notice Authorization hook invoked before any CMTAT deployment.
+    * @dev Declared without a body on purpose: a concrete factory cannot be deployed until it states
+    * its access-control policy. Implementations revert when the caller is not authorized, and are
+    * expected to be a bare override carrying only a modifier, e.g.
+    * `function _authorizeDeployCMTAT() internal view virtual override onlyRole(CMTAT_DEPLOYER_ROLE) {}`.
+    */
+    function _authorizeDeployCMTAT() internal view virtual;
 
     /**
     * @dev Predict the CREATE2 address of a proxy without deploying it.

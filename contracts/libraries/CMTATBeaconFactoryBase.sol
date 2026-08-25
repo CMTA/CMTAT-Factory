@@ -17,16 +17,14 @@ abstract contract CMTATBeaconFactoryBase is CMTATFactoryRoot {
 
     /**
     * @param implementation_ contract implementation used by the beacon
-    * @param factoryAdmin admin
     * @param beaconOwner owner of the beacon
     * @param useCustomSalt_ custom salt with create2 or not
     */
     constructor(
         address implementation_,
-        address factoryAdmin,
         address beaconOwner,
         bool useCustomSalt_
-    ) CMTATFactoryRoot(factoryAdmin, useCustomSalt_) {
+    ) CMTATFactoryRoot(useCustomSalt_) {
         if(beaconOwner == address(0)){
             revert  FactoryErrors.CMTAT_Factory_AddressZeroNotAllowedForBeaconOwner();
         }
