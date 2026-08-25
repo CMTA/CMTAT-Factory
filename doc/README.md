@@ -143,6 +143,8 @@ The individual contracts:
 
 ![surya_inheritance_CMTATFactoryRoot.sol](./schema/surya_inheritance/surya_inheritance_CMTATFactoryRoot.sol.png)
 
+![CMTATFactoryRootUML](./schema/sol2uml/CMTATFactoryRootUML.png)
+
 
 
 
@@ -291,7 +293,11 @@ function _authorizeDeployCMTAT() internal view virtual;   // no body: every depl
 
 ![surya_inheritance_CMTATFactoryAccessControl.sol](./schema/surya_inheritance/surya_inheritance_CMTATFactoryAccessControl.sol.png)
 
+![CMTATFactoryAccessControlUML](./schema/sol2uml/CMTATFactoryAccessControlUML.png)
+
 ![surya_inheritance_CMTATFactoryOwnable2Step.sol](./schema/surya_inheritance/surya_inheritance_CMTATFactoryOwnable2Step.sol.png)
+
+![CMTATFactoryOwnable2StepUML](./schema/sol2uml/CMTATFactoryOwnable2StepUML.png)
 
 **What this does not do.** The pattern makes the policy pluggable, not automatically correct: a hook overridden with the wrong role is exactly as broken as an inline check with the wrong role. It also does not reduce centralisation — a single admin or owner key still controls who may deploy.
 
@@ -775,6 +781,20 @@ To generate documentation with surya, you can call the three bash scripts in [do
 In the report, the path for the different files are indicated in absolute. You have to remove the part which correspond to your local filesystem.
 
 
+
+#### [sol2uml](https://github.com/naddison36/sol2uml)
+
+UML class diagrams — one image per contract, interface and library — are committed under
+[`doc/schema/sol2uml/`](./schema/sol2uml/). Regenerate the whole set with:
+
+```bash
+bash doc/script/script_sol2uml.sh          # PNG (default)
+FORMAT=svg bash doc/script/script_sol2uml.sh
+```
+
+The script holds the explicit list of diagrams, wipes the output directory first so a renamed or deleted contract leaves no stale image, and passes **repository-relative** source paths — sol2uml prints the path it is given underneath the class name, so an absolute one would bake a machine-specific path into a committed image. Test doubles under `contracts/mocks/` are deliberately not diagrammed (the Surya scripts do include them).
+
+> **Note:** the script renders PNG by asking sol2uml for Graphviz `dot` output and running `dot -Tpng` itself. sol2uml's own PNG writer goes through a headless-Chromium converter that fails on current Node versions (`Cannot read properties of undefined (reading 'html')`). `FORMAT=svg` skips Graphviz entirely.
 
 #### [Coverage](https://github.com/sc-forks/solidity-coverage/)
 
