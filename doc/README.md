@@ -201,7 +201,7 @@ All factories inherit `CMTATFactoryRoot` and share the following surface, in add
 
 ### Integration interface (`ICMTATFactory`)
 
-Every factory implements [`ICMTATFactory`](../contracts/interfaces/ICMTATFactory.sol), which declares the surface all five share: `CMTATProxyAddress`, `cmtatsList`, `cmtatCounterId`, `useCustomSalt`, `nextDeploymentSalt`, `isCustomSaltUsed`, `CMTAT_DEPLOYER_ROLE`, and the `CMTATDeployed` event.
+All ten deployable factories implement [`ICMTATFactory`](../contracts/interfaces/ICMTATFactory.sol), which declares the surface they share: `CMTATProxyAddress`, `cmtatsList`, `cmtatCounterId`, `useCustomSalt`, `nextDeploymentSalt`, `isCustomSaltUsed`, and the `CMTATDeployed` event. It declares no access-control member, because that is chosen per deployment — see [Access control](#access-control).
 
 **The file has no imports.** An indexer or integrating contract can compile against it without the CMTAT submodule or OpenZeppelin, instead of importing a concrete factory and its whole dependency graph. Factories advertise it through ERC-165:
 
@@ -303,7 +303,7 @@ function _authorizeDeployCMTAT() internal view virtual;   // no body: every depl
 
 ### Reentrancy protection
 
-Each concrete factory inherits OpenZeppelin `ReentrancyGuard` and marks its `deployCMTAT(...)` entrypoint `nonReentrant` (declared first, before `onlyRole`).
+Each per-family deployment base inherits OpenZeppelin `ReentrancyGuard` and marks its `deployCMTAT(...)` entrypoint `nonReentrant` (declared first, before `onlyCMTATDeployer`).
 
 In counter mode the effective salt is derived from `cmtatCounterId`, which is only incremented **after** `Create2.deploy`. Since `Create2.deploy` runs the proxy constructor — and its CMTAT initializer — before that increment, a reentrant `deployCMTAT(...)` call could otherwise observe the same `cmtatCounterId` and reuse the same auto-derived salt (Nethermind AuditAgent NM-2). The guard rejects any attempt to re-enter the deploy path mid-deployment, so every automatic deployment sees a distinct counter value and salt, keeping the deployment index and emitted events consistent.
 
