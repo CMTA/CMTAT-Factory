@@ -761,7 +761,7 @@ Please see [SECURITY.md](https://github.com/CMTA/CMTAT/blob/master/SECURITY.md) 
 
 ### Tools
 
-Static-analysis reports are versioned under [`doc/audits/`](./audits/); see the [audit overview](./audits/AUDIT_OVERVIEW.md) for the consolidated results and triage. All runs exclude mocks and exclude dependencies / the CMTAT submodule from scope. **For v0.4.0, neither tool reports anything to fix.**
+Static-analysis reports are versioned under [`doc/audits/`](./audits/); see the [audit overview](./audits/AUDIT_OVERVIEW.md) for the consolidated results and triage. All runs exclude mocks and exclude dependencies / the CMTAT submodule from scope. **For v0.5.0, neither tool reports anything to fix**: Slither's factory-scoped checklist is empty, and Aderyn's 1 High / 5 Low are false-positive, by-design or environment items — including the one new finding, `Empty Block`, which is the intended idiom of the authorization-hook pattern.
 
 #### [Slither](https://github.com/crytic/slither)
 
@@ -773,6 +773,7 @@ slither . --checklist --filter-paths "node_modules,CMTAT,test,forge-std,mocks" >
 
 | Version | Report | Feedback |
 | --- | --- | --- |
+| v0.5.0 | [slither-report.md](./audits/v0.5.0/slither-report.md) | [feedback](./audits/v0.5.0/slither-report-feedback.md) |
 | v0.4.0 | [slither-report.md](./audits/v0.4.0/slither-report.md) | [feedback](./audits/v0.4.0/slither-report-feedback.md) |
 | v0.3.0 | [slither-report.md](./audits/v0.3.0/slither-report.md) | [feedback](./audits/v0.3.0/slither-report-feedback.md) |
 | v0.2.0 | [slither-report.md](./audits/v0.2.0/slither-report.md) | — |
@@ -787,6 +788,7 @@ aderyn -x mocks --output aderyn-report.md
 
 | Version | Report | Feedback |
 | --- | --- | --- |
+| v0.5.0 | [aderyn-report.md](./audits/v0.5.0/aderyn-report.md) | [feedback](./audits/v0.5.0/aderyn-report-feedback.md) |
 | v0.4.0 | [aderyn-report.md](./audits/v0.4.0/aderyn-report.md) | [feedback](./audits/v0.4.0/aderyn-report-feedback.md) |
 | v0.3.0 | [aderyn-report.md](./audits/v0.3.0/aderyn-report.md) | [feedback](./audits/v0.3.0/aderyn-report-feedback.md) |
 | v0.2.0 | [aderyn-report.md](./audits/v0.2.0/aderyn-report.md) | — |

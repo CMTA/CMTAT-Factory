@@ -146,6 +146,16 @@ Commit: _pending release commit_
   beacon is created once in the factory constructor. Removed the superseded
   `doc/schema/drawio/factory-BeaconFactory.drawio.png` (the `factory.drawio` source is kept - it still backs the
   transparent-factory diagram).
+- Added versioned Slither (0.11.5) and Aderyn (0.6.5) static-analysis reports for v0.5.0 under
+  [`doc/audits/v0.5.0/`](doc/audits/v0.5.0/) with per-finding triage feedback, and registered them in
+  [`AUDIT_OVERVIEW.md`](doc/audits/AUDIT_OVERVIEW.md). **Neither tool reports anything to fix.** Slither's
+  factory-scoped checklist is empty (verified: the filter paths exist, the report cites no dependency, and all
+  155 unfiltered findings trace to `node_modules/` or `CMTAT/`). Aderyn reports 1 High + 5 Low, all
+  false-positive, by-design or environment - including the one finding new to this release, `Empty Block`, which
+  flags the two `_authorizeDeployCMTAT` overrides whose bodies are empty because the access check rides on the
+  modifier. Scope grew from 12 to 27 files (413 -> 697 nSLOC) with the `Ownable2Step` variants and the module
+  split; Aderyn's centralization-risk count actually *fell* from 6 to 4, since the role check moved out of five
+  entrypoints into two policy modules.
 - Added a code-quality review for v0.5.0 ([`doc/audits/v0.5.0/CLAUDE_ANALYSIS.md`](doc/audits/v0.5.0/CLAUDE_ANALYSIS.md)),
   produced with Claude Code and registered in [`AUDIT_OVERVIEW.md`](doc/audits/AUDIT_OVERVIEW.md). It reports no
   vulnerabilities. Applied from it: a measured 114-gas saving in `_deployAndRegisterProxy` (the deployment

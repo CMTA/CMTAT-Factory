@@ -102,7 +102,8 @@ npm run lint:js        # eslint  (add :fix to autofix)
 
 - **Vulnerability disclosure:** see [SECURITY.md](https://github.com/CMTA/CMTAT/blob/master/SECURITY.md) in the CMTAT main repository.
 - **Audit:** this project has not undergone a formal audit.
-- **Static analysis:** Slither, Aderyn, and Nethermind AuditAgent reports are versioned under [doc/audits/](./doc/audits/). For v0.4.0, neither Slither nor Aderyn reports anything to fix.
+- **Static analysis:** Slither, Aderyn, and Nethermind AuditAgent reports are versioned under [doc/audits/](./doc/audits/); see the [audit overview](./doc/audits/AUDIT_OVERVIEW.md). For **v0.5.0**, neither Slither nor Aderyn reports anything to fix.
+- **Code quality:** the [v0.5.0 code-quality review](./doc/audits/v0.5.0/CLAUDE_ANALYSIS.md) found no vulnerabilities.
 
 ## Further reading
 
