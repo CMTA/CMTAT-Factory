@@ -43,6 +43,7 @@ _Diagram source: [`doc/schema/plantuml/overview.puml`](./schema/plantuml/overvie
   - [Transparent Proxy Factory](#transparent-proxy-factory)
   - [UUPS ProxyFactory](#uups-proxyfactory)
   - [CMTAT Light Factories](#cmtat-light-factories)
+  - [Ownable2Step Factories](#ownable2step-factories)
 - [Usage instructions](#usage-instructions)
   - [Dependencies](#dependencies)
   - [Installation](#installation)
@@ -145,18 +146,24 @@ The individual contracts:
 
 
 
-|       Contract       |               Type               |                       Bases                        |                |               |
-| :------------------: | :------------------------------: | :------------------------------------------------: | :------------: | :-----------: |
-|          └           |        **Function Name**         |                  **Visibility**                    | **Mutability** | **Modifiers** |
-|                      |                                  |                                                    |                |               |
-| **CMTATFactoryRoot** |          Implementation          | AccessControl, ContractVersion, CMTATFactoryInvariant |             |               |
-|          └           |          <Constructor>           |               Public ❗️               |       🛑        |      NO❗️      |
-|          └           |        CMTATProxyAddress         |               Public ❗️               |                |      NO❗️      |
-|          └           |        supportsInterface         |               Public ❗️               |                |      NO❗️      |
-|          └           |        nextDeploymentSalt        |               Public ❗️               |                |      NO❗️      |
-|          └           | _checkAndDetermineDeploymentSalt |              Internal 🔒              |       🛑        |               |
-|          └           |       _computeDeploymentSalt     |              Internal 🔒              |                |               |
-|          └           |      _deployAndRegisterProxy     |              Internal 🔒              |       🛑        |               |
+|  Contract  |         Type        |       Bases      |                  |                 |
+|:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
+|     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
+||||||
+| **CMTATFactoryRoot** | Implementation | ContractVersion, CMTATFactoryInvariant, ICMTATFactory |||
+| └ | \<Constructor\> | Public ❗️ | 🛑  |NO❗️ |
+| └ | CMTATProxyAddress | Public ❗️ |   |NO❗️ |
+| └ | supportsInterface | Public ❗️ |   |NO❗️ |
+| └ | nextDeploymentSalt | Public ❗️ |   |NO❗️ |
+| └ | isCustomSaltUsed | Public ❗️ |   |NO❗️ |
+| └ | _checkAndDetermineDeploymentSalt | Internal 🔒 | 🛑  | |
+| └ | _deployAndRegisterProxy | Internal 🔒 | 🛑  | |
+| └ | _computeDeploymentSalt | Internal 🔒 |   | |
+| └ | _authorizeDeployCMTAT | Internal 🔒 |   | |
+| └ | _computeCreate2Address | Internal 🔒 |   | |
+
+> `CMTATFactoryRoot` no longer inherits `AccessControl`: since v0.5.0 it declares the abstract
+> `_authorizeDeployCMTAT` hook instead, and the policy modules answer it. See [Access control](#access-control).
 
 
 
@@ -279,6 +286,12 @@ function _authorizeDeployCMTAT() internal view virtual;   // no body: every depl
 > Pick the role-based one when duties must be separable — several deployers, independently revocable, an admin distinct from the deployer. Pick `Ownable2Step` for a single-operator deployment that wants a handover which cannot be lost to a mistyped address. **`Ownable2Step` has exactly one privilege level and cannot express separated duties.**
 
 `CMTAT_DEPLOYER_ROLE` is declared by `CMTATFactoryAccessControl`, the layer that enforces it — not by a shared base — so an `Ownable2Step` factory never publishes a role identifier it does not check. For the same reason [`ICMTATFactory`](../contracts/interfaces/ICMTATFactory.sol) declares no access-control member.
+
+#### Policy modules
+
+![surya_inheritance_CMTATFactoryAccessControl.sol](./schema/surya_inheritance/surya_inheritance_CMTATFactoryAccessControl.sol.png)
+
+![surya_inheritance_CMTATFactoryOwnable2Step.sol](./schema/surya_inheritance/surya_inheritance_CMTATFactoryOwnable2Step.sol.png)
 
 **What this does not do.** The pattern makes the policy pluggable, not automatically correct: a hook overridden with the wrong role is exactly as broken as an inline check with the wrong role. It also does not reduce centralisation — a single admin or owner key still controls who may deploy.
 
@@ -622,6 +635,30 @@ Both expose the same entrypoints as their standard counterparts but take `CMTAT_
 
 
 
+### Ownable2Step Factories
+
+The five single-owner variants share their deployment logic with the role-based factories and differ only in the access-control policy they plug into `_authorizeDeployCMTAT`. See [Access control](#access-control) for how to choose between them.
+
+| Contract | Source |
+| --- | --- |
+| `CMTAT_UUPS_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_UUPS_FACTORY_Ownable2Step.sol](../contracts/ownable/CMTAT_UUPS_FACTORY_Ownable2Step.sol) |
+| `CMTAT_TP_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_TP_FACTORY_Ownable2Step.sol](../contracts/ownable/CMTAT_TP_FACTORY_Ownable2Step.sol) |
+| `CMTAT_BEACON_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_BEACON_FACTORY_Ownable2Step.sol](../contracts/ownable/CMTAT_BEACON_FACTORY_Ownable2Step.sol) |
+| `CMTAT_LIGHT_TP_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_LIGHT_TP_FACTORY_Ownable2Step.sol](../contracts/ownable/CMTAT_LIGHT_TP_FACTORY_Ownable2Step.sol) |
+| `CMTAT_LIGHT_BEACON_FACTORY_Ownable2Step` | [contracts/ownable/CMTAT_LIGHT_BEACON_FACTORY_Ownable2Step.sol](../contracts/ownable/CMTAT_LIGHT_BEACON_FACTORY_Ownable2Step.sol) |
+
+#### Inheritance
+
+![surya_inheritance_CMTAT_UUPS_FACTORY_Ownable2Step.sol](./schema/surya_inheritance/surya_inheritance_CMTAT_UUPS_FACTORY_Ownable2Step.sol.png)
+
+![surya_inheritance_CMTAT_TP_FACTORY_Ownable2Step.sol](./schema/surya_inheritance/surya_inheritance_CMTAT_TP_FACTORY_Ownable2Step.sol.png)
+
+![surya_inheritance_CMTAT_BEACON_FACTORY_Ownable2Step.sol](./schema/surya_inheritance/surya_inheritance_CMTAT_BEACON_FACTORY_Ownable2Step.sol.png)
+
+#### Graph
+
+![surya_graph_CMTAT_UUPS_FACTORY_Ownable2Step.sol](./schema/surya_graph/surya_graph_CMTAT_UUPS_FACTORY_Ownable2Step.sol.png)
+
 ## Usage instructions
 
 > **AI assistance:** Parts of this project were written with the help of AI coding assistants, principally Claude Code (Anthropic) and Codex (OpenAI).
@@ -731,9 +768,9 @@ To generate documentation with surya, you can call the three bash scripts in [do
 
 | Task                 | Script                      | Command exemple                                              |
 | -------------------- | --------------------------- | ------------------------------------------------------------ |
-| Generate graph       | script_surya_graph.sh       | npx surya graph -i contracts/**/*.sol <br />npx surya graph contracts/CMTAT_TP_FACTORY.sol |
-| Generate inheritance | script_surya_inheritance.sh | npx surya inheritance contracts/modules/CMTAT_TP_FACTORY.sol -i <br />npx surya inheritance contracts/modules/CMTAT_TP_FACTORY.sol |
-| Generate report      | script_surya_report.sh      | npx surya mdreport -i surya_report.md contracts/modules/CMTAT_TP_FACTORY.sol <br />npx surya mdreport surya_report.md contracts/modules/CMTAT_TP_FACTORY.sol |
+| Generate graph       | script_surya_graph.sh       | npx surya graph -i contracts/**/*.sol <br />npx surya graph contracts/standard/CMTAT_TP_FACTORY.sol |
+| Generate inheritance | script_surya_inheritance.sh | npx surya inheritance contracts/standard/CMTAT_TP_FACTORY.sol -i <br />npx surya inheritance contracts/standard/CMTAT_TP_FACTORY.sol |
+| Generate report      | script_surya_report.sh      | npx surya mdreport -i surya_report.md contracts/standard/CMTAT_TP_FACTORY.sol <br />npx surya mdreport surya_report.md contracts/standard/CMTAT_TP_FACTORY.sol |
 
 In the report, the path for the different files are indicated in absolute. You have to remove the part which correspond to your local filesystem.
 

@@ -15,12 +15,9 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTAT_TP_FACTORY** | Implementation | CMTATTransparentFactoryBase, ReentrancyGuard |||
-| └ | <Constructor> | Public ❗️ | 🛑  | CMTATTransparentFactoryBase |
-| └ | deployCMTAT | Public ❗️ | 🛑  | nonReentrant onlyRole |
-| └ | computedProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | computedNextProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | _initializerData | Internal 🔒 |   | |
+| **CMTAT_TP_FACTORY** | Implementation | CMTATStandardTPFactoryBase, CMTATFactoryAccessControl |||
+| └ | <Constructor> | Public ❗️ | 🛑  | CMTATStandardTPFactoryBase CMTATFactoryAccessControl |
+| └ | supportsInterface | Public ❗️ |   |NO❗️ |
 
 
 ### Legend

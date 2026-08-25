@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./libraries/CMTATBeaconFactoryBase.sol | [object Promise] |
+| ./modules/proxy/CMTATBeaconFactoryBase.sol | [object Promise] |
 
 
 ### Contracts Description Table
@@ -19,9 +19,9 @@
 | └ | <Constructor> | Public ❗️ | 🛑  | CMTATFactoryRoot |
 | └ | implementation | Public ❗️ |   |NO❗️ |
 | └ | _deployBeaconProxy | Internal 🔒 | 🛑  | |
+| └ | _deployBeaconProxyBytecode | Internal 🔒 | 🛑  | |
 | └ | _computedBeaconProxyAddress | Internal 🔒 |   | |
 | └ | _computedNextBeaconProxyAddress | Internal 🔒 |   | |
-| └ | _deployBeaconProxyBytecode | Internal 🔒 | 🛑  | |
 | └ | _getBeaconProxyBytecode | Internal 🔒 |   | |
 
 

@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./libraries/CMTATFactoryInvariant.sol | [object Promise] |
+| ./modules/core/CMTATFactoryInvariant.sol | [object Promise] |
 
 
 ### Contracts Description Table
