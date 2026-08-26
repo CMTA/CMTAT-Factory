@@ -1,4 +1,4 @@
-# CMTAT Factory — Full Documentation
+# CMTAT Factory — Specification
 
 > This is the complete specification of the CMTAT Factory project.
 > For a short overview and quick start, see the [root README](../README.md).
