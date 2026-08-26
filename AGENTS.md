@@ -16,8 +16,8 @@ This file helps AI agents understand and work with this codebase.
 
 The factories deploy token proxies with `CREATE2`, track deployed instances by incremental id, and gate deployment behind `AccessControl`.
 
-- **Factory version:** `0.4.0` in `contracts/libraries/ContractVersion.sol`
-- **Solidity:** source files use `^0.8.20`, Hardhat compiles with `0.8.34`
+- **Factory version:** `0.5.0` in `contracts/modules/core/ContractVersion.sol`
+- **Solidity:** source files use `^0.8.20`, Hardhat compiles with `0.8.36`
 - **EVM target:** `prague`
 - **License:** `MPL-2.0`
 
@@ -44,7 +44,7 @@ This repo vendors the upstream CMTAT project in the `CMTAT/` directory. Some tes
 - Framework: Hardhat
 - Test stack: Mocha + Chai + `@nomicfoundation/hardhat-network-helpers`
 - Upgrade tooling: `@openzeppelin/hardhat-upgrades`
-- Solidity libs: OpenZeppelin Contracts `5.6.1` and `@openzeppelin/contracts-upgradeable` `5.6.1` (must match the OZ version required by the pinned CMTAT submodule)
+- Solidity libs: OpenZeppelin Contracts `5.7.0` and `@openzeppelin/contracts-upgradeable` `5.7.0` (must be at least the OZ version required by the pinned CMTAT submodule, and on the same major - enforced by `npm run check:oz`)
 - Docs/analysis tooling: `solidity-docgen`, `surya`, `sol2uml`, `hardhat-contract-sizer`, `solidity-coverage`
 
 ## Architecture
@@ -68,9 +68,12 @@ CMTATFactoryInvariant
 |- CMTAT_DEPLOYER_ROLE
 |- CMTATDeployed event
 
+ContractVersion
+|- ERC165 + IERC8303
+|- VERSION = "0.5.0" exposed through version()
+
 CMTATFactoryRoot
-|- AccessControl
-|- VERSION = "0.4.0"
+|- AccessControl + ContractVersion + CMTATFactoryInvariant
 |- cmtatsList / cmtatCounterId / CMTATProxyAddress(id)
 |- useCustomSalt
 |- _checkAndDetermineDeploymentSalt(...)
@@ -107,7 +110,7 @@ CMTATBeaconFactoryBase
 
 ## Deployment Flow
 
-For all three factories, deployment follows the same high-level sequence:
+For all five factories, deployment follows the same high-level sequence:
 
 1. Caller must hold `CMTAT_DEPLOYER_ROLE`.
 2. Factory derives the effective salt through `_checkAndDetermineDeploymentSalt`.
@@ -121,8 +124,9 @@ Salt behavior is central to this repo.
 
 - If `useCustomSalt == false`, the deployment salt is `keccak256(abi.encodePacked(cmtatCounterId))`.
 - If `useCustomSalt == true`, the caller-supplied salt is used directly.
-- Custom salts are one-time-use only and tracked in `customSaltUsed`.
+- Custom salts are one-time-use only and tracked in `customSaltUsed`, exposed through `isCustomSaltUsed(bytes32)`.
 - Reusing a custom salt reverts with `FactoryErrors.CMTAT_Factory_SaltAlreadyUsed()`.
+- The address predictors ignore `customSaltUsed`: they still answer for a consumed salt. `isCustomSaltUsed(...)` is the only way to ask whether a deployment is still available.
 - `nextDeploymentSalt()` returns the next effective non-custom salt.
 - `computedNextProxyAddress(...)` mirrors `deployCMTAT(...)`: it uses the caller-provided salt in custom-salt mode and `nextDeploymentSalt()` otherwise.
 
@@ -165,17 +169,44 @@ struct CMTAT_LIGHT_ARGUMENT {
 
 ## Access Control
 
-All factories inherit `AccessControl` through `CMTATFactoryRoot`.
+Access control uses the **authorization-hook (template method)** pattern. The logic decides WHAT is
+protected; the deployment decides WHO may do it.
 
-- `DEFAULT_ADMIN_ROLE` is granted to `factoryAdmin` in the constructor.
-- `CMTAT_DEPLOYER_ROLE` is also granted to `factoryAdmin` in the constructor.
-- `deployCMTAT(...)` is protected by `onlyRole(CMTAT_DEPLOYER_ROLE)`.
+- `CMTATFactoryRoot` declares `modifier onlyCMTATDeployer` and the bodyless hook
+  `function _authorizeDeployCMTAT() internal view virtual;`. It does **not** inherit any access-control
+  module, so no policy is welded into the shared core.
+- `deployCMTAT(...)` carries `nonReentrant onlyCMTATDeployer` on all ten deployable factories.
+- Each deployable contract answers the hook with one bare override:
 
-There is no separate deployer management wrapper; role administration uses the normal OpenZeppelin `AccessControl` surface.
+| Policy | Contract | Hook override | Constructor authority |
+| --- | --- | --- | --- |
+| Role-based | `CMTATFactoryAccessControl` | `_authorizeDeployCMTAT() ... onlyRole(CMTAT_DEPLOYER_ROLE) {}` | `factoryAdmin` gets `DEFAULT_ADMIN_ROLE` + `CMTAT_DEPLOYER_ROLE` |
+| Single-owner | `CMTATFactoryOwnable2Step` | `_authorizeDeployCMTAT() ... onlyOwner {}` | `initialOwner` via `Ownable(initialOwner)` |
+
+### Conventions to keep
+
+- Hooks are `internal view virtual` on the declaration **and** on every override. `view` is a
+  compiler-enforced guarantee that authorization never mutates state, and it is free on an internal
+  function.
+- Overrides carry the **modifier** and an **empty body** (`onlyRole(...) {}`), never a bare
+  `_checkRole` / `_checkOwner` call.
+- **Role constants live with the layer that enforces them.** `CMTAT_DEPLOYER_ROLE` is declared in
+  `CMTATFactoryAccessControl`, not in a shared base, so the `Ownable2Step` variants never publish a
+  role identifier they do not check. `ICMTATFactory` declares no access-control member for the same
+  reason.
+- The factories have no ERC-2771 module, so `msg.sender` and `_msgSender()` coincide; `AccessControl`
+  resolves through `Context` already.
+
+### Choosing a variant
+
+The two policies are **chosen at deployment and are not interchangeable at a deployed address**. Use
+the `AccessControl` variant when duties must be separable (several deployers, independently
+revocable, admin distinct from deployer). Use `Ownable2Step` for a single-operator deployment that
+wants a safer handover; it has exactly one privilege level and cannot express separated duties.
 
 ## Key Errors and Invariants
 
-Custom errors are defined in `contracts/libraries/FactoryErrors.sol`:
+Custom errors are defined in `contracts/libraries/FactoryErrors.sol` (the only real `library` in the project):
 
 - `CMTAT_Factory_AddressZeroNotAllowedForFactoryAdmin`
 - `CMTAT_Factory_AddressZeroNotAllowedForBeaconOwner`
@@ -191,6 +222,7 @@ Important invariants:
 4. Every successful deployment increments `cmtatCounterId` by exactly one.
 5. `CMTATProxyAddress(id)` must match the emitted `CMTAT` event and the corresponding entry in `cmtatsList`.
 6. Address prediction must stay aligned with the actual deployment bytecode.
+7. The surface common to all five factories is declared in `contracts/interfaces/ICMTATFactory.sol` and inherited, so changing one of those signatures breaks the build on purpose. That file must stay import-free: integrators compile against it without CMTAT or OpenZeppelin.
 
 ## Project Structure
 
@@ -203,10 +235,35 @@ contracts/
 |- light/
 |  |- CMTAT_LIGHT_TP_FACTORY.sol
 |  `- CMTAT_LIGHT_BEACON_FACTORY.sol
-`- libraries/
-   |- CMTATFactoryBase.sol
-   |- CMTATFactoryRoot.sol
-   |- CMTATFactoryInvariant.sol
+|- ownable/                            deployables: single-owner policy
+|  |- CMTAT_UUPS_FACTORY_Ownable2Step.sol
+|  |- CMTAT_TP_FACTORY_Ownable2Step.sol
+|  |- CMTAT_BEACON_FACTORY_Ownable2Step.sol
+|  |- CMTAT_LIGHT_TP_FACTORY_Ownable2Step.sol
+|  `- CMTAT_LIGHT_BEACON_FACTORY_Ownable2Step.sol
+|- interfaces/                         interfaces only
+|  |- ICMTATFactory.sol
+|  |- IERC8303.sol
+|  `- IERC173.sol
+|- modules/                            abstract contracts, grouped by capability
+|  |- core/                            policy-free shared machinery
+|  |  |- CMTATFactoryInvariant.sol     argument structs
+|  |  |- ContractVersion.sol           ERC-8303 version()
+|  |  |- CMTATFactoryRoot.sol          registry, salt logic, CREATE2, authorization hook
+|  |  `- CMTATFactoryBase.sol          immutable `logic` implementation
+|  |- proxy/                           proxy-mechanism bases, shared by standard and light
+|  |  |- CMTATTransparentFactoryBase.sol
+|  |  `- CMTATBeaconFactoryBase.sol
+|  |- deployment/                      per-family deployCMTAT + address prediction
+|  |  |- CMTATUUPSFactoryBase.sol
+|  |  |- CMTATStandardTPFactoryBase.sol
+|  |  |- CMTATStandardBeaconFactoryBase.sol
+|  |  |- CMTATLightTPFactoryBase.sol
+|  |  `- CMTATLightBeaconFactoryBase.sol
+|  `- access/                          who may deploy
+|     |- CMTATFactoryAccessControl.sol
+|     `- CMTATFactoryOwnable2Step.sol
+`- libraries/                          actual libraries
    `- FactoryErrors.sol
 
 test/
@@ -233,7 +290,7 @@ doc/
 - Shared constants live in `test/utils.js`.
 - Most test fixtures come from `CMTAT/test/deploymentUtils.js`.
 
-When changing shared factory logic in `CMTATFactoryRoot` or `CMTATFactoryInvariant`, update tests across all three factory families.
+When changing shared factory logic in `CMTATFactoryRoot` or `CMTATFactoryInvariant`, update tests across all four test families (`UUPS/`, `Transparent/`, `beacon/`, `Light/`).
 
 ## Editing Guidance
 
@@ -242,6 +299,8 @@ When changing shared factory logic in `CMTATFactoryRoot` or `CMTATFactoryInvaria
 - Follow the existing section-header pattern in contracts:
   `/* ============ SECTION ============ */`
 - Prefer minimal, targeted changes. The current codebase is small and has duplicated deployment logic by design.
+- Put a new file where its **kind** says: `interfaces/` for interfaces, `modules/<capability>/` for abstract contracts, `libraries/` for actual `library` declarations, and `standard/` / `light/` / `ownable/` for deployable contracts. Never declare an interface inside a module file.
+- Every function is `virtual`: all 13 public/external and all 20 internal. Keep it that way when adding one - subclasses rely on these as extension points, and `virtual` on an internal function costs zero bytecode (verified). `contracts/mocks/OverridableFactoryMock.sol` guards the two most important hooks.
 - Be careful with proxy initializer selectors:
   `CMTATUpgradeableUUPS.initialize.selector` is intentionally different from `CMTATStandardUpgradeable.initialize.selector`.
 - CMTAT Light uses `CMTATUpgradeableLight.initialize.selector` and only passes `admin` plus `ERC20Attributes`.

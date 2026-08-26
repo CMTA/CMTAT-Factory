@@ -1,0 +1,36 @@
+@startuml
+title CMTAT Factory - overview
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam ArrowFontSize 11
+skinparam NoteFontSize 11
+
+actor "Deployer\n<size:10>holds CMTAT_DEPLOYER_ROLE</size>" as Deployer
+
+component "CMTAT factory\n<size:10>AccessControl - deployment registry</size>" as Factory #EEF5FF
+component "CMTAT proxy\n<size:10>deployed with CREATE2</size>" as Proxy #F3F3F3
+component "CMTAT implementation\n<size:10>shared by every proxy</size>" as Impl #EAF7EE
+
+Deployer --> Factory : deployCMTAT(salt, cmtatArgument)
+Factory --> Proxy : CREATE2 - address known in advance
+Proxy --> Impl : delegatecall
+Factory ..> Impl : encodes initialize(...)
+
+note right of Factory
+  Per deployment: incremental id,
+  appended to cmtatsList,
+  CMTATDeployed event emitted.
+end note
+
+note bottom of Impl
+  |= Factory |= Proxy |= Implementation |
+  | CMTAT_UUPS_FACTORY | ERC1967Proxy | CMTATUpgradeableUUPS |
+  | CMTAT_TP_FACTORY | TransparentUpgradeableProxy | CMTATStandardUpgradeable |
+  | CMTAT_BEACON_FACTORY | BeaconProxy | CMTATStandardUpgradeable |
+  | CMTAT_LIGHT_TP_FACTORY | TransparentUpgradeableProxy | CMTATUpgradeableLight |
+  | CMTAT_LIGHT_BEACON_FACTORY | BeaconProxy | CMTATUpgradeableLight |
+end note
+
+@enduml

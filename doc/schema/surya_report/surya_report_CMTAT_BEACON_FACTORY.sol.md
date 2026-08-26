@@ -15,12 +15,9 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTAT_BEACON_FACTORY** | Implementation | CMTATBeaconFactoryBase, ReentrancyGuard |||
-| └ | <Constructor> | Public ❗️ | 🛑  | CMTATBeaconFactoryBase |
-| └ | deployCMTAT | Public ❗️ | 🛑  | nonReentrant onlyRole |
-| └ | computedProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | computedNextProxyAddress | Public ❗️ |   |NO❗️ |
-| └ | _initializerData | Internal 🔒 |   | |
+| **CMTAT_BEACON_FACTORY** | Implementation | CMTATStandardBeaconFactoryBase, CMTATFactoryAccessControl |||
+| └ | <Constructor> | Public ❗️ | 🛑  | CMTATStandardBeaconFactoryBase CMTATFactoryAccessControl |
+| └ | supportsInterface | Public ❗️ |   |NO❗️ |
 
 
 ### Legend

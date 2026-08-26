@@ -21,8 +21,8 @@
 ||||||
 | **ReentrantInitLogicMock** | Implementation |  |||
 | └ | <Constructor> | Public ❗️ | 🛑  |NO❗️ |
-| └ | <Fallback> | External ❗️ |  💵 |NO❗️ |
 | └ | <Receive Ether> | External ❗️ |  💵 |NO❗️ |
+| └ | <Fallback> | External ❗️ |  💵 |NO❗️ |
 
 
 ### Legend

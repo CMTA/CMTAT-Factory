@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./libraries/CMTATTransparentFactoryBase.sol | [object Promise] |
+| ./modules/proxy/CMTATTransparentFactoryBase.sol | [object Promise] |
 
 
 ### Contracts Description Table
@@ -18,9 +18,9 @@
 | **CMTATTransparentFactoryBase** | Implementation | CMTATFactoryBase |||
 | └ | <Constructor> | Public ❗️ | 🛑  | CMTATFactoryBase |
 | └ | _deployTransparentProxy | Internal 🔒 | 🛑  | |
+| └ | _deployTransparentProxyBytecode | Internal 🔒 | 🛑  | |
 | └ | _computedTransparentProxyAddress | Internal 🔒 |   | |
 | └ | _computedNextTransparentProxyAddress | Internal 🔒 |   | |
-| └ | _deployTransparentProxyBytecode | Internal 🔒 | 🛑  | |
 | └ | _checkProxyAdminOwner | Internal 🔒 |   | |
 | └ | _getTransparentProxyBytecode | Internal 🔒 |   | |
 
