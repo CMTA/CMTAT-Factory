@@ -24,7 +24,9 @@ describe('Factory ContractVersion', function () {
       this._.address,
       this.deployerAddress.address
     )
-    this.CMTAT_LIGHT_IMPL = await ethers.deployContract('CMTATUpgradeableLight')
+    this.CMTAT_LIGHT_IMPL = await ethers.deployContract(
+      'CMTATUpgradeableLight'
+    )
 
     this.factories = [
       await ethers.deployContract('CMTAT_UUPS_FACTORY', [

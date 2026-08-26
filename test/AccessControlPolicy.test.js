@@ -78,8 +78,9 @@ describe('Factory access-control policy', function () {
         this.deployerAddress.address
       )
     ).target
-    this.LIGHT_IMPL = (await ethers.deployContract('CMTATUpgradeableLight'))
-      .target
+    this.LIGHT_IMPL = (
+      await ethers.deployContract('CMTATUpgradeableLight')
+    ).target
 
     this.salt = ethers.encodeBytes32String('policy')
     this.proxyAdminOwner = this.admin
@@ -210,16 +211,21 @@ describe('Factory access-control policy', function () {
             ...family.deployArgs(this)
           )
         )
-          .to.be.revertedWithCustomError(this.FACTORY, 'OwnableUnauthorizedAccount')
+          .to.be.revertedWithCustomError(
+            this.FACTORY,
+            'OwnableUnauthorizedAccount'
+          )
           .withArgs(this.address1.address)
       })
 
       it('testCannotPublishADeployerRoleItDoesNotEnforce', async function () {
         // The Ownable variant must not expose a role identifier it never checks
-        expect(this.FACTORY.interface.hasFunction('CMTAT_DEPLOYER_ROLE()')).to
-          .equal(false)
-        expect(this.FACTORY.interface.hasFunction('grantRole(bytes32,address)'))
-          .to.equal(false)
+        expect(
+          this.FACTORY.interface.hasFunction('CMTAT_DEPLOYER_ROLE()')
+        ).to.equal(false)
+        expect(
+          this.FACTORY.interface.hasFunction('grantRole(bytes32,address)')
+        ).to.equal(false)
       })
 
       it('testCannotTransferControlWithoutAcceptance', async function () {
@@ -232,7 +238,10 @@ describe('Factory access-control policy', function () {
           this.FACTORY.connect(this.address1).deployCMTAT(
             ...family.deployArgs(this)
           )
-        ).to.be.revertedWithCustomError(this.FACTORY, 'OwnableUnauthorizedAccount')
+        ).to.be.revertedWithCustomError(
+          this.FACTORY,
+          'OwnableUnauthorizedAccount'
+        )
       })
 
       it('testCanTransferControlOnceAccepted', async function () {
@@ -250,7 +259,10 @@ describe('Factory access-control policy', function () {
           this.FACTORY.connect(this.admin).deployCMTAT(
             ...family.deployArgs(this)
           )
-        ).to.be.revertedWithCustomError(this.FACTORY, 'OwnableUnauthorizedAccount')
+        ).to.be.revertedWithCustomError(
+          this.FACTORY,
+          'OwnableUnauthorizedAccount'
+        )
       })
 
       it('testCanAdvertiseERC173AndNotAccessControl', async function () {

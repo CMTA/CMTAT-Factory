@@ -75,7 +75,12 @@ describe('Deploy UUPPSwith Factory', function () {
       )
       await expect(this.logs)
         .to.emit(this.FACTORY, 'CMTATDeployed')
-        .withArgs(computedCMTATAddress, this.admin.address, 0, effectiveDeploymentSalt)
+        .withArgs(
+          computedCMTATAddress,
+          this.admin.address,
+          0,
+          effectiveDeploymentSalt
+        )
       await this.logs.wait()
       const filter = this.FACTORY.filters.CMTATDeployed
       let events = await this.FACTORY.queryFilter(filter, -1)

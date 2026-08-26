@@ -5,17 +5,18 @@ import {CMTATUUPSFactoryBase} from "../modules/deployment/CMTATUUPSFactoryBase.s
 import {CMTATFactoryAccessControl} from "../modules/access/CMTATFactoryAccessControl.sol";
 import {CMTATFactoryRoot} from "../modules/core/CMTATFactoryRoot.sol";
 
+
 /**
-* @notice Factory to deploy CMTAT with a UUPS proxy, gated by `CMTAT_DEPLOYER_ROLE`.
-* @dev Role-based variant. For a single-owner deployment see `CMTAT_UUPS_FACTORY_Ownable2Step`; the
-* two are chosen at deployment and are not interchangeable at a deployed address.
-*/
+ * @notice Factory to deploy CMTAT with a UUPS proxy, gated by `CMTAT_DEPLOYER_ROLE`.
+ * @dev Role-based variant. For a single-owner deployment see `CMTAT_UUPS_FACTORY_Ownable2Step`; the
+ * two are chosen at deployment and are not interchangeable at a deployed address.
+ */
 contract CMTAT_UUPS_FACTORY is CMTATUUPSFactoryBase, CMTATFactoryAccessControl {
     /**
-    * @param logic_ contract implementation, cannot be zero
-    * @param factoryAdmin admin, receives DEFAULT_ADMIN_ROLE and CMTAT_DEPLOYER_ROLE
-    * @param useCustomSalt_ custom salt with create2 or not
-    */
+     * @param logic_ contract implementation, cannot be zero
+     * @param factoryAdmin admin, receives DEFAULT_ADMIN_ROLE and CMTAT_DEPLOYER_ROLE
+     * @param useCustomSalt_ custom salt with create2 or not
+     */
     constructor(
         address logic_,
         address factoryAdmin,
@@ -30,11 +31,17 @@ contract CMTAT_UUPS_FACTORY is CMTATUUPSFactoryBase, CMTATFactoryAccessControl {
     //////////////////////////////////////////////////////////////*/
 
     /**
-    * @inheritdoc CMTATFactoryAccessControl
-    */
+     * @inheritdoc CMTATFactoryAccessControl
+     */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(CMTATFactoryAccessControl, CMTATFactoryRoot) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(CMTATFactoryAccessControl, CMTATFactoryRoot)
+        returns (bool)
+    {
         return super.supportsInterface(interfaceId);
     }
 }

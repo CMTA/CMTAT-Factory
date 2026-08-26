@@ -184,12 +184,14 @@ describe('ICMTATFactory', function () {
       expect(await consumer.isSaltConsumed(salt)).to.equal(false)
 
       // Act
-      await factory.connect(this.admin).deployCMTAT(salt, [
-        this.admin,
-        ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
-        extraInformationAttributes,
-        [ZERO_ADDRESS]
-      ])
+      await factory
+        .connect(this.admin)
+        .deployCMTAT(salt, [
+          this.admin,
+          ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
+          extraInformationAttributes,
+          [ZERO_ADDRESS]
+        ])
 
       // Assert
       expect(await consumer.isSaltConsumed(salt)).to.equal(true)
