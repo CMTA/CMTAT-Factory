@@ -49,8 +49,6 @@ Custom changelog tag: `Dependencies`, `Documentation`, `Testing`
 
 ## 0.5.0 - 2026/08/24
 
-Branch: `style`
-
 Commit: _pending release commit_
 
 ### Summary
