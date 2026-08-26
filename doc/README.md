@@ -18,10 +18,42 @@ In addition to the three standard factories, two **CMTAT Light** factories (`CMT
 
 _Diagram source: [`doc/schema/plantuml/overview.puml`](./schema/plantuml/overview.puml)._
 
+### Factory / CMTAT compatibility
+
+Which CMTAT implementation each factory deploys, and the initializer it calls. Both access-control variants of a family (`CMTAT_*_FACTORY` and `CMTAT_*_FACTORY_Ownable2Step`) deploy exactly the same token — they differ only in who may call `deployCMTAT`.
+
+| Factory family | Proxy | CMTAT implementation | Initializer | Argument struct |
+| --- | --- | --- | --- | --- |
+| `CMTAT_UUPS_FACTORY` | `ERC1967Proxy` | `CMTATUpgradeableUUPS` | `0x5a54663c` | `CMTAT_ARGUMENT` |
+| `CMTAT_TP_FACTORY` | `TransparentUpgradeableProxy` | `CMTATStandardUpgradeable` | `0x5a54663c` | `CMTAT_ARGUMENT` |
+| `CMTAT_BEACON_FACTORY` | `BeaconProxy` | `CMTATStandardUpgradeable` | `0x5a54663c` | `CMTAT_ARGUMENT` |
+| `CMTAT_LIGHT_TP_FACTORY` | `TransparentUpgradeableProxy` | `CMTATUpgradeableLight` | `0xcf270aa9` | `CMTAT_LIGHT_ARGUMENT` |
+| `CMTAT_LIGHT_BEACON_FACTORY` | `BeaconProxy` | `CMTATUpgradeableLight` | `0xcf270aa9` | `CMTAT_LIGHT_ARGUMENT` |
+
+#### Which CMTAT releases work
+
+Built against **[CMTAT v3.3.0-rc3](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc3)**, pinned by the `CMTAT/` submodule. For any other release what matters is the `initialize` signature, which a factory hard-codes when it is compiled. It changed at **v3.2.0**, when `ICMTATConstructor.Engine` was cut from three fields to `ruleEngine` alone.
+
+| CMTAT release | Standard + UUPS factories | Light factories |
+| --- | --- | --- |
+| `v3.3.0-rc1` … `rc3` | **Yes** — factory `v0.5.0` (rc3), `v0.4.0` / `v0.3.0` (rc1) | **Yes** |
+| `v3.2.0` | **No release built for it.** The selector matches, so take factory `v0.3.0`+ and rename the `CMTATStandardUpgradeable` import to `CMTATUpgradeable` | **Yes** |
+| `v3.0.0`, `v3.1.0` | **Factory `v0.2.0` only** — later factories encode a different selector and every deployment reverts | **Yes** |
+| `v2.5.0`, `v2.5.1` | Factory `0.1.0` only | not available before v3 |
+| `v2.3.0` and earlier | Not available | not available |
+
+The Light initializer takes only `ERC20Attributes`, unchanged across v3, so the Light factories cover the whole v3 line. `CMTATUpgradeableUUPS` and `CMTATStandardUpgradeable` share one initializer — they differ in where the upgrade logic lives, not in how they are initialized.
+
+Initializer selectors, if you want to check an implementation before wiring it up: `0x5a54663c` (Standard/UUPS, v3.2.0+), `0x492c6610` (Standard/UUPS, v3.0.0–v3.1.0), `0xcf270aa9` (Light, all v3).
+
+> **None of this is enforced on-chain.** A factory never verifies the `logic` / `implementation_` you pass it, so a version mismatch surfaces as a revert at the first `deployCMTAT`, not at construction. Beacon factories also accept `implementation_ == address(0)` and deploy a fresh implementation of the type in the table above; Transparent and UUPS reject a zero `logic_`.
+
+
 ## Table of Contents
 
 - [Introduction](#introduction)
   - [Overview](#overview)
+  - [Factory / CMTAT compatibility](#factory--cmtat-compatibility)
   - [Key features](#key-features)
   - [Factory Overview](#factory-overview)
   - [CMTAT versions: Standard vs Light](#cmtat-versions-standard-vs-light)
