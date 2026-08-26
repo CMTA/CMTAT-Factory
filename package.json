@@ -1,6 +1,6 @@
 {
   "name": "CMTAT Factory",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Factory smart contracts for CMTAT",
   "files": [
     "contracts",
@@ -74,7 +74,7 @@
     "surya": "^0.4.11"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "5.6.1",
-    "@openzeppelin/contracts-upgradeable": "5.6.1"
+    "@openzeppelin/contracts": "5.7.0",
+    "@openzeppelin/contracts-upgradeable": "5.7.0"
   }
 }

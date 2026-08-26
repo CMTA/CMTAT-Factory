@@ -1,0 +1,36 @@
+@startuml
+title CMTAT Beacon Factory - one shared beacon, many proxies
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam ArrowFontSize 11
+skinparam NoteFontSize 11
+
+component "CMTAT_BEACON_FACTORY\n<size:10>AccessControl - CREATE2</size>" as Factory #EEF5FF
+
+component "UpgradeableBeacon\n<size:10>owner: beaconOwner</size>" as Beacon #FFF6E5
+
+component "BeaconProxy\n<size:10>CMTAT token #1</size>" as Proxy1 #F3F3F3
+component "BeaconProxy\n<size:10>CMTAT token #2</size>" as Proxy2 #F3F3F3
+
+component "CMTATStandardUpgradeable\n<size:10>implementation V1</size>" as ImplV1 #EAF7EE
+component "CMTATStandardUpgradeable\n<size:10>implementation V2</size>" as ImplV2 #FDEEEE
+
+Factory ..> Beacon : creates once in constructor
+Factory --> Proxy1 : deployCMTAT()
+Factory --> Proxy2 : deployCMTAT()
+
+Proxy1 --> Beacon : implementation()
+Proxy2 --> Beacon : implementation()
+
+Beacon --> ImplV1 : delegatecall target
+Beacon ..> ImplV2 : upgradeTo() moves\nEVERY proxy at once
+
+note bottom of ImplV2
+  All proxies share one beacon, so a single
+  upgradeTo() call migrates every deployed
+  CMTAT token in one transaction.
+end note
+
+@enduml

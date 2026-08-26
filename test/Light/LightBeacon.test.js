@@ -8,7 +8,9 @@ const DEPLOYMENT_DECIMAL = 0
 describe('Deploy Light Beacon with Factory', function () {
   beforeEach(async function () {
     Object.assign(this, await loadFixture(fixture))
-    this.CMTAT_LIGHT_IMPL = await ethers.deployContract('CMTATUpgradeableLight')
+    this.CMTAT_LIGHT_IMPL = await ethers.deployContract(
+      'CMTATUpgradeableLight'
+    )
     this.FACTORY = await ethers.deployContract('CMTAT_LIGHT_BEACON_FACTORY', [
       this.CMTAT_LIGHT_IMPL.target,
       this.admin,

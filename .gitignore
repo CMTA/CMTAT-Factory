@@ -14,3 +14,6 @@ artifacts
 *.bkp
 history
 .codex
+
+# LibreOffice lock files
+.~lock.*#

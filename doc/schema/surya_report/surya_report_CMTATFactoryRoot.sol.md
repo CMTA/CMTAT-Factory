@@ -5,7 +5,7 @@
 
 |  File Name  |  SHA-1 Hash  |
 |-------------|--------------|
-| ./libraries/CMTATFactoryRoot.sol | [object Promise] |
+| ./modules/core/CMTATFactoryRoot.sol | [object Promise] |
 
 
 ### Contracts Description Table
@@ -15,14 +15,17 @@
 |:----------:|:-------------------:|:----------------:|:----------------:|:---------------:|
 |     └      |  **Function Name**  |  **Visibility**  |  **Mutability**  |  **Modifiers**  |
 ||||||
-| **CMTATFactoryRoot** | Implementation | AccessControl, ContractVersion, CMTATFactoryInvariant |||
+| **CMTATFactoryRoot** | Implementation | ContractVersion, CMTATFactoryInvariant, ICMTATFactory |||
 | └ | <Constructor> | Public ❗️ | 🛑  |NO❗️ |
 | └ | CMTATProxyAddress | Public ❗️ |   |NO❗️ |
 | └ | supportsInterface | Public ❗️ |   |NO❗️ |
 | └ | nextDeploymentSalt | Public ❗️ |   |NO❗️ |
+| └ | isCustomSaltUsed | Public ❗️ |   |NO❗️ |
 | └ | _checkAndDetermineDeploymentSalt | Internal 🔒 | 🛑  | |
-| └ | _computeDeploymentSalt | Internal 🔒 |   | |
 | └ | _deployAndRegisterProxy | Internal 🔒 | 🛑  | |
+| └ | _computeDeploymentSalt | Internal 🔒 |   | |
+| └ | _authorizeDeployCMTAT | Internal 🔒 |   | |
+| └ | _computeCreate2Address | Internal 🔒 |   | |
 
 
 ### Legend

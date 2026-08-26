@@ -17,7 +17,10 @@ describe('Factory reentrancy guard (AuditAgent NM-2)', function () {
     Object.assign(this, await loadFixture(fixture))
 
     // Attacker holds CMTAT_DEPLOYER_ROLE so its re-entrant deployCMTAT reaches the guard (not onlyRole).
-    this.attackerContract = await ethers.deployContract('ReentrancyDeployAttacker', [])
+    this.attackerContract = await ethers.deployContract(
+      'ReentrancyDeployAttacker',
+      []
+    )
     // Malicious "logic": its fallback runs under the proxy's delegatecall and calls the attacker.
     this.logicMock = await ethers.deployContract('ReentrantInitLogicMock', [
       this.attackerContract.target
@@ -42,10 +45,10 @@ describe('Factory reentrancy guard (AuditAgent NM-2)', function () {
     )
 
     // Pre-encode the nested deployCMTAT call the attacker will replay during construction.
-    this.reentrantCall = this.FACTORY.interface.encodeFunctionData('deployCMTAT', [
-      ethers.encodeBytes32String('reenter'),
-      this.CMTATArg
-    ])
+    this.reentrantCall = this.FACTORY.interface.encodeFunctionData(
+      'deployCMTAT',
+      [ethers.encodeBytes32String('reenter'), this.CMTATArg]
+    )
   })
 
   it('testReentrantDeployIsBlockedByGuard', async function () {
